@@ -1,0 +1,192 @@
+\section{Phase 0: Canonical Problem Setting for BLOM}
+\label{sec:blom_phase0}
+
+This section fixes the minimal canonical setting used in the first stage of the BLOM theory.
+The goal is not to cover the most general formulation, but to define a mathematically stable starting point on top of which the later existence, uniqueness, analytic construction, and convergence results can be built.
+
+\subsection{Problem Statement}
+\label{subsec:phase0_problem}
+
+We consider a scalar flat output trajectory
+\[
+p:[0,\mathcal T] \to \mathbb R,
+\qquad
+\mathcal T = \sum_{i=1}^{M} T_i,
+\qquad T_i > 0,
+\]
+composed of $M$ polynomial pieces
+\[
+p_i:[0,T_i] \to \mathbb R,
+\qquad i=1,\dots,M,
+\]
+where each $p_i$ is a polynomial of degree at most $2s-1$.
+In Phase~0 we fix
+\[
+s = 4,
+\]
+so each segment is a polynomial of degree at most $7$.
+
+Let the waypoint sequence be
+\[
+q_0,q_1,\dots,q_M \in \mathbb R,
+\]
+and let the time vector be
+\[
+T=(T_1,\dots,T_M)^\top \in \mathbb R_{>0}^{M}.
+\]
+We only prescribe zeroth-order intermediate conditions, i.e.
+\[
+d_i = 1,
+\qquad i=1,\dots,M-1,
+\]
+which means that the trajectory is required to pass through the intermediate waypoints, but no higher-order derivative is fixed there.
+
+The global multistage minimum-snap reference problem is
+\begin{equation}
+\label{eq:phase0_global_minco}
+\begin{aligned}
+\min_{\{p_i\}_{i=1}^{M}} \quad &
+\sum_{i=1}^{M} \int_0^{T_i} \left| p_i^{(4)}(t) \right|^2 \, dt \\
+\text{s.t.} \quad
+& p_i(0)=q_{i-1}, \qquad p_i(T_i)=q_i, \qquad i=1,\dots,M, \\
+& p_i^{(\ell)}(T_i)=p_{i+1}^{(\ell)}(0), \qquad \ell=0,1,\dots,2s-2=6, \\
+& \hspace{5.1cm} i=1,\dots,M-1.
+\end{aligned}
+\end{equation}
+Equation~\eqref{eq:phase0_global_minco} is not yet the BLOM construction itself; it is the global MINCO-type reference problem against which local constructions will later be compared.
+
+\subsection{Canonical BLOM Window Setting}
+\label{subsec:phase0_canonical_window}
+
+In Phase~0 we fix the BLOM window width to
+\[
+k=2,
+\]
+namely the \emph{3-point stencil} setting.
+For each segment index $i$, define the local window
+\begin{equation}
+\label{eq:phase0_window}
+W(i,2)
+=
+\{i-1,i,i+1\}\cap \{1,2,\dots,M\}.
+\end{equation}
+Thus the coefficient of the $i$-th segment will later be defined only from local waypoint--time data associated with at most three neighboring segments.
+This is the smallest nontrivial setting that can simultaneously:
+\begin{enumerate}
+  \item encode local coupling,
+  \item exhibit local support explicitly,
+  \item remain analytically tractable, and
+  \item admit direct numerical verification.
+\end{enumerate}
+
+\subsection{Boundary Convention}
+\label{subsec:phase0_boundary}
+
+In Phase~0 we adopt only \emph{natural boundary conditions} for local window problems.
+For a local window with left boundary piece $p_{\mathrm{left}}$ and right boundary piece $p_{\mathrm{right}}$, we impose
+\begin{equation}
+\label{eq:phase0_natural_bc}
+ p_{\mathrm{left}}^{(\ell)}(0)=0,
+ \qquad
+ p_{\mathrm{right}}^{(\ell)}(T)=0,
+ \qquad \ell=s,s+1,\dots,2s-2,
+\end{equation}
+with $s=4$, i.e. for $\ell=4,5,6$.
+No periodic boundary conditions are considered in Phase~0.
+The reason is methodological: before discussing alternative boundary mechanisms, we first need a single canonical definition under which well-posedness and local analytic structure can be studied.
+
+\subsection{Canonical Research Goal of Phase~0}
+\label{subsec:phase0_goal}
+
+The sole purpose of Phase~0 is to freeze the mathematical object.
+More precisely, the Phase~0 output is the following canonical BLOM research setting:
+\begin{equation}
+\label{eq:phase0_setting}
+\boxed{
+\text{scalar output } p(t)\in\mathbb R,
+\quad s=4,
+\quad d_i=1,
+\quad k=2,
+\quad \text{natural boundary conditions only}.
+}
+\end{equation}
+This setting will serve as the base model for:
+\begin{enumerate}
+  \item local existence and uniqueness,
+  \item exact local linear-system construction,
+  \item Hermite coefficient reconstruction,
+  \item local-support proofs, and
+  \item later comparison with global MINCO.
+\end{enumerate}
+
+\subsection{Why This Restriction Is Necessary}
+\label{subsec:phase0_why}
+
+The restriction in Phase~0 is deliberate rather than conservative.
+The MINCO construction succeeds because it first fixes a unified multistage control-effort minimization problem, proves necessary and sufficient optimality conditions together with uniqueness, and only then introduces sparse parameterization and spatial--temporal deformation. Reproducing this discipline for BLOM requires first fixing one mathematically controlled regime. Trying to study arbitrary $s$, arbitrary $k$, multiple boundary conventions, and additional constraints from the beginning would mix several independent sources of difficulty and make later theorems ambiguous.
+
+\subsection{Notation Table}
+\label{subsec:phase0_notation}
+
+\begin{table}[h]
+\centering
+\caption{Notation used in Phase~0.}
+\label{tab:phase0_notation}
+\begin{tabular}{ll}
+\hline
+Symbol & Meaning \\
+\hline
+$M$ & number of trajectory segments \\
+$q_0,\dots,q_M$ & scalar waypoints \\
+$T_1,\dots,T_M$ & positive segment durations \\
+$\mathcal T$ & total duration, $\sum_{i=1}^{M} T_i$ \\
+$p_i$ & polynomial on the $i$-th segment \\
+$s$ & control order; fixed as $s=4$ in Phase~0 \\
+$d_i$ & number of prescribed derivatives at intermediate time $t_i$ \\
+$k$ & BLOM window width; fixed as $k=2$ in Phase~0 \\
+$W(i,2)$ & local window associated with segment $i$ \\
+$p^{(\ell)}$ & $\ell$-th derivative of $p$ \\
+$\theta$ & sparse BLOM parameter vector \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Sparse Parameter Vector}
+\label{subsec:phase0_theta}
+
+Following the MINCO-style external parameterization, we define the Phase~0 sparse parameter vector as
+\begin{equation}
+\label{eq:phase0_theta}
+\theta
+=
+(q_1,\dots,q_{M-1}, T_1,\dots,T_M)^\top.
+\end{equation}
+The boundary waypoints $q_0$ and $q_M$ are treated as fixed data.
+In Phase~0, no optimization over $\theta$ is performed yet; instead, $\theta$ is only treated as the canonical input format for all subsequent theory and code modules.
+
+\subsection{Canonical Extension Path}
+\label{subsec:phase0_extension}
+
+After the Phase~0 scalar theory is stabilized, the intended extension order is
+\[
+\mathbb R
+\longrightarrow
+\mathbb R^m,
+\qquad
+k=2
+\longrightarrow
+k\ge 2,
+\qquad
+\text{natural BC}
+\longrightarrow
+\text{alternative boundary mechanisms}.
+\]
+This order should not be reversed.
+
+\paragraph{Phase~0 Deliverables.}
+The mathematical deliverables of Phase~0 are:
+\begin{enumerate}
+  \item a formal problem statement,
+  \item a notation table, and
+  \item a canonical setting specification $(s,k,d_i)=(4,2,1)$ with scalar output and natural boundary conditions.
+\end{enumerate}
