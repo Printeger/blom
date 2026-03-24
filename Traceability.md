@@ -263,3 +263,69 @@ Implemented deliverables under `phase_3/`:
 - `results/figures/`
 - `results/tables/`
 - `results/logs/`
+
+## Phase 4 Traceability
+
+This section maps the Phase 4 requirements in `phase_4/REQ-Phase4-analytic-validation.md`
+to the implemented analytic-validation scripts, utilities, and verification assets.
+
+### Scope
+
+Implemented Phase 4 object:
+
+- symbolic exact verification of the warm-up model `(s, k) = (2, 2)`
+- exact numeric analytic core for the canonical local system `(s, k) = (4, 2)`
+- explicit comparison between the exact analytic model and Catmull-style heuristics
+- artifact export for text expressions, matrices, arrays, CSV tables, JSON summaries, and figures
+
+### Requirement Mapping
+
+| Requirement | Implementation | Verification |
+| --- | --- | --- |
+| Symbolic one-sided natural cubic derivation, local energy derivation, exact velocity solve, and Catmull equivalence proof for `s=2` | `phase_4/blom_k2_s2_sympy.py` -> `build_left_natural_cubic_symbolic`, `build_right_natural_cubic_symbolic`, `derive_s2_local_energy_symbolic`, `derive_s2_exact_velocity_symbolic`, `verify_catmull_equivalence_symbolic` | `phase_4/test_phase4_analytic.py`, `python3 -m phase_4.blom_k2_s2_sympy`, files under `phase_4/results/s2_sympy/` |
+| Shared Hermite matrices, Gram matrices, scaling operators, one-sided rank-one costs, and reconstruction utilities | `phase_4/utils/hermite_utils.py` | Transitively exercised by all Phase 4 scripts and tests |
+| Exact `6x6` local analytic system for canonical `s=4,k=2` and Hermite center-segment reconstruction | `phase_4/blom_k2_s4_numeric.py` -> `left_outer_cost_matrix`, `right_outer_cost_matrix`, `build_C4`, `build_G4`, `build_R4`, `middle_segment_cost_matrix`, `build_local_quadratic_s4_k2`, `solve_local_system_s4_k2`, `hermite_reconstruct_center_segment` | `phase_4/test_phase4_analytic.py`, `python3 -m phase_4.blom_k2_s4_numeric`, arrays and figures under `phase_4/results/s4_numeric/` |
+| Direct numeric comparison between Phase 4 analytic core and Phase 3 BLOM-Strict local QP | `phase_4/blom_k2_s4_numeric.py` -> `compare_with_blom_strict_qp` | `phase_4/test_phase4_analytic.py`, `phase_4/results/s4_numeric/analytic_vs_qp_metrics.json` |
+| Time-weighted Catmull baseline and exact-vs-heuristic comparison for `s=2` and `s=4` | `phase_4/blom_catmull_compare.py` -> `catmull_velocity_time_weighted`, `heuristic_local_state_s4`, `compare_s2_exact_vs_catmull`, `compare_s4_exact_vs_catmull`, `run_random_benchmark`, `plot_comparison_figures` | `phase_4/test_phase4_analytic.py`, `python3 -m phase_4.blom_catmull_compare`, files under `phase_4/results/catmull_compare/` |
+| Shared artifact saving and white-background plotting utilities | `phase_4/utils/io_utils.py`, `phase_4/utils/plotting_utils.py` | Artifact generation during all Phase 4 script runs |
+| Phase 4 README documenting scope, scripts, outputs, and interpretation | `phase_4/README_phase4.md` | manual review |
+
+### Verification Summary
+
+Executed for Phase 4 implementation:
+
+- `python3 -m compileall phase_4`
+- `python3 -m unittest phase_4.test_phase4_analytic`
+- `python3 -m unittest discover -s . -p 'test*.py'`
+- `python3 -m phase_4.blom_k2_s2_sympy`
+- `python3 -m phase_4.blom_k2_s4_numeric`
+- `python3 -m phase_4.blom_catmull_compare`
+
+Observed Phase 4 results:
+
+- Phase 4 unit tests: `5 passed`
+- Full repository test suite: `35 passed`
+- `s=2` symbolic difference `v_exact - v_catmull`: `0`
+- `s=2` random max exact-vs-Catmull velocity error: `1.332e-15`
+- `s=4` analytic matrix symmetry error: `0.0`
+- `s=4` minimum eigenvalue of `A2(T)` on representative sample: `3.139`
+- `s=4` analytic-vs-Phase-3 local-state error: `8.565e-11`
+- `s=4` analytic-vs-Phase-3 center-coefficient error: `1.292e-11`
+- Catmull comparison `s=4` mean center-coefficient error: `4.766e+02`
+- Catmull comparison `s=4` minimum objective gap `J_heuristic - J_exact`: `0.611`
+
+### Deliverables
+
+Implemented deliverables under `phase_4/`:
+
+- `REQ-Phase4-analytic-validation.md`
+- `__init__.py`
+- `blom_k2_s2_sympy.py`
+- `blom_k2_s4_numeric.py`
+- `blom_catmull_compare.py`
+- `test_phase4_analytic.py`
+- `README_phase4.md`
+- `utils/`
+- `results/s2_sympy/`
+- `results/s4_numeric/`
+- `results/catmull_compare/`

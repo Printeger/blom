@@ -1,0 +1,9 @@
+{
+  "quadratic_coeff": "3/h_p + 3/h_m",
+  "quadratic_coeff_positive_demo": true,
+  "symbolic_difference": "0",
+  "random_max_abs_error": 1.3322676295501878e-15,
+  "random_mean_abs_error": 1.2795618514402363e-16,
+  "v_exact_demo": 0.8958333333333333,
+  "v_catmull_demo": 0.8958333333333331
+}
