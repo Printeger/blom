@@ -687,6 +687,86 @@ Implemented deliverables under `phase_8/`:
 
 ## Phase 9 Traceability
 
+## Phase 8 Supplementary Traceability
+
+This section maps the supplementary Phase 8 requirements in
+`phase_8/REQ-Phase8-supplementary-experiments.md` to the implemented
+large-scale robustness checks, tests, and generated artifacts.
+
+### Scope
+
+Implemented supplementary Phase 8 object:
+
+- larger-`M` sweep with explicit nonempty-interior accounting
+- higher-trial robustness checks under uniform-time and bounded-nonuniform regimes
+- radius-mode sensitivity analysis for the interior/boundary split
+- raw-vs-reference-window sanity checks with inherited-`gamma` perturbation response
+- explicit empty-interior false-positive detection
+- raw-to-reference vs reference-to-ideal two-bridge comparison
+- unified supplementary suite runner with overview CSV and interpretation summary
+
+### Requirement Mapping
+
+| Requirement | Implementation | Verification |
+| --- | --- | --- |
+| Shared supplementary utilities for result directories, radius-mode aliases, case generation, fast reference-window extraction, and cross-experiment aggregation | `phase_8/phase8_supplementary_common.py` -> `ensure_supplementary_results_dirs`, `normalize_radius_mode`, `build_case`, `compute_reference_window_coefficients_fast`, `compute_case_metrics`, `aggregate_numeric_records` | `phase_8/test_phase8_supplementary_suite.py` |
+| Experiment 1 larger-`M` sweep with interior count, boundary ratio, and segmentwise heatmaps | `phase_8/exp1_large_M_sweep.py` -> `run_large_M_sweep` | `python3 -m phase_8.blom_phase8_supplementary_suite`, `phase_8/results/phase8_supplementary/exp1_large_M/` |
+| Experiment 2 more-trials robustness with slope boxplots, boundary-ratio boxplots, and mean-curve bands | `phase_8/exp2_more_trials.py` -> `run_more_trials` | `python3 -m phase_8.blom_phase8_supplementary_suite`, `phase_8/results/phase8_supplementary/exp2_more_trials/` |
+| Experiment 3 radius sensitivity across `r(k)=ceil(k/2)`, `r(k)=k`, and `r(k)=ceil(3k/2)` | `phase_8/exp3_radius_sensitivity.py` -> `run_radius_sensitivity` | `python3 -m phase_8.blom_phase8_supplementary_suite`, `phase_8/results/phase8_supplementary/exp3_radius_sensitivity/` |
+| Experiment 4 raw-vs-reference sanity checks with large-`M`, regime split, and perturbed inherited-`gamma` response | `phase_8/exp4_raw_vs_reference_sanity.py` -> `run_raw_vs_reference_sanity` | `python3 -m phase_8.blom_phase8_supplementary_suite`, `phase_8/results/phase8_supplementary/exp4_raw_vs_reference_sanity/` |
+| Experiment 5 explicit empty-interior risk detection and annotation outputs | `phase_8/exp5_empty_interior_risk.py` -> `run_empty_interior_risk` | `python3 -m phase_8.blom_phase8_supplementary_suite`, `phase_8/results/phase8_supplementary/exp5_empty_interior_risk/` |
+| Experiment 6 raw-to-reference vs reference-to-ideal bridge-gap comparison | `phase_8/exp6_two_bridge_gap_compare.py` -> `run_two_bridge_gap_compare` | `python3 -m phase_8.blom_phase8_supplementary_suite`, `phase_8/results/phase8_supplementary/exp6_two_bridge_gaps/` |
+| Unified supplementary suite with total overview CSV and mandatory high-level summary answers | `phase_8/blom_phase8_supplementary_suite.py` -> `run_phase8_supplementary_suite`, `_write_suite_summary` | `phase_8/results/phase8_supplementary/summary/phase8_supplementary_overview.csv`, `phase_8/results/phase8_supplementary/summary/phase8_supplementary_summary.md` |
+| Supplementary tests covering radius aliases, raw/reference sanity smoke run, empty-interior marking, and suite smoke run | `phase_8/test_phase8_supplementary_suite.py` | `python3 -m unittest phase_8.test_phase8_supplementary_suite`, `python3 -m unittest discover -s phase_8 -p 'test*.py'` |
+| Supplementary examples and README updates | `phase_8/examples/demo_exp1_large_M.py`, `phase_8/examples/demo_exp2_more_trials.py`, `phase_8/examples/demo_exp3_radius.py`, `phase_8/examples/demo_exp4_raw_ref.py`, `phase_8/examples/demo_exp5_empty_interior.py`, `phase_8/examples/demo_exp6_two_bridge.py`, `phase_8/examples/demo_phase8_supplementary_suite.py`, `phase_8/README_phase8.md` | direct script execution and manual review |
+
+### Verification Summary
+
+Executed for supplementary Phase 8 implementation:
+
+- `python3 -m compileall phase_8`
+- `python3 -m phase_8.blom_phase8_supplementary_suite`
+- `python3 -m unittest discover -s phase_8 -p 'test*.py'`
+
+Observed supplementary Phase 8 results:
+
+- Phase 8 full test subset: `12 passed`
+- Larger-`M` sweep nonempty-interior cases: `22 / 24`
+- Larger-`M` sweep mean boundary energy ratio: `0.424942`
+- More-trials mean interior slope: `-4.147938`
+- More-trials mean full slope: `-0.369023`
+- Share of trials with interior slope more negative than full slope: `1.0`
+- Raw-vs-reference mean gap: `2.187265e-13`
+- Raw-vs-reference max gap: `6.702577e-12`
+- Empty-interior cases flagged: `13 / 87`
+- Mean two-bridge gap ratio: `3.541086e+12`
+- Recommended next bridge from the suite summary: `reference-window / ideal-truncation consistency`
+
+### Deliverables
+
+Implemented supplementary deliverables under `phase_8/`:
+
+- `REQ-Phase8-supplementary-experiments.md`
+- `phase8_supplementary_common.py`
+- `exp1_large_M_sweep.py`
+- `exp2_more_trials.py`
+- `exp3_radius_sensitivity.py`
+- `exp4_raw_vs_reference_sanity.py`
+- `exp5_empty_interior_risk.py`
+- `exp6_two_bridge_gap_compare.py`
+- `blom_phase8_supplementary_suite.py`
+- `test_phase8_supplementary_suite.py`
+- `examples/demo_exp1_large_M.py`
+- `examples/demo_exp2_more_trials.py`
+- `examples/demo_exp3_radius.py`
+- `examples/demo_exp4_raw_ref.py`
+- `examples/demo_exp5_empty_interior.py`
+- `examples/demo_exp6_two_bridge.py`
+- `examples/demo_phase8_supplementary_suite.py`
+- `results/phase8_supplementary/`
+
+## Phase 9 Traceability
+
 This section maps the Phase 9 requirements in
 `phase_9/REQ-Phase9-minimal-differentiable-loop.md` to the implemented
 minimal differentiable-loop toolbox, tests, and generated artifacts.
