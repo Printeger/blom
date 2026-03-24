@@ -394,3 +394,74 @@ Implemented deliverables under `phase_5/`:
 - `examples/`
 - `README_phase5.md`
 - `results/phase5_boundary_jump_check/`
+
+## Phase 6 Traceability
+
+This section maps the Phase 6 requirements in `phase_6/REQ-Phase6-fd-jacobian-check.md`
+to the implemented Jacobian-validation toolbox, tests, and generated artifacts.
+
+### Scope
+
+Implemented Phase 6 object:
+
+- theoretical sparsity masks for the canonical raw BLOM-Analytic coefficient map
+- analytic-vs-finite-difference validation for raw `J_c_q`, `J_c_T`, `J_x_q`, and `J_x_T`
+- scheme-level locality comparison for final assembled Scheme A / B / C coefficients
+- random-trial verification of mask stability, Jacobian error levels, and `||dc/dT||` boundedness statistics
+
+### Requirement Mapping
+
+| Requirement | Implementation | Verification |
+| --- | --- | --- |
+| Theoretical raw waypoint and duration support masks | `phase_6/blom_fd_jacobian_check.py` -> `theoretical_mask_c_q`, `theoretical_mask_c_T`, `theoretical_mask_x_q`, `theoretical_mask_x_T` | `phase_6/test_blom_fd_jacobian_check.py`, raw sparsity CSV and theory-vs-FD plots under `phase_6/results/phase6_fd_jacobian_check/raw_scheme_C/` |
+| Unified vector-output finite-difference Jacobian helper | `phase_6/blom_fd_jacobian_check.py` -> `finite_difference_jacobian` | `phase_6/test_blom_fd_jacobian_check.py`, all Phase 6 FD comparisons |
+| Raw canonical BLOM-Analytic coefficient and local-jet maps | `phase_6/blom_fd_jacobian_check.py` -> `raw_local_coefficient_map`, `raw_local_jet_state_map`, `raw_local_jacobians` | `phase_6/test_blom_fd_jacobian_check.py`, `python3 -m phase_6.examples.demo_raw_local_support` |
+| Analytic derivative chain for `d x / dT` and `d c / dT` in the canonical local system | `phase_6/blom_fd_jacobian_check.py` -> `_raw_local_analytic_jacobians_local`, `_d_build_H_mid`, `_d_build_g_mid`, `_d_outer_rank_one_hessian`, `_d_outer_linear_term`, `_d_D_matrix`, `_d_Lambda8` | raw analytic-vs-FD error heatmaps and step-size sweeps in `phase_6/results/phase6_fd_jacobian_check/compare/` |
+| Scheme A / B / C assembled coefficient maps and nonlocality diagnostics | `phase_6/blom_fd_jacobian_check.py` -> `assembled_scheme_A_map`, `assembled_scheme_B_map`, `assembled_scheme_C_map`, `assembled_scheme_jacobians_fd`, `_scheme_nonlocality_check` | `phase_6/test_blom_fd_jacobian_check.py`, scheme heatmaps and sparsity CSVs under `phase_6/results/phase6_fd_jacobian_check/` |
+| High-level single-run, compare-all, and random-trial runners | `phase_6/blom_fd_jacobian_check.py` -> `run_fd_jacobian_check`, `run_compare_all_schemes`, `run_random_trials` | `phase_6/examples/demo_compare_all.py`, random-trial summaries and boxplots |
+| Phase 6 example entry points | `phase_6/examples/demo_raw_local_support.py`, `phase_6/examples/demo_scheme_A_nonlocality.py`, `phase_6/examples/demo_scheme_B_nonlocality.py`, `phase_6/examples/demo_compare_all.py` | direct script execution |
+| Phase 6 README documenting interfaces, outputs, and interpretation | `phase_6/README_phase6.md` | manual review |
+
+### Verification Summary
+
+Executed for Phase 6 implementation:
+
+- `python3 -m compileall phase_6`
+- `python3 -m phase_6.blom_fd_jacobian_check`
+- `python3 -m phase_6.examples.demo_raw_local_support`
+- `python3 -m phase_6.examples.demo_scheme_A_nonlocality`
+- `python3 -m phase_6.examples.demo_scheme_B_nonlocality`
+- `python3 -m phase_6.examples.demo_compare_all`
+- `python3 -m unittest phase_6.test_blom_fd_jacobian_check`
+- `python3 -m unittest discover -s . -p 'test*.py'`
+
+Observed Phase 6 results:
+
+- Phase 6 unit tests: `5 passed`
+- Full repository test suite: `45 passed`
+- Raw `J_c_q` analytic-vs-FD max abs error: `4.063e-08`
+- Raw `J_c_T` analytic-vs-FD max abs error: `1.209e-07`
+- Raw `J_c_q` mask pass: `True`
+- Raw `J_c_T` mask pass: `True`
+- Scheme C final `q` bandwidth: `2`
+- Scheme A final `q` bandwidth: `5`
+- Scheme B final `q` bandwidth: `3`
+- Scheme C final outside-band `q` max abs: `0.0`
+- Scheme A final outside-band `q` max abs: `1.317`
+- Scheme B final outside-band `q` max abs: `8.843`
+- Random-trial raw `q` mask pass rate: `1.00`
+- Random-trial raw `T` mask pass rate: `1.00`
+- Random-trial mean `q` bandwidth: `A=7.0, B=3.0, C=2.0`
+- Random-trial max `||dc/dT||`: `1.765`
+
+### Deliverables
+
+Implemented deliverables under `phase_6/`:
+
+- `REQ-Phase6-fd-jacobian-check.md`
+- `__init__.py`
+- `blom_fd_jacobian_check.py`
+- `test_blom_fd_jacobian_check.py`
+- `examples/`
+- `README_phase6.md`
+- `results/phase6_fd_jacobian_check/`

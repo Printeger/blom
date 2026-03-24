@@ -1,0 +1,13 @@
+scheme,segment_idx,jacobian_type,nnz_total,nnz_theory_band,nnz_outside_band,max_abs_outside_band,mean_abs_outside_band
+scheme_C,1,c_q,14,14,0,0.0,0.0
+scheme_C,2,c_q,22,22,0,0.0,0.0
+scheme_C,3,c_q,13,13,0,0.0,0.0
+scheme_C,4,c_q,13,13,0,0.0,0.0
+scheme_C,5,c_q,22,22,0,0.0,0.0
+scheme_C,6,c_q,15,15,0,0.0,0.0
+scheme_C,1,c_T,14,14,0,0.0,0.0
+scheme_C,2,c_T,21,21,0,0.0,0.0
+scheme_C,3,c_T,9,9,0,0.0,0.0
+scheme_C,4,c_T,9,9,0,0.0,0.0
+scheme_C,5,c_T,21,21,0,0.0,0.0
+scheme_C,6,c_T,14,14,0,0.0,0.0

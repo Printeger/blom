@@ -1,0 +1,638 @@
+\section{Phase 6: Basic Properties of BLOM}
+\label{sec:phase6_basic_properties}
+
+The purpose of this section is to establish the first layer of closed-form properties of BLOM before attempting any convergence theorem.
+The guiding principle is that all statements in this section must be either:
+\begin{enumerate}
+    \item exact structural consequences of the local analytic map constructed in Phase~4, or
+    \item exact consequences of the global assembly mechanisms introduced in Phase~5.
+\end{enumerate}
+No asymptotic statement is used in this section.
+
+Throughout, we adopt the notation of Phases~0--5.
+In particular, the canonical setting is
+\[
+p:[0,\mathcal T]\to\mathbb R,
+\qquad
+s=4,\qquad
+k=2,
+\qquad
+\theta=(q_1,\dots,q_{M-1},T_1,\dots,T_M)^\top,
+\]
+with
+\[
+q_0,\dots,q_M\in\mathbb R,
+\qquad
+T_i>0,
+\qquad
+\mathcal T=\sum_{i=1}^{M}T_i.
+\]
+For every segment \(i\), the raw BLOM-Analytic coefficient map derived in Phase~4 has the form
+\begin{equation}
+\label{eq:phase6_local_map}
+c_i^{\mathrm{BLOM},2}
+=
+\mathcal M_{2,i}\bigl(q_{i-2},q_{i-1},q_i,q_{i+1},T_{i-1},T_i,T_{i+1}\bigr),
+\end{equation}
+for all interior segments \(2\le i\le M-1\), with the obvious truncation near the global boundaries.
+The associated local segment polynomial is
+\begin{equation}
+\label{eq:phase6_segment_poly}
+p_i^{\mathrm{loc}}(\tau)
+=
+\bigl(c_i^{\mathrm{BLOM},2}\bigr)^\top \beta_s(\tau),
+\qquad
+\tau\in[0,T_i].
+\end{equation}
+
+In this section, unless otherwise specified, ``BLOM coefficient'' refers to the raw local map \eqref{eq:phase6_local_map}, i.e.\ the coefficient delivered by the local window centered at segment \(i\).
+Assembly-dependent properties will be stated separately.
+
+\subsection{Neighborhood notation}
+\label{subsec:phase6_neighborhood_notation}
+
+For the canonical three-segment stencil, define the local waypoint and time neighborhoods of segment \(i\) by
+\begin{equation}
+\label{eq:phase6_q_neighborhood}
+\mathcal Q_i
+:=
+\{i-2,i-1,i,i+1\}\cap\{0,1,\dots,M\},
+\end{equation}
+and
+\begin{equation}
+\label{eq:phase6_T_neighborhood}
+\mathcal T_i^{\mathrm{idx}}
+:=
+\{i-1,i,i+1\}\cap\{1,\dots,M\}.
+\end{equation}
+Thus \(\mathcal M_{2,i}\) depends only on the waypoint values with indices in \(\mathcal Q_i\) and the durations with indices in \(\mathcal T_i^{\mathrm{idx}}\).
+
+For later use, define the derivative row operator
+\[
+B^{(\ell)}(\tau):=\frac{d^\ell}{d\tau^\ell}\beta_s(\tau)^\top.
+\]
+
+\subsection{Proposition 1: local support}
+\label{subsec:phase6_prop1}
+
+We first prove the strongest structural property of the raw BLOM coefficient map: exact finite local support.
+
+\begin{proposition}[Exact local support of the raw BLOM-Analytic map]
+\label{prop:phase6_local_support}
+Fix an interior segment \(i\in\{2,\dots,M-1\}\) in the canonical setting \(s=4,\ k=2\).
+Then the raw BLOM-Analytic coefficient map
+\[
+c_i^{\mathrm{BLOM},2}
+=
+\mathcal M_{2,i}\bigl(q_{i-2},q_{i-1},q_i,q_{i+1},T_{i-1},T_i,T_{i+1}\bigr)
+\]
+satisfies
+\begin{equation}
+\label{eq:phase6_dcdq_zero}
+\frac{\partial c_i^{\mathrm{BLOM},2}}{\partial q_j}=0,
+\qquad
+j\notin \mathcal Q_i,
+\end{equation}
+and
+\begin{equation}
+\label{eq:phase6_dcdT_zero}
+\frac{\partial c_i^{\mathrm{BLOM},2}}{\partial T_j}=0,
+\qquad
+j\notin \mathcal T_i^{\mathrm{idx}},
+\end{equation}
+whenever the derivatives exist.
+Equivalently, the Jacobians
+\[
+\frac{\partial c^{\mathrm{BLOM},2}}{\partial q},
+\qquad
+\frac{\partial c^{\mathrm{BLOM},2}}{\partial T}
+\]
+are exactly banded in the segment index.
+\end{proposition}
+
+\begin{proof}
+By Phase~4, the raw coefficient vector of segment \(i\) is obtained by the composition
+\[
+c_i^{\mathrm{BLOM},2}
+=
+\Lambda_8(T_i)\,C_4^{-1}\,y_i,
+\]
+where
+\[
+y_i
+=
+\begin{bmatrix}
+q_{i-1}\\ D(T_i)\chi_{i-1}^\star\\ q_i\\ D(T_i)\chi_i^\star
+\end{bmatrix},
+\qquad
+x_i^{\mathrm{loc},\star}
+=
+\begin{bmatrix}
+\chi_{i-1}^\star\\ \chi_i^\star
+\end{bmatrix}
+=
+\bigl(A_2^{(i)}(T)\bigr)^{-1}B_2^{(i)}(q,T).
+\]
+In the canonical \(k=2\) construction, the local system matrices satisfy
+\[
+A_2^{(i)}(T)=A_2^{(i)}(T_{i-1},T_i,T_{i+1}),
+\]
+and
+\[
+B_2^{(i)}(q,T)=B_2^{(i)}(q_{i-2},q_{i-1},q_i,q_{i+1},T_{i-1},T_i,T_{i+1}).
+\]
+Therefore the local solution \(x_i^{\mathrm{loc},\star}\), hence \(y_i\), and hence \(c_i^{\mathrm{BLOM},2}\), depend only on the variables
+\[
+(q_{i-2},q_{i-1},q_i,q_{i+1},T_{i-1},T_i,T_{i+1}).
+\]
+Consequently, for every \(q_j\) with \(j\notin\mathcal Q_i\), the map \(\mathcal M_{2,i}\) is constant in \(q_j\), so
+\[
+\frac{\partial c_i^{\mathrm{BLOM},2}}{\partial q_j}=0.
+\]
+Likewise, for every \(T_j\) with \(j\notin\mathcal T_i^{\mathrm{idx}}\), the map is constant in \(T_j\), so
+\[
+\frac{\partial c_i^{\mathrm{BLOM},2}}{\partial T_j}=0.
+\]
+This proves \eqref{eq:phase6_dcdq_zero}--\eqref{eq:phase6_dcdT_zero}.
+\end{proof}
+
+\begin{remark}[Scope of Proposition~\ref{prop:phase6_local_support}]
+\label{rem:phase6_prop1_scope}
+Proposition~\ref{prop:phase6_local_support} is a property of the \emph{raw local coefficient map}, equivalently of Scheme~C before any additional global assembly mechanism is imposed.
+It does \emph{not} hold, in general, for the assembled coefficients of Scheme~A or Scheme~B, because both of those schemes introduce global or quasi-global coupling through shared knot states or consensus projection.
+Thus exact finite local support is strongest for raw BLOM, and is partially traded away in favor of stronger global continuity in Schemes~A and~B.
+\end{remark}
+
+\begin{remark}[General \texorpdfstring{$k$}{k} statement]
+\label{rem:phase6_prop1_general_k}
+A corresponding exact-support proposition for general \(k\) should read
+\[
+\frac{\partial c_i^{\mathrm{BLOM},k}}{\partial q_j}=0
+\quad\text{and}\quad
+\frac{\partial c_i^{\mathrm{BLOM},k}}{\partial T_j}=0
+\]
+outside the \(k\)-window neighborhood.
+However, this general statement requires the existence of a fully explicit analytic map \(\mathcal M_{k,i}\) for arbitrary \(k\), which has not yet been derived in this thesis.
+Accordingly, the proof is completed here only for the canonical analytic map \(k=2\).
+\end{remark}
+
+\subsection{Proposition 2: interpolation}
+\label{subsec:phase6_prop2}
+
+The next property is exact interpolation of the waypoint data.
+
+\begin{proposition}[Exact interpolation]
+\label{prop:phase6_interpolation}
+Let \(p\) be any BLOM trajectory generated by Scheme~A, Scheme~B, or Scheme~C in the canonical setting.
+Then
+\begin{equation}
+\label{eq:phase6_interpolation}
+p(t_i)=q_i,
+\qquad i=0,1,\dots,M.
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+We argue segment by segment.
+
+For the raw local map, the coefficient vector of segment \(i\) is reconstructed by the Hermite formula
+\[
+c_i
+=
+\mathcal H_i(q_{i-1},q_i,T_i,\eta_{i-1},\eta_i),
+\]
+where the endpoint values \(q_{i-1}\) and \(q_i\) are explicitly inserted into the reconstruction data.
+By the unisolvence of degree-\((2s-1)\) Hermite interpolation, the resulting segment polynomial satisfies
+\[
+p_i(0)=q_{i-1},
+\qquad
+p_i(T_i)=q_i.
+\]
+This holds irrespective of whether the lower-order endpoint jets \(\eta_{i-1},\eta_i\) come from Scheme~A, Scheme~B, or are implicit in Scheme~C.
+
+Therefore, for every interior knot \(t_i\),
+\[
+p_i(T_i)=q_i
+\qquad\text{and}\qquad
+p_{i+1}(0)=q_i.
+\]
+Hence the assembled trajectory takes the exact waypoint value \(q_i\) at knot \(t_i\).
+The boundary values \(p(0)=q_0\) and \(p(\mathcal T)=q_M\) follow identically from the first and last segments.
+\end{proof}
+
+\begin{corollary}[Universal \(C^0\) property]
+\label{cor:phase6_C0}
+Every BLOM trajectory generated by any of the three assembly schemes belongs to \(C^0([0,\mathcal T])\).
+\end{corollary}
+
+\begin{proof}
+Equation \eqref{eq:phase6_interpolation} implies that the left and right traces at every interior knot both equal \(q_i\), so the value jump vanishes.
+\end{proof}
+
+\subsection{Proposition 3: post-assembly continuity}
+\label{subsec:phase6_prop3}
+
+The continuity statement must be formulated at the level of the \emph{final assembled trajectory}.
+It is not enough to say that the local window solution is \(C^{2s-2}\) within its own window, because that property does not automatically survive global extraction and assembly.
+
+We therefore state the result scheme by scheme.
+
+\begin{proposition}[Post-assembly continuity]
+\label{prop:phase6_continuity}
+Let \(p\) be the final assembled BLOM trajectory.
+
+\begin{enumerate}
+    \item \textbf{Scheme A.}
+    If \(p=p^A\) is assembled by shared junction states as in Phase~5, then
+    \begin{equation}
+    \label{eq:phase6_schemeA_cont}
+    \llbracket p^{(\ell)}\rrbracket(t_i)=0,
+    \qquad
+    \ell=0,1,\dots,s-1,
+    \qquad
+    i=1,\dots,M-1.
+    \end{equation}
+    Hence
+    \[
+    p^A\in C^{s-1}([0,\mathcal T]).
+    \]
+
+    \item \textbf{Scheme B.}
+    If \(p=p^B\) is assembled by overlapping consensus as in Phase~5, then
+    \begin{equation}
+    \label{eq:phase6_schemeB_cont}
+    \llbracket p^{(\ell)}\rrbracket(t_i)=0,
+    \qquad
+    \ell=0,1,\dots,s-1,
+    \qquad
+    i=1,\dots,M-1.
+    \end{equation}
+    Hence
+    \[
+    p^B\in C^{s-1}([0,\mathcal T]).
+    \]
+
+    \item \textbf{Scheme C.}
+    If \(p=p^C\) is assembled by raw central-segment extraction, then
+    \begin{equation}
+    \label{eq:phase6_schemeC_C0}
+    \llbracket p\rrbracket(t_i)=0,
+    \qquad i=1,\dots,M-1.
+    \end{equation}
+    Therefore
+    \[
+    p^C\in C^0([0,\mathcal T]).
+    \]
+    Moreover, for any fixed \(r\in\{1,\dots,s-1\}\), if the endpoint-jet compatibility condition
+    \begin{equation}
+    \label{eq:phase6_schemeC_compatibility}
+    \Gamma_i^{-}(q,T)=\Gamma_i^{+}(q,T)
+    \quad\text{up to order }r
+    \end{equation}
+    holds for all interior knots \(t_i\), then
+    \[
+    p^C\in C^r([0,\mathcal T]).
+    \]
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+Parts (1) and (2) follow from the corresponding assembly theorems of Phase~5.
+Indeed, Scheme~A and Scheme~B reconstruct both neighboring segments using the same shared or consensus knot-state \(\eta_i\) at the common knot \(t_i\), and Proposition~\ref{prop:phase5_basic_hermite} implies continuity up to order \(s-1\).
+
+Part (3) follows from Corollary~\ref{cor:phase6_C0}, which gives exact continuity of the value.
+The conditional \(C^r\) statement is exactly the sufficient condition proved for Scheme~C in Phase~5: if the lower-order endpoint jets match up to order \(r\), then the corresponding derivative jumps vanish up to order \(r\).
+\end{proof}
+
+\begin{remark}[What Proposition~\ref{prop:phase6_continuity} does not claim]
+\label{rem:phase6_no_C2sminus2}
+Proposition~\ref{prop:phase6_continuity} deliberately does \emph{not} claim global \(C^{2s-2}\) continuity for any scheme.
+The stronger within-window continuity from Phase~3 is a \emph{local optimality property}, whereas the present proposition is a \emph{global assembly property}.
+Without an additional theorem linking overlapping windows at higher derivative orders, these two notions must be kept distinct.
+\end{remark}
+
+\subsection{Proposition 4: weak time sensitivity}
+\label{subsec:phase6_prop4}
+
+We now study the weakest time-sensitivity statement that is both useful and rigorously provable at the current stage.
+Rather than claiming monotonicity, which is generally too strong, we only prove:
+
+\begin{enumerate}
+    \item the local coefficient map is continuously differentiable with respect to the local duration vector;
+    \item its Jacobians with respect to local durations are uniformly bounded on compact admissible subsets.
+\end{enumerate}
+
+As in Proposition~\ref{prop:phase6_local_support}, this proposition is proved for the canonical explicit analytic map of Phase~4.
+
+\paragraph{Local duration domain.}
+For an interior segment \(i\in\{2,\dots,M-1\}\), define the local duration vector
+\[
+\tau_i:=(T_{i-1},T_i,T_{i+1})^\top\in\mathbb R_{>0}^3.
+\]
+Let
+\begin{equation}
+\label{eq:phase6_domain}
+\mathcal D_i
+:=
+\left\{
+(q_{i-2},q_{i-1},q_i,q_{i+1},\tau_i)
+\in \mathbb R^4\times \mathbb R_{>0}^3
+\ \middle|\
+A_2^{(i)}(\tau_i)\ \text{is nonsingular}
+\right\}.
+\end{equation}
+By Phase~4, on the canonical admissible BLOM domain the matrix \(A_2^{(i)}(\tau_i)\) is symmetric positive definite, hence \(\mathcal D_i\) contains all physically admissible local data.
+
+\paragraph{Canonical analytic map.}
+Recall from Phase~4 that
+\begin{equation}
+\label{eq:phase6_x_def}
+x_i^{\mathrm{loc},\star}
+=
+\bigl(A_2^{(i)}(\tau_i)\bigr)^{-1} B_2^{(i)}(q,\tau_i),
+\end{equation}
+and
+\begin{equation}
+\label{eq:phase6_ci_def}
+c_i^{\mathrm{BLOM},2}
+=
+\Lambda_8(T_i)\,C_4^{-1}\,y_i,
+\end{equation}
+where
+\begin{equation}
+\label{eq:phase6_y_def}
+y_i
+=
+\begin{bmatrix}
+q_{i-1}\\
+D(T_i)\chi_{i-1}^\star\\
+q_i\\
+D(T_i)\chi_i^\star
+\end{bmatrix},
+\qquad
+x_i^{\mathrm{loc},\star}
+=
+\begin{bmatrix}
+\chi_{i-1}^\star\\
+\chi_i^\star
+\end{bmatrix}.
+\end{equation}
+
+\begin{proposition}[Weak time sensitivity of the canonical BLOM-Analytic map]
+\label{prop:phase6_time_sensitivity}
+Consider the canonical BLOM-Analytic map \(c_i^{\mathrm{BLOM},2}\) defined by
+\eqref{eq:phase6_x_def}--\eqref{eq:phase6_y_def} for an interior segment \(i\).
+Then:
+
+\begin{enumerate}
+    \item \textbf{Continuous differentiability.}
+    The map
+    \[
+    (q_{i-2},q_{i-1},q_i,q_{i+1},T_{i-1},T_i,T_{i+1})
+    \longmapsto
+    c_i^{\mathrm{BLOM},2}
+    \]
+    is \(C^1\) on \(\mathcal D_i\).
+
+    \item \textbf{Derivative formula for the local jet state.}
+    For every \(j\in\{i-1,i,i+1\}\),
+    \begin{equation}
+    \label{eq:phase6_dx_dT}
+    \frac{\partial x_i^{\mathrm{loc},\star}}{\partial T_j}
+    =
+    \bigl(A_2^{(i)}\bigr)^{-1}
+    \left(
+    \frac{\partial B_2^{(i)}}{\partial T_j}
+    -
+    \frac{\partial A_2^{(i)}}{\partial T_j}\,x_i^{\mathrm{loc},\star}
+    \right).
+    \end{equation}
+
+    \item \textbf{Derivative formula for the segment coefficient.}
+    For every \(j\in\{i-1,i,i+1\}\),
+    \begin{equation}
+    \label{eq:phase6_dc_dT}
+    \frac{\partial c_i^{\mathrm{BLOM},2}}{\partial T_j}
+    =
+    \frac{\partial \Lambda_8(T_i)}{\partial T_j} C_4^{-1} y_i
+    +
+    \Lambda_8(T_i) C_4^{-1} \frac{\partial y_i}{\partial T_j},
+    \end{equation}
+    where
+    \begin{equation}
+    \label{eq:phase6_dy_dT}
+    \frac{\partial y_i}{\partial T_j}
+    =
+    \mathbf 1_{\{j=i\}}
+    \begin{bmatrix}
+    0\\ D'(T_i)\chi_{i-1}^\star\\ 0\\ D'(T_i)\chi_i^\star
+    \end{bmatrix}
+    +
+    \begin{bmatrix}
+    0\\ D(T_i)\dfrac{\partial \chi_{i-1}^\star}{\partial T_j}\\ 0\\ D(T_i)\dfrac{\partial \chi_i^\star}{\partial T_j}
+    \end{bmatrix}.
+    \end{equation}
+
+    \item \textbf{Uniform boundedness on compact admissible sets.}
+    Let \(K_i\subset \mathcal D_i\) be compact.
+    Then there exists a constant \(C_{K_i}>0\) such that for all local data in \(K_i\),
+    \begin{equation}
+    \label{eq:phase6_bounded_dcdT}
+    \left\|
+    \frac{\partial c_i^{\mathrm{BLOM},2}}{\partial T_j}
+    \right\|
+    \le C_{K_i},
+    \qquad
+    j=i-1,i,i+1.
+    \end{equation}
+\end{enumerate}
+Moreover, by Proposition~\ref{prop:phase6_local_support},
+\[
+\frac{\partial c_i^{\mathrm{BLOM},2}}{\partial T_j}=0
+\qquad\text{for all } j\notin\{i-1,i,i+1\}.
+\]
+\end{proposition}
+
+\begin{proof}
+We proceed statement by statement.
+
+\paragraph{Step 1: \(C^1\)-regularity of the local jet state.}
+The map \(A_2^{(i)}(\tau_i)\) is built from the matrices \(S_-(h)\), \(S_+(h)\), and \(H_{\mathrm{mid}}(h)\), each of which is a rational or polynomial matrix function of the positive durations \(h=T_{i-1},T_i,T_{i+1}\).
+Likewise, \(B_2^{(i)}(q,\tau_i)\) is built from polynomial and negative-power expressions of the local durations and affine expressions in the local waypoint vector.
+Hence both \(A_2^{(i)}\) and \(B_2^{(i)}\) are \(C^\infty\) on the domain \(T_{i-1},T_i,T_{i+1}>0\).
+
+On \(\mathcal D_i\), the matrix \(A_2^{(i)}\) is nonsingular.
+Since matrix inversion is smooth on the general linear group, the map
+\[
+(q,\tau_i)\mapsto \bigl(A_2^{(i)}(\tau_i)\bigr)^{-1}
+\]
+is \(C^\infty\) on \(\mathcal D_i\).
+Therefore
+\[
+x_i^{\mathrm{loc},\star}
+=
+\bigl(A_2^{(i)}\bigr)^{-1}B_2^{(i)}
+\]
+is \(C^1\) on \(\mathcal D_i\).
+
+\paragraph{Step 2: derivative of the local jet state.}
+Differentiate the identity
+\[
+A_2^{(i)}(\tau_i)\,x_i^{\mathrm{loc},\star}=B_2^{(i)}(q,\tau_i)
+\]
+with respect to \(T_j\), where \(j\in\{i-1,i,i+1\}\).
+Using the product rule,
+\[
+\frac{\partial A_2^{(i)}}{\partial T_j}x_i^{\mathrm{loc},\star}
++
+A_2^{(i)}\frac{\partial x_i^{\mathrm{loc},\star}}{\partial T_j}
+=
+\frac{\partial B_2^{(i)}}{\partial T_j}.
+\]
+Rearranging,
+\[
+A_2^{(i)}\frac{\partial x_i^{\mathrm{loc},\star}}{\partial T_j}
+=
+\frac{\partial B_2^{(i)}}{\partial T_j}
+-
+\frac{\partial A_2^{(i)}}{\partial T_j}x_i^{\mathrm{loc},\star}.
+\]
+Since \(A_2^{(i)}\) is invertible on \(\mathcal D_i\), multiplying by \(\bigl(A_2^{(i)}\bigr)^{-1}\) gives \eqref{eq:phase6_dx_dT}.
+
+\paragraph{Step 3: derivative of the coefficient vector.}
+Differentiate
+\[
+c_i^{\mathrm{BLOM},2}
+=
+\Lambda_8(T_i)\,C_4^{-1}\,y_i.
+\]
+Because \(C_4^{-1}\) is constant,
+\[
+\frac{\partial c_i^{\mathrm{BLOM},2}}{\partial T_j}
+=
+\frac{\partial \Lambda_8(T_i)}{\partial T_j}C_4^{-1}y_i
++
+\Lambda_8(T_i)C_4^{-1}\frac{\partial y_i}{\partial T_j}.
+\]
+This is \eqref{eq:phase6_dc_dT}.
+To compute \(\partial y_i/\partial T_j\), note that
+\[
+y_i
+=
+\begin{bmatrix}
+q_{i-1}\\
+D(T_i)\chi_{i-1}^\star\\
+q_i\\
+D(T_i)\chi_i^\star
+\end{bmatrix}.
+\]
+Only the scaling matrix \(D(T_i)\) depends explicitly on \(T_i\), while \(\chi_{i-1}^\star\) and \(\chi_i^\star\) depend on all three local durations through \(x_i^{\mathrm{loc},\star}\).
+Hence
+\[
+\frac{\partial}{\partial T_j}\bigl(D(T_i)\chi_{i-1}^\star\bigr)
+=
+\mathbf 1_{\{j=i\}}D'(T_i)\chi_{i-1}^\star
++
+D(T_i)\frac{\partial \chi_{i-1}^\star}{\partial T_j},
+\]
+and similarly for the right-end jet.
+This yields \eqref{eq:phase6_dy_dT}.
+
+\paragraph{Step 4: boundedness on compact admissible sets.}
+Let \(K_i\subset\mathcal D_i\) be compact.
+Because all functions
+\[
+A_2^{(i)},\ B_2^{(i)},\ \partial_{T_j}A_2^{(i)},\ \partial_{T_j}B_2^{(i)},\ 
+\Lambda_8,\ \partial_{T_i}\Lambda_8,\ D,\ D'
+\]
+are continuous on \(\mathcal D_i\), and because inversion is continuous on the nonsingular set, all functions
+\[
+x_i^{\mathrm{loc},\star},\quad
+\frac{\partial x_i^{\mathrm{loc},\star}}{\partial T_j},\quad
+c_i^{\mathrm{BLOM},2},\quad
+\frac{\partial c_i^{\mathrm{BLOM},2}}{\partial T_j}
+\]
+are continuous on \(K_i\).
+Every continuous function on a compact set is bounded.
+Hence there exists \(C_{K_i}>0\) such that \eqref{eq:phase6_bounded_dcdT} holds for all data in \(K_i\).
+
+Finally, the zero derivative outside the local support follows from Proposition~\ref{prop:phase6_local_support}.
+\end{proof}
+
+\begin{remark}[Marked limitation for Proposition~\ref{prop:phase6_time_sensitivity}]
+\label{rem:phase6_prop4_limitation}
+Proposition~\ref{prop:phase6_time_sensitivity} is completed only for the canonical explicit BLOM-Analytic map derived in Phase~4, namely \(s=4,\ k=2\).
+A general \(C^1\)-regularity theorem for arbitrary \((s,k)\) would require an explicit analytic local system
+\[
+A_k^{(i)}(T)x_i^{\mathrm{loc}}=B_k^{(i)}(q,T)
+\]
+for all \(k\), together with a corresponding general Hermite reconstruction map.
+That general proof is \textbf{not completed in this chapter}.
+\end{remark}
+
+\subsection{Consequences for Jacobian structure}
+\label{subsec:phase6_jacobian_structure}
+
+Combining Propositions~\ref{prop:phase6_local_support} and \ref{prop:phase6_time_sensitivity}, we obtain the exact sparsity pattern of the canonical BLOM-Analytic Jacobian.
+
+\begin{corollary}[Exact Jacobian bandedness of raw BLOM]
+\label{cor:phase6_jacobian_banded}
+For the canonical \(s=4,\ k=2\) raw BLOM-Analytic map,
+\[
+c_i^{\mathrm{BLOM},2}
+=
+\mathcal M_{2,i}(q_{i-2},q_{i-1},q_i,q_{i+1},T_{i-1},T_i,T_{i+1}),
+\]
+one has
+\[
+\frac{\partial c_i^{\mathrm{BLOM},2}}{\partial q_j}=0
+\quad\text{for } j\notin\{i-2,i-1,i,i+1\},
+\]
+and
+\[
+\frac{\partial c_i^{\mathrm{BLOM},2}}{\partial T_j}=0
+\quad\text{for } j\notin\{i-1,i,i+1\}.
+\]
+Therefore the raw Jacobians with respect to \(q\) and \(T\) are exactly banded.
+\end{corollary}
+
+\begin{proof}
+This is merely a restatement of Proposition~\ref{prop:phase6_local_support}.
+\end{proof}
+
+\subsection{What has and has not been established in Phase~6}
+\label{subsec:phase6_summary}
+
+We summarize the exact status of the four basic propositions.
+
+\begin{enumerate}
+    \item \textbf{Proposition 1 (local support): completed.}  
+    It is rigorously true for the raw BLOM-Analytic coefficient map, equivalently for Scheme~C before any global coupling mechanism is added.
+
+    \item \textbf{Proposition 2 (interpolation): completed.}  
+    It is rigorously true for all assembly schemes.
+
+    \item \textbf{Proposition 3 (post-assembly continuity): completed.}  
+    The exact statement depends on the scheme:
+    \begin{itemize}
+        \item Scheme~A and Scheme~B: \(C^{s-1}\);
+        \item Scheme~C: \(C^0\) always, and \(C^r\) only under explicit compatibility conditions.
+    \end{itemize}
+
+    \item \textbf{Proposition 4 (weak time sensitivity): completed only in the canonical analytic case \(s=4,\ k=2\).}  
+    A full general-\((s,k)\) theorem is not yet available.
+\end{enumerate}
+
+Thus Phase~6 establishes a complete first layer of BLOM properties without invoking any asymptotic approximation theorem:
+\[
+\boxed{
+\text{local support}
+\;\Longrightarrow\;
+\text{interpolation}
+\;\Longrightarrow\;
+\text{scheme-dependent assembly continuity}
+\;\Longrightarrow\;
+\text{weak time sensitivity}.
+}
+\]
+These are precisely the ``hard'' properties that should be secured before attempting the convergence theory of later phases.

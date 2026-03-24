@@ -1,0 +1,7 @@
+scheme,segment_idx,jacobian_type,error_metric,analytic_vs_fd,ad_vs_fd,analytic_vs_ad,eps
+raw,3,c_q,fro_error,7.770060991709886e-08,nan,nan,1e-06
+raw,3,c_q,max_abs_error,4.062682501526638e-08,nan,nan,1e-06
+raw,3,c_T,fro_error,2.099693792339265e-07,nan,nan,1e-06
+raw,3,c_T,max_abs_error,1.209002866708886e-07,nan,nan,1e-06
+raw,3,x_q,fro_error,3.604580403131342e-07,nan,nan,1e-06
+raw,3,x_T,fro_error,9.152324505894314e-07,nan,nan,1e-06

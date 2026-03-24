@@ -1,0 +1,39 @@
+{
+  "autodiff": {
+    "available": false,
+    "backend": null,
+    "reason": "neither jax nor autograd is installed in the execution environment",
+    "requested": true
+  },
+  "figure_paths": {
+    "dc_dT_bound_statistics": "phase_6/results/phase6_fd_jacobian_check/compare/dc_dT_bound_statistics.png",
+    "jacobian_error_boxplot_random_trials": "phase_6/results/phase6_fd_jacobian_check/compare/jacobian_error_boxplot_random_trials.png"
+  },
+  "raw": {
+    "mask_pass_rate_T": 1.0,
+    "mask_pass_rate_q": 1.0,
+    "max_dc_dT_norm": 1.7653138539427928,
+    "mean_analytic_fd_T_max": 6.27822993678523e-08,
+    "mean_analytic_fd_q_max": 1.5713864512167316e-07
+  },
+  "schemes": {
+    "A": {
+      "mean_T_bandwidth": 7.0,
+      "mean_outside_band_T_ratio": 0.8214285714285713,
+      "mean_outside_band_q_ratio": 0.8125,
+      "mean_q_bandwidth": 7.0
+    },
+    "B": {
+      "mean_T_bandwidth": 2.0,
+      "mean_outside_band_T_ratio": 0.19642857142857142,
+      "mean_outside_band_q_ratio": 0.22916666666666663,
+      "mean_q_bandwidth": 3.0
+    },
+    "C": {
+      "mean_T_bandwidth": 1.0,
+      "mean_outside_band_T_ratio": 0.0,
+      "mean_outside_band_q_ratio": 0.0,
+      "mean_q_bandwidth": 2.0
+    }
+  }
+}

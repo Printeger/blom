@@ -1,0 +1,9 @@
+scheme,segment_idx,jacobian_type,nnz_total,nnz_theory_band,nnz_outside_band,max_abs_outside_band,mean_abs_outside_band
+raw,1,c_q,22,22,0,0.0,0.0
+raw,2,c_q,28,28,0,0.0,0.0
+raw,3,c_q,29,29,0,0.0,0.0
+raw,4,c_q,22,22,0,0.0,0.0
+raw,1,c_T,21,21,0,0.0,0.0
+raw,2,c_T,21,21,0,0.0,0.0
+raw,3,c_T,20,20,0,0.0,0.0
+raw,4,c_T,21,21,0,0.0,0.0
