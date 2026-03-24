@@ -1,0 +1,817 @@
+\section{Phase 4: From BLOM-Strict to BLOM-Analytic}
+\label{sec:phase4_blom_analytic}
+
+Phase~3 established that BLOM-Strict is a well-posed local variational object:
+for each admissible window \(W(i,k)\), the local minimum-control problem admits a unique minimizer.
+However, a variational definition alone is not yet sufficient for efficient evaluation, differentiation, or implementation.
+The purpose of this section is to convert the abstract existence result of Phase~3 into an \emph{analytic local solver}.
+
+The key principle is the following.
+
+\begin{quote}
+BLOM-Analytic is obtained by reducing the BLOM-Strict local variational problem to a finite-dimensional linear system in a small local derivative state \(x\), followed by exact Hermite reconstruction of the segment coefficients.
+\end{quote}
+
+In the present work, the most important case is the canonical minimum-snap three-point stencil
+\[
+s=4,\qquad k=2.
+\]
+Before deriving that system, we first study the smallest exactly solvable warm-up model \((s,k)=(2,2)\), in which the local analytic map can be written in closed form and the well-known time-weighted Catmull--Rom velocity formula appears as an \emph{exact} local optimum.
+
+Throughout this section, all notation is inherited from Phases~0--3.
+In particular,
+\[
+\theta=(q_1,\dots,q_{M-1},T_1,\dots,T_M)^\top,
+\qquad
+q_0,q_M \text{ fixed},
+\qquad
+T_i>0.
+\]
+
+\subsection{Warm-up: the exact local analytic model for \texorpdfstring{$s=2,\ k=2$}{s=2,k=2}}
+\label{subsec:phase4_s2_k2}
+
+We first treat the minimum-acceleration case \(s=2\).
+This is not the final model of interest, but it is the smallest instance in which the entire derivation can be carried out by hand and the analytic structure of BLOM becomes completely transparent.
+
+\subsubsection{A knot-centered two-segment local problem}
+\label{subsubsec:phase4_s2_local_problem}
+
+Fix an interior knot index \(i\in\{1,\dots,M-1\}\).
+Set
+\[
+h_-:=T_i,\qquad h_+:=T_{i+1},
+\qquad
+\Delta_-:=q_i-q_{i-1},\qquad
+\Delta_+:=q_{i+1}-q_i.
+\]
+We consider the two adjacent segments
+\[
+[q_{i-1},q_i]
+\quad\text{and}\quad
+[q_i,q_{i+1}],
+\]
+with a common interior velocity
+\[
+v_i:=p'(t_i).
+\]
+At the artificial left and right boundaries of this two-segment local problem, we impose the natural boundary condition of the \(s=2\) problem, namely
+\[
+p''=0.
+\]
+Thus the local unknown reduces to the scalar \(v_i\).
+
+\subsubsection{One-sided natural cubic segment}
+\label{subsubsec:phase4_s2_one_sided}
+
+Consider first a single segment on \([0,h]\) joining \(q_L\) to \(q_R\), with prescribed right-end velocity \(v_R\) and a natural boundary at the left end:
+\[
+p(0)=q_L,\qquad p(h)=q_R,\qquad p'(h)=v_R,\qquad p''(0)=0.
+\]
+Since \(s=2\), the optimal segment is cubic.
+Introduce normalized time
+\[
+\tau:=t/h\in[0,1],
+\]
+and write
+\[
+p(t)=a_0+a_1\tau+a_2\tau^2+a_3\tau^3.
+\]
+The constraint \(p''(0)=0\) implies
+\[
+\frac{d^2p}{dt^2}(0)=\frac{1}{h^2}\frac{d^2p}{d\tau^2}(0)=\frac{2a_2}{h^2}=0
+\quad\Longrightarrow\quad
+a_2=0.
+\]
+The remaining endpoint conditions become
+\[
+a_0=q_L,
+\qquad
+a_0+a_1+a_3=q_R,
+\qquad
+\frac{1}{h}(a_1+3a_3)=v_R.
+\]
+Solving gives
+\[
+a_3=\frac{q_L-q_R+h v_R}{2},
+\qquad
+a_1=\frac{3(q_R-q_L)-h v_R}{2}.
+\]
+Since
+\[
+\frac{d^2p}{dt^2}(t)=\frac{1}{h^2}\frac{d^2p}{d\tau^2}(\tau)=\frac{6a_3}{h^2}\tau,
+\]
+the local acceleration cost is
+\begin{align}
+J_{2,\mathrm{L}}(v_R;q_L,q_R,h)
+&=
+\int_0^h \bigl|p''(t)\bigr|^2\,dt \notag\\
+&=
+\int_0^h \left(\frac{6a_3}{h^2}\frac{t}{h}\right)^2 dt
+=
+\frac{36a_3^2}{h^5}\int_0^h t^2\,dt \notag\\
+&=
+\frac{12a_3^2}{h^2}
+=
+\frac{3}{h}\left(\frac{q_R-q_L}{h}-v_R\right)^2 h^2
+\notag\\
+&=
+\frac{3}{h}\Bigl(s(q_L,q_R;h)-v_R\Bigr)^2,
+\label{eq:phase4_s2_left_cost}
+\end{align}
+where
+\begin{equation}
+\label{eq:phase4_s2_secant}
+s(q_L,q_R;h):=\frac{q_R-q_L}{h}
+\end{equation}
+is the secant slope.
+
+By symmetry, if a segment has prescribed left-end velocity \(v_L\) and a natural right boundary, then
+\begin{equation}
+\label{eq:phase4_s2_right_cost}
+J_{2,\mathrm{R}}(v_L;q_L,q_R,h)
+=
+\frac{3}{h}\Bigl(s(q_L,q_R;h)-v_L\Bigr)^2.
+\end{equation}
+
+\subsubsection{Exact local velocity formula}
+\label{subsubsec:phase4_s2_exact_velocity}
+
+The two-segment local problem around knot \(q_i\) therefore has objective
+\begin{equation}
+\label{eq:phase4_s2_total_cost}
+J_i^{(2)}(v_i)
+=
+\frac{3}{h_-}\bigl(s_- - v_i\bigr)^2
++
+\frac{3}{h_+}\bigl(s_+ - v_i\bigr)^2,
+\end{equation}
+where
+\[
+s_-:=\frac{\Delta_-}{h_-},
+\qquad
+s_+:=\frac{\Delta_+}{h_+}.
+\]
+Expanding \eqref{eq:phase4_s2_total_cost},
+\[
+J_i^{(2)}(v_i)
+=
+3\left(\frac{1}{h_-}+\frac{1}{h_+}\right)v_i^2
+-
+6\left(\frac{s_-}{h_-}+\frac{s_+}{h_+}\right)v_i
++
+3\left(\frac{s_-^2}{h_-}+\frac{s_+^2}{h_+}\right).
+\]
+Hence the first-order optimality condition is
+\begin{equation}
+\label{eq:phase4_s2_linear_system_scalar}
+A_2^{(i)}(T)\,v_i^\star = B_2^{(i)}(q,T),
+\end{equation}
+with
+\begin{equation}
+\label{eq:phase4_s2_A_B}
+A_2^{(i)}(T)
+=
+6\left(\frac{1}{h_-}+\frac{1}{h_+}\right),
+\qquad
+B_2^{(i)}(q,T)
+=
+6\left(\frac{s_-}{h_-}+\frac{s_+}{h_+}\right).
+\end{equation}
+Therefore
+\begin{equation}
+\label{eq:phase4_s2_exact_velocity_formula}
+v_i^\star
+=
+\frac{\dfrac{s_-}{h_-}+\dfrac{s_+}{h_+}}{\dfrac{1}{h_-}+\dfrac{1}{h_+}}
+=
+\frac{h_+\,s_-+h_-\,s_+}{h_-+h_+}.
+\end{equation}
+
+\begin{remark}[Relation to time-weighted Catmull--Rom]
+\label{rem:phase4_catmull_rom_exact_s2}
+Equation~\eqref{eq:phase4_s2_exact_velocity_formula} is exactly the time-weighted Catmull--Rom velocity formula.
+Thus, in the minimum-acceleration case \(s=2\), the time-weighted Catmull--Rom rule is not heuristic: it is the exact optimizer of the corresponding BLOM-Strict local problem.
+This ceases to be true in the minimum-snap case \(s=4\), which is why the heuristic velocity formula must be replaced by an exact local linear system.
+\end{remark}
+
+\subsection{The canonical analytic core: \texorpdfstring{$s=4,\ k=2$}{s=4,k=2}}
+\label{subsec:phase4_s4_k2}
+
+We now return to the canonical setting of this work:
+\[
+s=4,\qquad k=2.
+\]
+By Phase~3, the segment-centered BLOM-Strict window for segment \(i\) is
+\[
+W(i,2)=\{i-1,i,i+1\}\cap[1,M].
+\]
+For an interior segment \(2\le i\le M-1\), this is the three-segment window
+\[
+W(i,2)=\{i-1,i,i+1\},
+\]
+whose knot set is
+\[
+\{q_{i-2},q_{i-1},q_i,q_{i+1}\}.
+\]
+
+The analytic unknowns are the endpoint jets of the central segment \(i\), namely
+\begin{equation}
+\label{eq:phase4_local_state_def}
+\chi_{i-1}:=
+\begin{bmatrix}
+v_{i-1}\\ a_{i-1}\\ j_{i-1}
+\end{bmatrix},
+\qquad
+\chi_i:=
+\begin{bmatrix}
+v_i\\ a_i\\ j_i
+\end{bmatrix},
+\qquad
+x_i^{\mathrm{loc}}
+:=
+\begin{bmatrix}
+\chi_{i-1}\\ \chi_i
+\end{bmatrix}
+\in\mathbb R^6.
+\end{equation}
+Here \(v_r,a_r,j_r\) denote the velocity, acceleration, and jerk at knot \(q_r\).
+
+The purpose of this subsection is to derive the exact local system
+\begin{equation}
+\label{eq:phase4_main_local_system}
+A_2^{(i)}(T)\,x_i^{\mathrm{loc}}
+=
+B_2^{(i)}(q,T),
+\end{equation}
+where \(A_2^{(i)}(T)\in\mathbb R^{6\times 6}\) depends only on the local durations
+\[
+(T_{i-1},T_i,T_{i+1}),
+\]
+while \(B_2^{(i)}(q,T)\in\mathbb R^6\) depends on the local waypoint and duration data
+\[
+(q_{i-2},q_{i-1},q_i,q_{i+1},T_{i-1},T_i,T_{i+1}).
+\]
+
+\subsubsection{Left-natural and right-natural outer segment energies}
+\label{subsubsec:phase4_outer_segments}
+
+We first derive the exact one-sided minimum-snap energy for an outer segment.
+
+\paragraph{Left-natural outer segment.}
+Let a segment on \([0,h]\) join \(q_L\) to \(q_R\), with prescribed \emph{right} endpoint jet
+\[
+x_R=
+\begin{bmatrix}
+v_R\\ a_R\\ j_R
+\end{bmatrix},
+\]
+and with a natural artificial boundary at the left endpoint.
+In the \(s=4\) case, the natural boundary conditions from Phase~3 are
+\[
+p^{(4)}(0)=p^{(5)}(0)=p^{(6)}(0)=0.
+\]
+Write the polynomial in normalized time \(\tau=t/h\in[0,1]\) as
+\[
+p(t)=\sum_{m=0}^{7}\alpha_m \tau^m.
+\]
+Because
+\[
+\frac{d^r p}{dt^r}(t)=h^{-r}\frac{d^r p}{d\tau^r}(\tau),
+\]
+the natural conditions at \(\tau=0\) imply
+\[
+\alpha_4=\alpha_5=\alpha_6=0.
+\]
+Hence
+\[
+p(t)=\alpha_0+\alpha_1\tau+\alpha_2\tau^2+\alpha_3\tau^3+\alpha_7\tau^7.
+\]
+The remaining constraints are
+\[
+p(0)=q_L,
+\qquad
+p(h)=q_R,
+\qquad
+p'(h)=v_R,
+\qquad
+p''(h)=a_R,
+\qquad
+p^{(3)}(h)=j_R.
+\]
+Equivalently,
+\begin{align*}
+\alpha_0 &= q_L,\\
+\alpha_0+\alpha_1+\alpha_2+\alpha_3+\alpha_7 &= q_R,\\
+\alpha_1+2\alpha_2+3\alpha_3+7\alpha_7 &= h v_R,\\
+2\alpha_2+6\alpha_3+42\alpha_7 &= h^2 a_R,\\
+6\alpha_3+210\alpha_7 &= h^3 j_R.
+\end{align*}
+Solving this \(4\times 4\) linear system for \(\alpha_7\) yields
+\begin{equation}
+\label{eq:phase4_alpha7_left}
+\alpha_7
+=
+\frac{1}{20}
+\left(
+q_L-q_R+h v_R-\frac{h^2}{2}a_R+\frac{h^3}{6}j_R
+\right).
+\end{equation}
+Since
+\[
+\frac{d^4p}{dt^4}(t)=h^{-4}\frac{d^4p}{d\tau^4}(\tau)
+=
+h^{-4}\cdot 840\,\alpha_7\,\tau^3,
+\]
+the minimum-snap energy equals
+\begin{align}
+J_{4,\mathrm{L}}(x_R;q_L,q_R,h)
+&=
+\int_0^h \bigl|p^{(4)}(t)\bigr|^2\,dt \notag\\
+&=
+\int_0^h h^{-8}\,(840\alpha_7)^2\left(\frac{t}{h}\right)^6 dt \notag\\
+&=
+\frac{840^2}{h^8}\alpha_7^2 \int_0^h \frac{t^6}{h^6}\,dt
+=
+\frac{840^2}{7}\,h^{-7}\alpha_7^2 \notag\\
+&=
+252\,h^{-7}
+\left(
+\Delta - h v_R + \frac{h^2}{2}a_R - \frac{h^3}{6}j_R
+\right)^2,
+\label{eq:phase4_left_natural_cost}
+\end{align}
+where
+\[
+\Delta:=q_R-q_L.
+\]
+Define the vector
+\begin{equation}
+\label{eq:phase4_m_minus}
+m_-(h):=
+\begin{bmatrix}
+h\\ -\dfrac{h^2}{2}\\ \dfrac{h^3}{6}
+\end{bmatrix}.
+\end{equation}
+Then \eqref{eq:phase4_left_natural_cost} can be written compactly as
+\begin{equation}
+\label{eq:phase4_left_natural_cost_compact}
+J_{4,\mathrm{L}}(x_R;q_L,q_R,h)
+=
+252\,h^{-7}\bigl(\Delta-m_-(h)^\top x_R\bigr)^2.
+\end{equation}
+
+\paragraph{Right-natural outer segment.}
+By the symmetric argument, if the \emph{left} endpoint jet
+\[
+x_L=
+\begin{bmatrix}
+v_L\\ a_L\\ j_L
+\end{bmatrix}
+\]
+is prescribed and the right endpoint is artificial-natural, then
+\begin{equation}
+\label{eq:phase4_right_natural_cost}
+J_{4,\mathrm{R}}(x_L;q_L,q_R,h)
+=
+252\,h^{-7}\bigl(\Delta-m_+(h)^\top x_L\bigr)^2,
+\end{equation}
+where
+\begin{equation}
+\label{eq:phase4_m_plus}
+m_+(h):=
+\begin{bmatrix}
+h\\ \dfrac{h^2}{2}\\ \dfrac{h^3}{6}
+\end{bmatrix}.
+\end{equation}
+
+Equations \eqref{eq:phase4_left_natural_cost_compact} and \eqref{eq:phase4_right_natural_cost}
+show that the one-sided outer-segment energies are explicit rank-one quadratics in the local jet variables.
+
+\subsubsection{The exact middle-segment Hermite energy}
+\label{subsubsec:phase4_middle_segment}
+
+We now derive the exact two-endpoint Hermite energy for the central segment.
+
+Fix a segment of duration \(h>0\) joining \(q_L\) to \(q_R\), with endpoint jets
+\[
+x_L=
+\begin{bmatrix}
+v_L\\ a_L\\ j_L
+\end{bmatrix},
+\qquad
+x_R=
+\begin{bmatrix}
+v_R\\ a_R\\ j_R
+\end{bmatrix}.
+\]
+Introduce normalized time
+\[
+\tau=t/h\in[0,1]
+\]
+and the normalized monomial basis
+\[
+\widehat\beta_8(\tau):=(1,\tau,\dots,\tau^7)^\top\in\mathbb R^8.
+\]
+Write
+\[
+p(t)=\alpha^\top \widehat\beta_8(\tau),
+\qquad \alpha\in\mathbb R^8.
+\]
+
+\paragraph{Hermite interpolation matrix.}
+Define the normalized Hermite constraint matrix
+\begin{equation}
+\label{eq:phase4_C4}
+C_4
+:=
+\begin{bmatrix}
+\widehat B^{(0)}(0)\\
+\widehat B^{(1)}(0)\\
+\widehat B^{(2)}(0)\\
+\widehat B^{(3)}(0)\\
+\widehat B^{(0)}(1)\\
+\widehat B^{(1)}(1)\\
+\widehat B^{(2)}(1)\\
+\widehat B^{(3)}(1)
+\end{bmatrix}
+\in\mathbb R^{8\times 8},
+\end{equation}
+where
+\[
+\widehat B^{(r)}(\tau)
+:=
+\frac{d^r}{d\tau^r}\widehat\beta_8(\tau)^\top.
+\]
+Since degree-\(7\) Hermite interpolation with endpoint derivatives up to order \(3\) is unisolvent,
+\(C_4\) is nonsingular.
+
+Define
+\[
+H_4:=C_4^{-1}.
+\]
+
+\paragraph{Scaled boundary data.}
+Introduce the scaling matrix
+\begin{equation}
+\label{eq:phase4_Dh}
+D(h):=\operatorname{diag}(h,h^2,h^3)\in\mathbb R^{3\times 3}.
+\end{equation}
+Then the normalized boundary data vector is
+\begin{equation}
+\label{eq:phase4_y_middle}
+y
+=
+\begin{bmatrix}
+q_L\\ D(h)x_L\\ q_R\\ D(h)x_R
+\end{bmatrix}
+\in\mathbb R^8.
+\end{equation}
+The normalized polynomial coefficient vector is therefore
+\begin{equation}
+\label{eq:phase4_alpha_middle}
+\alpha = H_4 y.
+\end{equation}
+
+\paragraph{Energy matrix.}
+Define the normalized fourth-derivative Gram matrix
+\begin{equation}
+\label{eq:phase4_G4}
+G_4
+:=
+\int_0^1
+\widehat B^{(4)}(\tau)^\top \widehat B^{(4)}(\tau)\,d\tau
+\in\mathbb R^{8\times 8}.
+\end{equation}
+Then
+\[
+\frac{d^4p}{dt^4}(t)
+=
+h^{-4}\alpha^\top \frac{d^4\widehat\beta_8}{d\tau^4}(\tau),
+\]
+and therefore
+\begin{align}
+J_{4,\mathrm{mid}}(x_L,x_R;q_L,q_R,h)
+&=
+\int_0^h \bigl|p^{(4)}(t)\bigr|^2\,dt \notag\\
+&=
+h^{-7}\,\alpha^\top G_4 \alpha
+=
+h^{-7}\, y^\top R_4 y,
+\label{eq:phase4_middle_energy}
+\end{align}
+where
+\begin{equation}
+\label{eq:phase4_R4}
+R_4:=H_4^\top G_4 H_4 \in\mathbb R^{8\times 8}.
+\end{equation}
+
+\paragraph{Quadratic form in the endpoint jets.}
+Define selector matrices
+\begin{equation}
+\label{eq:phase4_selectors}
+P_q
+:=
+\begin{bmatrix}
+1&0\\
+0&0\\
+0&0\\
+0&0\\
+0&1\\
+0&0\\
+0&0\\
+0&0
+\end{bmatrix}
+\in\mathbb R^{8\times 2},
+\qquad
+P_x(h)
+:=
+\begin{bmatrix}
+0_{1\times 6}\\
+D(h)&0\\
+0_{1\times 6}\\
+0&D(h)
+\end{bmatrix}
+\in\mathbb R^{8\times 6}.
+\end{equation}
+Let
+\[
+x:=\begin{bmatrix}x_L\\ x_R\end{bmatrix}\in\mathbb R^6,
+\qquad
+q:=\begin{bmatrix}q_L\\ q_R\end{bmatrix}\in\mathbb R^2.
+\]
+Then \(y=P_q q+P_x(h)x\), and \eqref{eq:phase4_middle_energy} becomes
+\begin{equation}
+\label{eq:phase4_middle_quadratic}
+J_{4,\mathrm{mid}}(x_L,x_R;q_L,q_R,h)
+=
+\frac{1}{2}x^\top H_{\mathrm{mid}}(h)x
+-
+x^\top g_{\mathrm{mid}}(h)\,q
++
+\gamma_{\mathrm{mid}}(h;q),
+\end{equation}
+where
+\begin{align}
+\label{eq:phase4_middle_blocks}
+H_{\mathrm{mid}}(h)
+&:=
+2h^{-7}P_x(h)^\top R_4 P_x(h)\in\mathbb R^{6\times 6},\\
+g_{\mathrm{mid}}(h)
+&:=
+-2h^{-7}P_x(h)^\top R_4 P_q\in\mathbb R^{6\times 2},\\
+\gamma_{\mathrm{mid}}(h;q)
+&:=
+h^{-7}q^\top P_q^\top R_4 P_q\,q.
+\end{align}
+
+\subsubsection{The three-segment local analytic system}
+\label{subsubsec:phase4_three_segment_system}
+
+We now assemble the full local energy for the BLOM-Strict window
+\[
+W(i,2)=\{i-1,i,i+1\},
+\qquad 2\le i\le M-1.
+\]
+For convenience define
+\[
+h_-:=T_{i-1},\qquad h_0:=T_i,\qquad h_+:=T_{i+1},
+\]
+and
+\[
+\Delta_-:=q_{i-1}-q_{i-2},
+\qquad
+\Delta_0:=q_i-q_{i-1},
+\qquad
+\Delta_+:=q_{i+1}-q_i.
+\]
+The local unknown vector is
+\[
+x_i^{\mathrm{loc}}
+=
+\begin{bmatrix}
+\chi_{i-1}\\ \chi_i
+\end{bmatrix}
+\in\mathbb R^6,
+\qquad
+\chi_{i-1},\chi_i\in\mathbb R^3.
+\]
+
+The BLOM-Strict local energy from Phase~3 is exactly the sum of:
+\begin{enumerate}
+    \item the left outer segment with left-natural boundary:
+    \[
+    J_{4,\mathrm{L}}(\chi_{i-1};q_{i-2},q_{i-1},h_-),
+    \]
+    \item the middle segment:
+    \[
+    J_{4,\mathrm{mid}}(\chi_{i-1},\chi_i;q_{i-1},q_i,h_0),
+    \]
+    \item the right outer segment with right-natural boundary:
+    \[
+    J_{4,\mathrm{R}}(\chi_i;q_i,q_{i+1},h_+).
+    \]
+\end{enumerate}
+Using \eqref{eq:phase4_left_natural_cost_compact}, \eqref{eq:phase4_right_natural_cost}, and
+\eqref{eq:phase4_middle_quadratic}, we obtain
+\begin{equation}
+\label{eq:phase4_total_local_quadratic}
+J_i^{(4,2)}(x_i^{\mathrm{loc}})
+=
+\frac{1}{2}(x_i^{\mathrm{loc}})^\top A_2^{(i)}(T)x_i^{\mathrm{loc}}
+-
+(x_i^{\mathrm{loc}})^\top B_2^{(i)}(q,T)
++
+C_2^{(i)}(q,T),
+\end{equation}
+where
+\begin{equation}
+\label{eq:phase4_A2_def}
+A_2^{(i)}(T)
+=
+\begin{bmatrix}
+S_-(h_-) & 0\\
+0 & 0
+\end{bmatrix}
++
+H_{\mathrm{mid}}(h_0)
++
+\begin{bmatrix}
+0 & 0\\
+0 & S_+(h_+)
+\end{bmatrix},
+\end{equation}
+with
+\begin{equation}
+\label{eq:phase4_outer_hessian_blocks}
+S_-(h):=504\,h^{-7}m_-(h)m_-(h)^\top,
+\qquad
+S_+(h):=504\,h^{-7}m_+(h)m_+(h)^\top,
+\end{equation}
+and
+\begin{equation}
+\label{eq:phase4_B2_def}
+B_2^{(i)}(q,T)
+=
+\begin{bmatrix}
+504\,h_-^{-7}\Delta_-\,m_-(h_-)\\[0.5ex]
+0
+\end{bmatrix}
++
+g_{\mathrm{mid}}(h_0)
+\begin{bmatrix}
+q_{i-1}\\ q_i
+\end{bmatrix}
++
+\begin{bmatrix}
+0\\[0.5ex]
+504\,h_+^{-7}\Delta_+\,m_+(h_+)
+\end{bmatrix}.
+\end{equation}
+The scalar term \(C_2^{(i)}(q,T)\) is irrelevant to optimization and is omitted below.
+
+Therefore the first-order optimality condition is exactly
+\begin{equation}
+\label{eq:phase4_final_local_system}
+\boxed{
+A_2^{(i)}(T)\,x_i^{\mathrm{loc},\star}
+=
+B_2^{(i)}(q,T).
+}
+\end{equation}
+
+\begin{proposition}[Exact local linear system for the canonical BLOM-Analytic core]
+\label{prop:phase4_exact_local_system}
+For every interior segment \(2\le i\le M-1\), the canonical minimum-snap BLOM-Strict local problem on \(W(i,2)\) reduces exactly to the linear system \eqref{eq:phase4_final_local_system}.
+Moreover, \(A_2^{(i)}(T)\) depends only on the local durations \((T_{i-1},T_i,T_{i+1})\), whereas \(B_2^{(i)}(q,T)\) depends only on the local data
+\[
+(q_{i-2},q_{i-1},q_i,q_{i+1},T_{i-1},T_i,T_{i+1}).
+\]
+\end{proposition}
+
+\begin{proof}
+Equation~\eqref{eq:phase4_total_local_quadratic} is a direct sum decomposition of the exact BLOM-Strict local energy into one left-natural one-sided segment, one middle Hermite segment, and one right-natural one-sided segment.
+Differentiating \eqref{eq:phase4_total_local_quadratic} with respect to \(x_i^{\mathrm{loc}}\) yields
+\[
+\nabla J_i^{(4,2)}(x_i^{\mathrm{loc}})
+=
+A_2^{(i)}(T)\,x_i^{\mathrm{loc}}-B_2^{(i)}(q,T).
+\]
+The unique minimizer from Phase~3 must satisfy the vanishing gradient condition, and therefore solves \eqref{eq:phase4_final_local_system}.
+The dependence statements follow immediately from the explicit constructions \eqref{eq:phase4_A2_def}--\eqref{eq:phase4_B2_def}.
+\end{proof}
+
+\begin{proposition}[Nonsingularity of the analytic local system]
+\label{prop:phase4_A2_nonsingular}
+Under the hypotheses of Theorem~\ref{thm:phase3_blom_strict_wellposedness}, the matrix
+\[
+A_2^{(i)}(T)\in\mathbb R^{6\times 6}
+\]
+is symmetric positive definite, and hence \eqref{eq:phase4_final_local_system} has a unique solution.
+\end{proposition}
+
+\begin{proof}
+By Phase~3, the local BLOM-Strict problem on \(W(i,2)\) has a unique minimizer.
+Equation~\eqref{eq:phase4_total_local_quadratic} is the exact reduced quadratic form of that problem in the local jet variable \(x_i^{\mathrm{loc}}\).
+Therefore the Hessian of this reduced quadratic form must be positive definite; otherwise the local minimizer would fail to be unique.
+But that Hessian is exactly \(A_2^{(i)}(T)\).
+Hence \(A_2^{(i)}(T)\) is symmetric positive definite.
+\end{proof}
+
+\subsection{Hermite reconstruction: from local derivative state to segment coefficients}
+\label{subsec:phase4_hermite_reconstruction}
+
+Once the local state
+\[
+x_i^{\mathrm{loc},\star}
+=
+\begin{bmatrix}
+\chi_{i-1}^\star\\ \chi_i^\star
+\end{bmatrix}
+\]
+is known, the coefficient vector of the central segment \(i\) is reconstructed exactly by two-endpoint septic Hermite interpolation.
+
+For the central segment \(i\), define
+\begin{equation}
+\label{eq:phase4_yi}
+y_i
+=
+\begin{bmatrix}
+q_{i-1}\\ D(T_i)\chi_{i-1}^\star\\ q_i\\ D(T_i)\chi_i^\star
+\end{bmatrix}
+\in\mathbb R^8.
+\end{equation}
+The normalized coefficient vector is
+\begin{equation}
+\label{eq:phase4_alpha_i}
+\alpha_i = H_4 y_i = C_4^{-1}y_i.
+\end{equation}
+To convert from normalized monomials in \(\tau=t/T_i\) to physical monomials in \(t\), define
+\begin{equation}
+\label{eq:phase4_lambda8}
+\Lambda_8(T_i):=\operatorname{diag}(1,T_i^{-1},T_i^{-2},\dots,T_i^{-7}).
+\end{equation}
+Then the physical coefficient vector of the central segment is
+\begin{equation}
+\label{eq:phase4_ci_reconstruction}
+c_i^{\mathrm{BLOM},2}
+=
+\Lambda_8(T_i)\,C_4^{-1}y_i.
+\end{equation}
+Substituting \(x_i^{\mathrm{loc},\star}=(A_2^{(i)}(T))^{-1}B_2^{(i)}(q,T)\) into \eqref{eq:phase4_yi} and then into \eqref{eq:phase4_ci_reconstruction}, we obtain the explicit local coefficient map
+\begin{equation}
+\label{eq:phase4_exact_local_map}
+\boxed{
+c_i^{\mathrm{BLOM},2}
+=
+\mathcal M_{2,i}\bigl(q_{i-2},q_{i-1},q_i,q_{i+1},T_{i-1},T_i,T_{i+1}\bigr),
+}
+\end{equation}
+where
+\[
+\mathcal M_{2,i}
+:=
+\Lambda_8(T_i)\,C_4^{-1}
+\circ
+\mathcal Y_i
+\circ
+\bigl(A_2^{(i)}(T)\bigr)^{-1}
+\circ
+B_2^{(i)}(q,T),
+\]
+and \(\mathcal Y_i\) denotes the affine assembly map in \eqref{eq:phase4_yi}.
+
+\begin{remark}[Locality of the analytic map]
+\label{rem:phase4_locality}
+Equation~\eqref{eq:phase4_exact_local_map} is the exact analytic replacement of the heuristic local rule.
+It is local because it depends only on the three-segment window of the central segment \(i\), namely the four knot positions
+\[
+q_{i-2},q_{i-1},q_i,q_{i+1}
+\]
+and the three durations
+\[
+T_{i-1},T_i,T_{i+1}.
+\]
+Thus BLOM-Analytic preserves the finite-support philosophy of BLOM-Strict while replacing the abstract local minimizer by an explicit small linear system and a closed-form Hermite reconstruction.
+\end{remark}
+
+\subsection{Summary of the Phase~4 analytic construction}
+\label{subsec:phase4_summary}
+
+Phase~4 establishes the following exact analytic chain:
+\[
+\boxed{
+\text{BLOM-Strict local QP}
+\;\Longrightarrow\;
+A_2^{(i)}(T)x_i^{\mathrm{loc}}=B_2^{(i)}(q,T)
+\;\Longrightarrow\;
+c_i^{\mathrm{BLOM},2}
+=
+\Lambda_8(T_i)C_4^{-1}y_i.
+}
+\]
+This is the computational core of BLOM-Analytic.
+
+The warm-up case \(s=2\) shows that the time-weighted Catmull--Rom velocity formula is the exact local optimizer only in the minimum-acceleration model.
+The canonical minimum-snap case \(s=4\) instead leads to a genuine matrix equation in the local derivative state.
+Therefore the heuristic velocity formula must be replaced by the exact local linear system \eqref{eq:phase4_final_local_system} if BLOM is to be a rigorous theory rather than a geometric approximation.

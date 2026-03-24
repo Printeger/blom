@@ -1,0 +1,372 @@
+\section{Phase 2: Necessity Theory for BLOM --- Why Exact Localization Cannot Be Obtained by Directly Localizing MINCO}
+\label{sec:phase2_necessity}
+
+This section establishes the mathematical necessity of BLOM.
+The goal is to convert the motivation of BLOM from an intuitive statement into a rigorous obstruction theorem.
+The central question is the following:
+
+\begin{quote}
+Can one preserve the sparse waypoint--duration parameterization of Phase~0 and the exact global optimality of the Phase~1 MINCO mother problem, while simultaneously obtaining exact finite local support of the coefficient map?
+\end{quote}
+
+The answer, under the Phase~0/1 parameterization, is negative.
+More precisely, the loss of local support in MINCO is not an implementation artifact, but a structural consequence of the exact global optimality system.
+
+Throughout this section, we adopt the notation of Phase~0 and Phase~1.
+In particular,
+\[
+\theta=(q_1,\dots,q_{M-1},T_1,\dots,T_M)^\top,
+\qquad
+T_i>0,
+\qquad
+\mathcal T=\sum_{i=1}^{M}T_i,
+\]
+and the trajectory is represented segmentwise by
+\[
+p_i(\tau)=c_i^\top \beta_s(\tau),
+\qquad
+\tau\in[0,T_i],
+\qquad
+c_i\in\mathbb R^{2s},
+\]
+where
+\[
+\beta_s(\tau)=(1,\tau,\dots,\tau^{2s-1})^\top.
+\]
+Let
+\[
+c=(c_1^\top,\dots,c_M^\top)^\top\in\mathbb R^{2sM}.
+\]
+For notational convenience, we write the global coefficient system derived in Phase~1 as
+\begin{equation}
+\label{eq:phase2_global_system}
+A(T)c^\star(q,T)=b(q,T),
+\end{equation}
+where \(A(T)\in\mathbb R^{2sM\times 2sM}\) is nonsingular and banded, and \(c^\star(q,T)\) denotes the unique globally optimal coefficient vector.
+
+In the canonical setting of Phase~0 and Phase~1, one has \(s=4\), \(d_i=1\), and hence \(2s=8\).
+However, most arguments in this section are stated for general \(s\), since the obstruction is structural rather than specific to minimum snap.
+
+\subsection{Exact local support: definition and scope}
+\label{subsec:phase2_local_support_def}
+
+We first formalize what ``exact finite local support'' means in the present sparse waypoint parameterization.
+
+Let
+\[
+\bar q := (q_1,\dots,q_{M-1})^\top \in \mathbb R^{M-1}
+\]
+denote the vector of interior waypoints.
+For fixed \(T\), the exact optimal coefficient map is
+\[
+\bar q \longmapsto c^\star(\bar q,T)\in\mathbb R^{2sM}.
+\]
+
+\begin{definition}[Exact finite local support with respect to sparse waypoints]
+\label{def:phase2_exact_local_support}
+Fix \(T\).
+We say that the exact optimal coefficient map has \emph{finite local support of half-bandwidth \(w\)} with respect to the sparse waypoint variables if, for every segment index \(i\in\{1,\dots,M\}\), there exists a function
+\[
+\Phi_i^{(T)}:\mathbb R^{|\mathcal N_w(i)|}\to\mathbb R^{2s}
+\]
+such that
+\begin{equation}
+\label{eq:phase2_local_map}
+c_i^\star(\bar q,T)
+=
+\Phi_i^{(T)}\!\bigl((q_j)_{j\in \mathcal N_w(i)}\bigr),
+\end{equation}
+where
+\[
+\mathcal N_w(i)
+:=
+\{\,j\in\{1,\dots,M-1\}: |j-i|\le w\,\}.
+\]
+Equivalently, whenever \(c^\star\) is differentiable with respect to \(\bar q\),
+\begin{equation}
+\label{eq:phase2_local_support_jacobian}
+\frac{\partial c_i^\star}{\partial q_j}(\bar q,T)=0
+\qquad
+\text{for all } |j-i|>w.
+\end{equation}
+If such a \(w\) exists independently of \(M\), we say that the exact optimal coefficient map has \emph{uniform finite local support}.
+\end{definition}
+
+\begin{remark}
+\label{rem:phase2_scope_of_definition}
+Definition~\ref{def:phase2_exact_local_support} is deliberately tied to the Phase~0/1 sparse parameterization by interior waypoints and segment durations.
+This is the relevant notion for BLOM, whose purpose is precisely to preserve the sparse outer interface \(\theta=(q,T)\) while recovering locality.
+\end{remark}
+
+\subsection{The root cause of the loss of local support in MINCO}
+\label{subsec:phase2_root_cause}
+
+The first observation is that, once the exact global optimum is represented through the coefficient system \eqref{eq:phase2_global_system}, the sensitivity of \(c^\star\) with respect to the sparse waypoint variables is entirely determined by the inverse of the global banded matrix \(A(T)\).
+
+In the canonical Phase~1 construction, the right-hand side is affine in the interior waypoints:
+\begin{equation}
+\label{eq:phase2_rhs_affine}
+b(q,T)=b_0(T)+S_q \bar q,
+\end{equation}
+where \(S_q\in\mathbb R^{2sM\times(M-1)}\) is a fixed sparse selector matrix.
+For \(d_i=1\), each interior waypoint enters exactly one scalar interpolation row, and therefore each column of \(S_q\) contains exactly one nonzero entry equal to \(1\).
+
+\begin{lemma}[Exact coefficient sensitivity with respect to sparse waypoints]
+\label{lem:phase2_exact_sensitivity}
+Assume that \(A(T)\) is nonsingular.
+Then, for every fixed \(T\),
+\begin{equation}
+\label{eq:phase2_exact_map}
+c^\star(\bar q,T)=A(T)^{-1}\bigl(b_0(T)+S_q\bar q\bigr),
+\end{equation}
+and the Jacobian of the exact optimal coefficient map with respect to the interior waypoint vector is
+\begin{equation}
+\label{eq:phase2_jacobian_exact}
+D_{\bar q}c^\star(\bar q,T)=A(T)^{-1}S_q.
+\end{equation}
+In particular, this Jacobian is independent of \(\bar q\).
+\end{lemma}
+
+\begin{proof}
+Equation~\eqref{eq:phase2_exact_map} follows immediately from the nonsingularity of \(A(T)\) and the affine form \eqref{eq:phase2_rhs_affine}:
+\[
+c^\star(\bar q,T)
+=
+A(T)^{-1}b(q,T)
+=
+A(T)^{-1}\bigl(b_0(T)+S_q\bar q\bigr).
+\]
+Differentiating with respect to \(\bar q\) yields
+\[
+D_{\bar q}c^\star(\bar q,T)=A(T)^{-1}S_q,
+\]
+since \(A(T)\) and \(b_0(T)\) do not depend on \(\bar q\).
+\end{proof}
+
+\begin{remark}[Why banded \(A(T)\) does not imply local support]
+\label{rem:phase2_banded_not_enough}
+The matrix \(A(T)\) in \eqref{eq:phase2_global_system} is banded because the Euler--Lagrange and knot coupling conditions are local in the segment index.
+However, the exact coefficient map is governed by \(A(T)^{-1}\), not by \(A(T)\) itself.
+Therefore, the structural question relevant to local support is whether \(A(T)^{-1}S_q\) is finitely banded, not whether \(A(T)\) is banded.
+\end{remark}
+
+\subsection{Weak obstruction theorem: dense inverse implies loss of exact local support}
+\label{subsec:phase2_weak_theorem}
+
+We now state the first, weaker theorem.
+It is already sufficient to justify the transition from exact global optimality to local optimality.
+
+\begin{theorem}[Weak obstruction theorem]
+\label{thm:phase2_weak_obstruction}
+Fix \(T\), and assume that \(A(T)\) is nonsingular.
+Suppose that the matrix
+\[
+A(T)^{-1}S_q \in \mathbb R^{2sM\times(M-1)}
+\]
+is not block-banded with any prescribed half-bandwidth \(w\).
+Then the exact globally optimal coefficient map
+\[
+\bar q\longmapsto c^\star(\bar q,T)
+\]
+does not admit exact finite local support of half-bandwidth \(w\) in the sense of Definition~\ref{def:phase2_exact_local_support}.
+\end{theorem}
+
+\begin{proof}
+Assume, to the contrary, that the exact optimal coefficient map has local support of half-bandwidth \(w\).
+Then by Definition~\ref{def:phase2_exact_local_support}, whenever differentiable,
+\[
+\frac{\partial c_i^\star}{\partial q_j}(\bar q,T)=0
+\qquad \text{for all } |j-i|>w.
+\]
+Equivalently, the Jacobian \(D_{\bar q}c^\star(\bar q,T)\) is block-banded with half-bandwidth \(w\).
+
+By Lemma~\ref{lem:phase2_exact_sensitivity},
+\[
+D_{\bar q}c^\star(\bar q,T)=A(T)^{-1}S_q.
+\]
+Hence \(A(T)^{-1}S_q\) must also be block-banded with half-bandwidth \(w\), contradicting the assumption.
+Therefore the exact optimal coefficient map cannot have exact finite local support of half-bandwidth \(w\).
+\end{proof}
+
+\begin{corollary}[Immediate consequence for MINCO]
+\label{cor:phase2_minco_no_local_support}
+If, for a given \(T\), the matrix \(A(T)^{-1}S_q\) has nonzero entries arbitrarily far from the block diagonal, then the exact MINCO coefficient map loses local support with respect to the sparse waypoint parameterization.
+\end{corollary}
+
+\begin{proof}
+Apply Theorem~\ref{thm:phase2_weak_obstruction} for every candidate half-bandwidth \(w\).
+\end{proof}
+
+\begin{remark}[Interpretation]
+\label{rem:phase2_interpretation}
+Theorem~\ref{thm:phase2_weak_obstruction} is intentionally conditional.
+It does not claim that every banded matrix has a dense inverse.
+Rather, it states that \emph{once} the exact global optimality system produces a non-banded matrix \(A(T)^{-1}S_q\), exact finite local support becomes impossible.
+This already explains why BLOM cannot be obtained by naively ``localizing'' the exact MINCO map while preserving exact global optimality.
+\end{remark}
+
+\subsection{From the weak theorem to a structural impossibility theorem}
+\label{subsec:phase2_strong_theorem}
+
+We next upgrade the previous result from a fixed-\(T\) statement to a structural impossibility theorem under the Phase~0/1 sparse parameterization.
+
+Let
+\[
+\mathfrak S_{s}(T)
+\]
+denote the class of piecewise polynomials of degree at most \(2s-1\) on the partition induced by \(T\), and let
+\[
+\mathfrak A_{s}(q,T)
+\subset \mathfrak S_s(T)
+\]
+denote the affine feasible subset satisfying the interpolation constraints, the prescribed endpoint jet, and the required continuity constraints from the global minimum-control problem.
+By Phase~1, for every admissible \((q,T)\), the exact global minimum exists uniquely and is represented by a unique coefficient vector \(c^\star(q,T)\).
+
+We now formalize the impossibility of combining the following three requirements:
+
+1. exact global optimality in the Phase~1 MINCO mother problem,
+2. the sparse outer parameterization \(\theta=(q,T)\),
+3. uniform finite local support of the coefficient map.
+
+\begin{theorem}[Impossibility of exact finite local support under the Phase~0/1 sparse parameterization]
+\label{thm:phase2_strong_impossibility}
+Assume the following:
+
+\begin{enumerate}
+    \item For every admissible pair \((q,T)\), the Phase~1 global minimum-control problem has a unique minimizer \(p^\star(\cdot;q,T)\), with coefficient vector \(c^\star(q,T)\in\mathbb R^{2sM}\).
+
+    \item For every admissible \(T\), the coefficient vector is characterized by the exact global system
+    \[
+    A(T)c^\star(q,T)=b(q,T),
+    \]
+    with \(A(T)\) nonsingular and \(b(q,T)=b_0(T)+S_q\bar q\).
+
+    \item There is no uniform half-bandwidth \(w\), independent of \(M\), such that
+    \[
+    A(T)^{-1}S_q
+    \]
+    is block-banded with half-bandwidth \(w\) for all admissible \(T\).
+\end{enumerate}
+
+Then there does not exist an exact coefficient representation
+\begin{equation}
+\label{eq:phase2_hypothetical_local_representation}
+c_i^\star(q,T)
+=
+\Psi_i\!\bigl((q_j,T_j)_{j\in \mathcal N_w(i)}\bigr),
+\qquad i=1,\dots,M,
+\end{equation}
+with a uniform half-bandwidth \(w\) independent of \(M\), that reproduces the exact global optimum for all admissible \((q,T)\).
+
+Equivalently, under the sparse outer parameterization of Phase~0/1, one cannot simultaneously retain:
+
+\begin{enumerate}
+    \item exact global optimality,
+    \item exact coefficient reproduction,
+    \item uniform finite local support.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+Suppose, for contradiction, that there exists a representation of the form
+\eqref{eq:phase2_hypothetical_local_representation} with a uniform half-bandwidth \(w\).
+Fix any admissible \(T\).
+Since the representation is exact, the coefficient vector generated by \eqref{eq:phase2_hypothetical_local_representation} must coincide with the unique globally optimal coefficient vector \(c^\star(q,T)\) for every admissible \(q\).
+Hence, by differentiability, its Jacobian with respect to \(\bar q\) must satisfy the locality condition
+\[
+\frac{\partial c_i^\star}{\partial q_j}(q,T)=0
+\qquad \text{whenever } |j-i|>w.
+\]
+Therefore \(D_{\bar q}c^\star(q,T)\) is block-banded with half-bandwidth \(w\).
+
+On the other hand, by Lemma~\ref{lem:phase2_exact_sensitivity},
+\[
+D_{\bar q}c^\star(q,T)=A(T)^{-1}S_q.
+\]
+Thus \(A(T)^{-1}S_q\) must be block-banded with the same uniform half-bandwidth \(w\) for every admissible \(T\), contradicting assumption (3).
+Therefore no such exact finite-local-support representation exists.
+\end{proof}
+
+\begin{remark}[What this theorem does and does not forbid]
+\label{rem:phase2_scope_of_strong_theorem}
+Theorem~\ref{thm:phase2_strong_impossibility} does \emph{not} say that no local trajectory representation can ever exist.
+It only rules out exact finite-local-support representations that preserve the Phase~0/1 sparse outer variables and reproduce the exact global optimum of the Phase~1 mother problem.
+Hence the theorem leaves open three possible routes:
+\begin{enumerate}
+    \item relax exact global optimality;
+    \item enlarge the parameter set (for example, introduce additional knot-state variables);
+    \item change the representation space itself.
+\end{enumerate}
+BLOM will follow the first route.
+\end{remark}
+
+\subsection{Consequences for BLOM}
+\label{subsec:phase2_consequence_for_blom}
+
+Theorems~\ref{thm:phase2_weak_obstruction} and \ref{thm:phase2_strong_impossibility} provide the exact logical transition from MINCO to BLOM.
+
+\paragraph{Conclusion 1: direct localization of the exact MINCO map is impossible.}
+Once the exact global optimum is encoded by a system of the form
+\[
+A(T)c^\star(q,T)=b(q,T),
+\]
+the sensitivity with respect to sparse waypoint variables is
+\[
+D_{\bar q}c^\star = A(T)^{-1}S_q.
+\]
+Therefore local support is controlled by the inverse operator, not by the local coupling pattern of \(A(T)\) itself.
+If the inverse-induced sensitivity is not finitely banded, then any exact coefficient map must be globally coupled.
+
+\paragraph{Conclusion 2: BLOM must relax exact global optimality.}
+In order to recover locality while keeping the sparse outer variables \((q,T)\), BLOM cannot remain an exact globally optimal coefficient map.
+Instead, BLOM must be defined through \emph{locally optimal} or \emph{windowwise optimal} subproblems.
+This is not a heuristic choice, but a mathematically necessary relaxation.
+
+\paragraph{Conclusion 3: Phase~2 is the logical bridge to Phase~3.}
+Phase~3 will therefore not attempt to reproduce the exact MINCO coefficient map locally.
+Instead, it will define a new map
+\[
+(q,T)\longmapsto c^{\mathrm{BLOM}}(q,T)
+\]
+through local optimization windows, and will study which properties of the exact MINCO map can be preserved after sacrificing exact global optimality.
+
+\subsection{Canonical specialization to the Phase~0 setting}
+\label{subsec:phase2_canonical_specialization}
+
+For the canonical configuration of Phase~0 and Phase~1,
+\[
+s=4,\qquad d_i=1,
+\]
+each segment coefficient block satisfies
+\[
+c_i\in\mathbb R^8,
+\]
+and the global coefficient vector belongs to \(\mathbb R^{8M}\).
+The global exact optimality system is
+\[
+A(T)c^\star(q,T)=b_0(T)+S_q\bar q,
+\qquad
+A(T)\in\mathbb R^{8M\times 8M},
+\qquad
+S_q\in\mathbb R^{8M\times(M-1)}.
+\]
+Hence the exact waypoint sensitivity is
+\[
+D_{\bar q}c^\star(q,T)=A(T)^{-1}S_q.
+\]
+Therefore, in the canonical minimum-snap case, the entire question of whether exact local support can hold is reduced to the structural sparsity, or lack thereof, of the matrix \(A(T)^{-1}S_q\).
+
+\subsection{Roadmap implication}
+\label{subsec:phase2_roadmap_implication}
+
+Phase~2 identifies the precise mathematical obstruction that BLOM must circumvent:
+\[
+\boxed{
+\text{exact global optimality}
+\;+\;
+\text{sparse waypoint parameterization}
+\;\Longrightarrow\;
+\text{inverse-induced global coupling}.
+}
+\]
+Accordingly, the next phase will not attempt to preserve the exact map \(c^\star(q,T)\), but to construct a new locally computable map that preserves as much of the MINCO structure as possible while restoring finite local support.

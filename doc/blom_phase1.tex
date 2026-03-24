@@ -1,0 +1,635 @@
+\section{Phase 1: Reconstructing the Global MINCO Mother Problem as the Reference Model for BLOM}
+\label{sec:phase1_minco_reference}
+
+In this section we reconstruct the mathematical backbone of MINCO under the notation fixed in
+Section~\ref{sec:blom_phase0}. The purpose is not to reproduce the full GCOPTER planning
+framework, but to isolate the precise chain
+\[
+  \text{mother problem}
+  \;\Longrightarrow\;
+  \text{optimality \& uniqueness}
+  \;\Longrightarrow\;
+  \text{banded coefficient system}
+  \;\Longrightarrow\;
+  \text{parameter sensitivity \& gradients},
+\]
+which will later be localized in the BLOM construction.
+
+Throughout this section we remain in the canonical scalar setting of Phase~0:
+\[
+  p:[0,\mathcal T]\to \mathbb R,
+  \qquad
+  \mathcal T=\sum_{i=1}^{M}T_i,
+  \qquad
+  T_i>0,
+  \qquad
+  s=4,
+  \qquad
+  d_i=1.
+\]
+Hence the control effort is the snap energy
+\[
+  J[p]
+  =
+  \sum_{i=1}^{M}\int_{0}^{T_i}\bigl|p_i^{(4)}(t)\bigr|^2\,dt.
+\]
+The sparse external parameter vector is still
+\begin{equation}
+  \label{eq:phase1_theta}
+  \theta=(q_1,\dots,q_{M-1},T_1,\dots,T_M)^\top,
+\end{equation}
+exactly as fixed in Phase~0. The boundary waypoints $q_0$ and $q_M$ remain fixed data.
+
+\subsection{Why the MINCO mother problem must strengthen the Phase~0 reference problem}
+\label{subsec:phase1_why_strengthen}
+
+The global reference problem in Phase~0 is sufficient as a \emph{comparison target} for BLOM,
+but it is not yet a mathematically adequate MINCO mother problem for uniqueness. Indeed, if
+one fixes only waypoint values and minimizes the snap energy, then uniqueness generally fails.
+For example, when $M=1$, any cubic interpolant between $q_0$ and $q_1$ has zero snap cost.
+Therefore, in the MINCO mother problem we must additionally fix the full boundary jet up to
+order $s-1=3$ at both ends.
+
+Accordingly, we introduce fixed boundary data
+\begin{equation}
+  \label{eq:phase1_boundary_jets}
+  \zeta^-=(\zeta^-_0,\zeta^-_1,\zeta^-_2,\zeta^-_3)^\top,
+  \qquad
+  \zeta^+=(\zeta^+_0,\zeta^+_1,\zeta^+_2,\zeta^+_3)^\top,
+\end{equation}
+with
+\[
+  \zeta^-_0=q_0,
+  \qquad
+  \zeta^+_0=q_M.
+\]
+In the canonical minimum-snap setting, these are the position, velocity, acceleration, and jerk
+values at the initial and terminal times.
+
+\subsection{Mother problem}
+\label{subsec:phase1_mother_problem}
+
+Let
+\[
+  t_0:=0,
+  \qquad
+  t_i:=\sum_{r=1}^{i}T_r,
+  \qquad
+  i=1,\dots,M,
+\]
+so that $t_M=\mathcal T$.
+We consider trajectories $p$ whose restriction to each interval $[t_{i-1},t_i]$ is denoted by
+\[
+  p_i:[0,T_i]\to\mathbb R,
+  \qquad
+  p_i(\tau)=p(t_{i-1}+\tau).
+\]
+
+Define the admissible set
+\begin{equation}
+  \label{eq:phase1_admissible_set}
+  \mathcal A(q,T;\zeta^-,\zeta^+)
+  =
+  \left\{
+    p
+    \;\middle|\;
+    \begin{aligned}
+      & p_i\in H^4(0,T_i), \quad i=1,\dots,M,\\
+      & p(t_i)=q_i,\quad i=0,\dots,M,\\
+      & p^{(\ell)}(0)=\zeta^-_\ell,\quad p^{(\ell)}(\mathcal T)=\zeta^+_\ell,
+      \quad \ell=1,2,3,\\
+      & p^{(\ell)}(t_i^-)=p^{(\ell)}(t_i^+),\quad \ell=1,2,3,\quad i=1,\dots,M-1
+    \end{aligned}
+  \right\}.
+\end{equation}
+The Phase~1 MINCO mother problem is
+\begin{equation}
+  \label{eq:phase1_mother_problem}
+  \boxed{
+    \min_{p\in \mathcal A(q,T;\zeta^-,\zeta^+)}
+    \;
+    J[p]
+    =
+    \sum_{i=1}^{M}\int_{0}^{T_i}\bigl|p_i^{(4)}(\tau)\bigr|^2\,d\tau.
+  }
+\end{equation}
+
+\paragraph{Remark on the role of \texorpdfstring{$d_i=1$}{d_i=1}.}
+The canonical choice $d_i=1$ means that only the waypoint value $p(t_i)=q_i$ is prescribed at each
+interior knot. No interior derivative value is fixed. The continuity of orders $1,2,3$ belongs to the
+integrator-chain state continuity, while the continuity of higher orders will emerge from optimality.
+
+\subsection{Optimality conditions and uniqueness}
+\label{subsec:phase1_optimality_uniqueness}
+
+We now state and prove the canonical mother theorem for the Phase~0 setting $(s,d_i)=(4,1)$.
+
+\begin{theorem}[Optimality conditions and uniqueness in the canonical minimum-snap case]
+  \label{thm:phase1_minco_theorem}
+  Fix $T_i>0$ for all $i$, waypoint data $q_0,\dots,q_M\in\mathbb R$, and boundary jets
+  $\zeta^-,\zeta^+\in\mathbb R^4$ with $\zeta^-_0=q_0$ and $\zeta^+_0=q_M$.
+  A trajectory $p^\star\in\mathcal A(q,T;\zeta^-,\zeta^+)$ solves
+  \eqref{eq:phase1_mother_problem} if and only if the following hold:
+
+  \begin{enumerate}
+    \item For each $i=1,\dots,M$, the segment $p_i^\star$ is a polynomial of degree at most $7$.
+
+    \item The boundary conditions are satisfied:
+      \[
+        (p^\star)^{(\ell)}(0)=\zeta^-_\ell,
+        \qquad
+        (p^\star)^{(\ell)}(\mathcal T)=\zeta^+_\ell,
+        \qquad \ell=0,1,2,3,
+      \]
+      where $\zeta^-_0=q_0$ and $\zeta^+_0=q_M$.
+
+    \item The waypoint conditions are satisfied:
+      \[
+        p^\star(t_i)=q_i,\qquad i=1,\dots,M-1.
+      \]
+
+    \item The trajectory is $C^6$ at every interior knot:
+      \[
+        (p^\star)^{(\ell)}(t_i^-)
+        =
+        (p^\star)^{(\ell)}(t_i^+),
+        \qquad
+        \ell=0,1,\dots,6,
+        \qquad
+        i=1,\dots,M-1.
+      \]
+  \end{enumerate}
+
+  Moreover, the solution of \eqref{eq:phase1_mother_problem} exists and is unique.
+\end{theorem}
+
+\begin{proof}
+  We split the proof into necessity, sufficiency, and uniqueness.
+
+  \paragraph{Necessity.}
+  Let $p^\star\in\mathcal A(q,T;\zeta^-,\zeta^+)$ be optimal and let
+  $h\in \mathcal T_{p^\star}\mathcal A$ be any admissible variation. Then
+  \[
+    h(t_i)=0,\qquad i=0,\dots,M,
+  \]
+  and
+  \[
+    h^{(\ell)}(0)=h^{(\ell)}(\mathcal T)=0,\qquad \ell=1,2,3,
+  \]
+  while
+  \[
+    h^{(\ell)}(t_i^-)=h^{(\ell)}(t_i^+),\qquad \ell=1,2,3,\quad i=1,\dots,M-1.
+  \]
+  Since $J$ is quadratic,
+  \[
+    0
+    =
+    \frac{1}{2}\,\delta J[p^\star;h]
+    =
+    \sum_{i=1}^{M}\int_{0}^{T_i} (p_i^\star)^{(4)}(\tau)\, h_i^{(4)}(\tau)\,d\tau.
+  \]
+  Integrating by parts four times on each segment gives
+  \begin{align}
+    \int_{0}^{T_i} (p_i^\star)^{(4)} h_i^{(4)}\,d\tau
+    &=
+    \Bigl[
+      (p_i^\star)^{(4)} h_i^{(3)}
+      -
+      (p_i^\star)^{(5)} h_i^{(2)}
+      +
+      (p_i^\star)^{(6)} h_i^{(1)}
+      -
+      (p_i^\star)^{(7)} h_i
+    \Bigr]_{0}^{T_i}
+    \notag\\
+    &\qquad
+    +
+    \int_{0}^{T_i}(p_i^\star)^{(8)}(\tau)\,h_i(\tau)\,d\tau .
+    \label{eq:phase1_ibp4}
+  \end{align}
+  Summing \eqref{eq:phase1_ibp4} over $i$, the endpoint contributions at $t=0$ and $t=\mathcal T$
+  vanish because the boundary jet is fixed, and the terms multiplying $h(t_i)$ vanish because
+  $h(t_i)=0$. Hence
+  \begin{align}
+    0
+    &=
+    \sum_{i=1}^{M}\int_{0}^{T_i}(p_i^\star)^{(8)}(\tau)\,h_i(\tau)\,d\tau
+    \notag\\
+    &\quad
+    +
+    \sum_{i=1}^{M-1}
+    \Bigl[
+      \bigl((p_i^\star)^{(4)}(T_i)-(p_{i+1}^\star)^{(4)}(0)\bigr)\,h^{(3)}(t_i)
+      \notag\\
+      &\qquad\qquad
+      -
+      \bigl((p_i^\star)^{(5)}(T_i)-(p_{i+1}^\star)^{(5)}(0)\bigr)\,h^{(2)}(t_i)
+      \notag\\
+      &\qquad\qquad
+      +
+      \bigl((p_i^\star)^{(6)}(T_i)-(p_{i+1}^\star)^{(6)}(0)\bigr)\,h^{(1)}(t_i)
+    \Bigr].
+    \label{eq:phase1_variation_reduced}
+  \end{align}
+  Now $h$ is arbitrary in the interior of each segment, and the traces
+  $h^{(1)}(t_i),h^{(2)}(t_i),h^{(3)}(t_i)$ are independent free variables. Therefore
+  \[
+    (p_i^\star)^{(8)}(\tau)=0
+    \quad\text{for all }\tau\in(0,T_i),
+  \]
+  hence each $p_i^\star$ is a polynomial of degree at most $7$, and
+  \[
+    (p_i^\star)^{(\ell)}(T_i)=(p_{i+1}^\star)^{(\ell)}(0),
+    \qquad \ell=4,5,6,
+    \qquad i=1,\dots,M-1.
+  \]
+  Since $p^\star\in\mathcal A(q,T;\zeta^-,\zeta^+)$ already has continuity of orders $0,1,2,3$,
+  we conclude that $p^\star$ is $C^6$ at every interior knot.
+
+  \paragraph{Sufficiency.}
+  Assume a feasible trajectory $p$ satisfies items (1)--(4). Then each segment is a polynomial of
+  degree at most $7$, so $p_i^{(8)}\equiv 0$ on every segment. Repeating the integration-by-parts
+  identity \eqref{eq:phase1_ibp4}, all knot terms in \eqref{eq:phase1_variation_reduced} vanish
+  because of $C^6$ continuity and $h(t_i)=0$. Thus
+  \[
+    \delta J[p;h]=0
+    \qquad
+    \text{for all } h\in \mathcal T_p\mathcal A .
+  \]
+  Since $J$ is a quadratic functional with nonnegative Hessian,
+  \[
+    \delta^2 J[p;h]
+    =
+    2\sum_{i=1}^{M}\int_{0}^{T_i}|h_i^{(4)}(\tau)|^2\,d\tau
+    \ge 0,
+  \]
+  the vanishing of the first variation implies that $p$ is a global minimizer over the affine feasible
+  set.
+
+  \paragraph{Uniqueness.}
+  Suppose $p^\star$ and $\tilde p^\star$ are two minimizers. Their difference
+  $h:=p^\star-\tilde p^\star$ satisfies all homogeneous constraints, and
+  \[
+    0
+    =
+    J[p^\star]+J[\tilde p^\star]-2J\!\left[\frac{p^\star+\tilde p^\star}{2}\right]
+    =
+    \frac{1}{2}\sum_{i=1}^{M}\int_{0}^{T_i}|h_i^{(4)}(\tau)|^2\,d\tau.
+  \]
+  Hence $h_i^{(4)}\equiv 0$ for every $i$, so each $h_i$ is a polynomial of degree at most $3$.
+  Because $h$ is $C^3$ across all interior knots, $h$ is in fact a single global cubic polynomial on
+  $[0,\mathcal T]$. Moreover, all boundary jet data are homogeneous:
+  \[
+    h^{(\ell)}(0)=0,\qquad \ell=0,1,2,3.
+  \]
+  Therefore the global cubic polynomial $h$ has all four Taylor coefficients at $0$ equal to zero,
+  which implies $h\equiv 0$. Thus $p^\star=\tilde p^\star$, and the minimizer is unique.
+\end{proof}
+
+\begin{remark}[Why the endpoint jet is not optional]
+  \label{rem:phase1_endpoint_jet}
+  The fixed endpoint jet in \eqref{eq:phase1_boundary_jets} is not a cosmetic addition but a
+  mathematical necessity for uniqueness. If one keeps only the waypoint constraints
+  $p(t_i)=q_i$ and removes the higher-order endpoint conditions, then the functional
+  \eqref{eq:phase1_mother_problem} is no longer strictly convex on the feasible affine space.
+  For example, when $M=1$, every cubic interpolant between $q_0$ and $q_1$ has zero snap energy.
+\end{remark}
+
+\subsection{Banded linear system for the optimal coefficient vector}
+\label{subsec:phase1_banded_system}
+
+Theorem~\ref{thm:phase1_minco_theorem} converts the variational problem
+\eqref{eq:phase1_mother_problem} into a purely algebraic construction.
+
+For each segment we adopt the monomial basis
+\[
+  \beta(\tau)
+  =
+  (1,\tau,\tau^2,\tau^3,\tau^4,\tau^5,\tau^6,\tau^7)^\top \in \mathbb R^8,
+\]
+and write
+\begin{equation}
+  \label{eq:phase1_segment_poly}
+  p_i(\tau)=c_i^\top \beta(\tau),
+  \qquad
+  \tau\in[0,T_i],
+  \qquad
+  c_i\in\mathbb R^8.
+\end{equation}
+Let
+\[
+  c=(c_1^\top,\dots,c_M^\top)^\top \in \mathbb R^{8M}.
+\]
+For convenience define the derivative row operators
+\[
+  B^{(\ell)}(\tau)
+  :=
+  \frac{d^\ell}{d\tau^\ell}\beta(\tau)^\top
+  \in \mathbb R^{1\times 8},
+  \qquad
+  \ell=0,1,\dots,7.
+\]
+Then
+\[
+  p_i^{(\ell)}(\tau)=B^{(\ell)}(\tau)c_i.
+\]
+
+\paragraph{Boundary rows.}
+Define
+\begin{equation}
+  \label{eq:phase1_boundary_blocks}
+  F_0
+  =
+  \begin{bmatrix}
+    B^{(0)}(0)\\
+    B^{(1)}(0)\\
+    B^{(2)}(0)\\
+    B^{(3)}(0)
+  \end{bmatrix}
+  \in\mathbb R^{4\times 8},
+  \qquad
+  E_M(T_M)
+  =
+  \begin{bmatrix}
+    B^{(0)}(T_M)\\
+    B^{(1)}(T_M)\\
+    B^{(2)}(T_M)\\
+    B^{(3)}(T_M)
+  \end{bmatrix}
+  \in\mathbb R^{4\times 8},
+\end{equation}
+and the boundary data vectors
+\begin{equation}
+  \label{eq:phase1_boundary_rhs}
+  D_0=\zeta^- \in\mathbb R^4,
+  \qquad
+  D_M=\zeta^+ \in\mathbb R^4.
+\end{equation}
+
+\paragraph{Interior rows.}
+For each interior knot $t_i$ with $1\le i\le M-1$, define
+\begin{equation}
+  \label{eq:phase1_interior_blocks}
+  E_i(T_i)
+  =
+  \begin{bmatrix}
+    B^{(0)}(T_i)\\
+    B^{(0)}(T_i)\\
+    B^{(1)}(T_i)\\
+    B^{(2)}(T_i)\\
+    B^{(3)}(T_i)\\
+    B^{(4)}(T_i)\\
+    B^{(5)}(T_i)\\
+    B^{(6)}(T_i)
+  \end{bmatrix}
+  \in\mathbb R^{8\times 8},
+  \qquad
+  F_i
+  =
+  \begin{bmatrix}
+    0_{1\times 8}\\
+    -\,B^{(0)}(0)\\
+    -\,B^{(1)}(0)\\
+    -\,B^{(2)}(0)\\
+    -\,B^{(3)}(0)\\
+    -\,B^{(4)}(0)\\
+    -\,B^{(5)}(0)\\
+    -\,B^{(6)}(0)
+  \end{bmatrix}
+  \in\mathbb R^{8\times 8},
+\end{equation}
+and
+\begin{equation}
+  \label{eq:phase1_interior_rhs}
+  d_i
+  =
+  (q_i,0,0,0,0,0,0,0)^\top \in\mathbb R^8.
+\end{equation}
+The first row of \eqref{eq:phase1_interior_blocks} enforces the waypoint condition
+$p_i(T_i)=q_i$, while the remaining seven rows enforce continuity of derivatives of orders
+$0,\dots,6$ between segments $i$ and $i+1$.
+
+Collecting all rows yields the linear system
+\begin{equation}
+  \label{eq:phase1_Mcb}
+  M(T)c(q,T)=b(q),
+\end{equation}
+where
+\begin{equation}
+  \label{eq:phase1_M_matrix}
+  M(T)
+  =
+  \begin{bmatrix}
+    F_0        & 0          & 0          & \cdots & 0 \\
+    E_1(T_1)   & F_1        & 0          & \cdots & 0 \\
+    0          & E_2(T_2)   & F_2        & \ddots & \vdots \\
+    \vdots     & \ddots     & \ddots     & \ddots & 0 \\
+    0          & \cdots     & 0          & E_{M-1}(T_{M-1}) & F_{M-1} \\
+    0          & \cdots     & 0          & 0      & E_M(T_M)
+  \end{bmatrix}
+  \in\mathbb R^{8M\times 8M},
+\end{equation}
+and
+\begin{equation}
+  \label{eq:phase1_b_vector}
+  b(q)
+  =
+  \begin{bmatrix}
+    D_0\\
+    d_1\\
+    d_2\\
+    \vdots\\
+    d_{M-1}\\
+    D_M
+  \end{bmatrix}
+  \in\mathbb R^{8M}.
+\end{equation}
+
+\begin{proposition}[Structure of the coefficient system]
+  \label{prop:phase1_banded}
+  For fixed $s=4$, the matrix $M(T)$ in \eqref{eq:phase1_M_matrix} is block bi-diagonal with
+  constant block size $8\times 8$. Consequently:
+  \begin{enumerate}
+    \item $M(T)$ has uniformly bounded bandwidth independent of $M$;
+    \item the unique coefficient vector $c(q,T)$ is obtained by solving a banded linear system;
+    \item a banded PLU factorization computes $c(q,T)$ in $O(M)$ time and $O(M)$ memory.
+  \end{enumerate}
+\end{proposition}
+
+\begin{proof}
+  The block pattern in \eqref{eq:phase1_M_matrix} is immediate from the fact that every interior
+  optimality condition couples only two adjacent segments. Because the block size is fixed
+  ($8\times 8$ for $s=4$), both the scalar bandwidth and the fill pattern remain $O(1)$ with respect
+  to $M$. Theorem~\ref{thm:phase1_minco_theorem} implies existence and uniqueness of the
+  trajectory, hence the coefficient vector is unique and $M(T)$ is nonsingular. Standard banded
+  PLU factorization for nonsingular banded matrices therefore yields the claimed linear
+  complexity.
+\end{proof}
+
+\paragraph{Canonical specialization to Phase~0.}
+In the notation of Phase~0, the external sparse parameter vector remains
+\[
+  \theta=(q_1,\dots,q_{M-1},T_1,\dots,T_M)^\top.
+\]
+The only additional data in Phase~1 are the fixed boundary jets $\zeta^-$ and $\zeta^+$, which are
+not optimization variables.
+
+\subsection{Parameter sensitivity and linear-complexity gradient propagation}
+\label{subsec:phase1_sensitivity_gradient}
+
+The role of MINCO as a trajectory class is not merely to generate a reference trajectory, but to
+support further spatial--temporal deformation under user-defined objectives. Following the
+MINCO construction, let
+\begin{equation}
+  \label{eq:phase1_W_def}
+  W(q,T)=K(c(q,T),T),
+\end{equation}
+where $K:\mathbb R^{8M}\times\mathbb R^M_{>0}\to\mathbb R$ is any $C^2$ objective (or smooth penalty)
+with available partial derivatives $\partial K/\partial c$ and $\partial K/\partial T$.
+
+Differentiate \eqref{eq:phase1_Mcb}:
+\begin{equation}
+  \label{eq:phase1_diff_Mcb}
+  M\,dc + (dM)\,c = db.
+\end{equation}
+Hence
+\begin{equation}
+  \label{eq:phase1_dc_formula}
+  dc
+  =
+  M^{-1}\bigl(db-(dM)c\bigr).
+\end{equation}
+Using \eqref{eq:phase1_W_def}, the total differential of $W$ is
+\begin{equation}
+  \label{eq:phase1_dW}
+  dW
+  =
+  \left(\frac{\partial K}{\partial c}\right)^\top dc
+  +
+  \left(\frac{\partial K}{\partial T}\right)^\top dT.
+\end{equation}
+To eliminate the inverse of $M$, define the adjoint vector $g\in\mathbb R^{8M}$ by
+\begin{equation}
+  \label{eq:phase1_adjoint}
+  M(T)^\top g = \frac{\partial K}{\partial c}.
+\end{equation}
+Substituting \eqref{eq:phase1_dc_formula} into \eqref{eq:phase1_dW} and using
+\eqref{eq:phase1_adjoint} gives
+\begin{equation}
+  \label{eq:phase1_dW_compact}
+  dW
+  =
+  g^\top db
+  -
+  g^\top (dM)c
+  +
+  \left(\frac{\partial K}{\partial T}\right)^\top dT.
+\end{equation}
+
+\paragraph{Gradient with respect to waypoint parameters.}
+Only the vector $b(q)$ depends on $q$, and for $1\le i\le M-1$,
+\[
+  \frac{\partial b}{\partial q_i}
+  =
+  e_{4+8(i-1)+1},
+\]
+where $e_j$ is the $j$-th Euclidean basis vector in $\mathbb R^{8M}$. Therefore,
+\begin{equation}
+  \label{eq:phase1_grad_qi}
+  \frac{\partial W}{\partial q_i}
+  =
+  g^\top \frac{\partial b}{\partial q_i}
+  =
+  g_{\,4+8(i-1)+1},
+  \qquad
+  i=1,\dots,M-1.
+\end{equation}
+Hence all spatial gradients are obtained once the single adjoint solve \eqref{eq:phase1_adjoint}
+is completed.
+
+\paragraph{Gradient with respect to segment durations.}
+Only $M(T)$ depends on $T$. Therefore,
+\begin{equation}
+  \label{eq:phase1_grad_Ti_general}
+  \frac{\partial W}{\partial T_i}
+  =
+  \frac{\partial K}{\partial T_i}
+  -
+  g^\top
+  \left(\frac{\partial M}{\partial T_i}\right)c,
+  \qquad
+  i=1,\dots,M.
+\end{equation}
+Because $T_i$ appears only in the local right-end evaluation of segment $i$, the matrix
+$\partial M/\partial T_i$ has support in exactly one block row:
+\begin{equation}
+  \label{eq:phase1_dM_support}
+  \frac{\partial M}{\partial T_i}
+  =
+  \begin{cases}
+    \text{zero everywhere except the block } \dfrac{\partial E_i(T_i)}{\partial T_i}, & 1\le i\le M-1,\\[1.2ex]
+    \text{zero everywhere except the block } \dfrac{\partial E_M(T_M)}{\partial T_M}, & i=M.
+  \end{cases}
+\end{equation}
+Thus each $\partial W/\partial T_i$ is computed from a constant-size local contraction, and the
+whole vector $\partial W/\partial T$ is obtained in $O(M)$ total complexity.
+
+\begin{proposition}[Linear-complexity gradient propagation]
+  \label{prop:phase1_linear_gradient}
+  Assume that $K(c,T)$ and its partial derivatives with respect to $c$ and $T$ are available.
+  Then the gradients
+  \[
+    \frac{\partial W}{\partial q}
+    \in \mathbb R^{M-1},
+    \qquad
+    \frac{\partial W}{\partial T}
+    \in \mathbb R^{M}
+  \]
+  can be computed in $O(M)$ time and $O(M)$ memory.
+\end{proposition}
+
+\begin{proof}
+  The forward coefficients $c(q,T)$ are obtained by one banded solve of \eqref{eq:phase1_Mcb},
+  which is $O(M)$ by Proposition~\ref{prop:phase1_banded}. The adjoint vector $g$ is obtained by
+  one banded solve of \eqref{eq:phase1_adjoint}, again in $O(M)$. Formula
+  \eqref{eq:phase1_grad_qi} extracts one entry of $g$ for each $q_i$, and
+  \eqref{eq:phase1_grad_Ti_general}--\eqref{eq:phase1_dM_support} require only constant-size local
+  contractions for each $T_i$. Therefore the whole gradient propagation is linear in $M$.
+\end{proof}
+
+\subsection{Why Phase~1 is logically prior to BLOM}
+\label{subsec:phase1_prior_to_blom}
+
+The purpose of Phase~1 is not to advocate global MINCO as the final representation, but to fix
+the exact mathematical chain that BLOM must later localize:
+\[
+  \boxed{
+    \begin{aligned}
+      &\text{variational mother problem}
+      &&\Longrightarrow\text{optimality \& uniqueness}\\
+      &\Longrightarrow M(T)c(q,T)=b(q)
+      &&\Longrightarrow W(q,T)=K(c(q,T),T)\\
+      &\Longrightarrow\left(\frac{\partial W}{\partial q},\frac{\partial W}{\partial T}\right)
+    \end{aligned}
+  }
+\]
+All later BLOM theorems will be local modifications of one of these five arrows, not independent
+constructions detached from them.
+
+\begin{remark}[General-\texorpdfstring{$s$}{s} version]
+  \label{rem:phase1_general_s}
+  The whole section extends verbatim to arbitrary control order $s\ge 2$.
+  The replacements are
+  \[
+    4 \mapsto s,
+    \qquad
+    7 \mapsto 2s-1,
+    \qquad
+    6 \mapsto 2s-2,
+    \qquad
+    8 \mapsto 2s.
+  \]
+  For an interior knot with prescribed derivative count $d_i\le s$, the optimality theorem gives
+  continuity order $2s-d_i-1$. In the canonical Phase~0 setting, $d_i=1$, hence the interior
+  continuity becomes $2s-2$, which is $6$ when $s=4$.
+\end{remark}

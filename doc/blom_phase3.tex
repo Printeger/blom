@@ -1,0 +1,675 @@
+\section{Phase 3: BLOM-Strict --- Local Variational Definition and Well-Posedness}
+\label{sec:phase3_blom_strict}
+
+This section turns BLOM from an informal localization idea into a mathematically well-defined object.
+The key task is to define a local variational problem on each window and to prove that the problem is well-posed, namely:
+\begin{enumerate}
+    \item the local admissible set is nonempty and affine;
+    \item the local objective is strictly convex on that affine set;
+    \item the induced local linear system is nonsingular;
+    \item the local minimizer is unique.
+\end{enumerate}
+This theorem will play the role of the local analogue of the global MINCO mother theorem established in Phase~1.
+
+Throughout this section, all notation is inherited from Phases~0--2.
+In particular,
+\[
+\theta=(q_1,\dots,q_{M-1},T_1,\dots,T_M)^\top,
+\qquad
+T_i>0,
+\qquad
+\mathcal T=\sum_{i=1}^{M}T_i,
+\]
+and the canonical setting remains
+\[
+s=4,\qquad d_i=1
+\]
+unless otherwise stated.
+For general statements we keep \(s\ge 2\) symbolic, and only specialize to \(s=4\) when needed.
+
+\subsection{Local windows and local knot times}
+\label{subsec:phase3_windows}
+
+For each segment index \(i\in\{1,\dots,M\}\) and bandwidth parameter \(k\in\mathbb N\), define the window
+\begin{equation}
+\label{eq:phase3_window}
+W(i,k)
+=
+\{\,i-\lfloor k/2\rfloor,\dots,i+\lfloor k/2\rfloor\,\}\cap[1,M].
+\end{equation}
+Let
+\[
+L_i:=\min W(i,k),\qquad R_i:=\max W(i,k),\qquad m_i:=|W(i,k)|=R_i-L_i+1.
+\]
+Thus the \(i\)-th local problem is posed on the segment set
+\[
+\{L_i,L_i+1,\dots,R_i\}.
+\]
+
+The corresponding local knot set is
+\[
+\Xi_{i,k}:=\{L_i-1,L_i,\dots,R_i\}.
+\]
+We introduce local cumulative times
+\begin{equation}
+\label{eq:phase3_local_knots}
+\sigma_{L_i-1}:=0,
+\qquad
+\sigma_r:=\sum_{\ell=L_i}^{r}T_\ell,
+\qquad
+r=L_i,\dots,R_i,
+\end{equation}
+and denote the local horizon by
+\begin{equation}
+\label{eq:phase3_local_horizon}
+\mathcal T_{i,k}:=\sigma_{R_i}=\sum_{\ell=L_i}^{R_i}T_\ell.
+\end{equation}
+
+\subsection{Local spline space and affine constraint set}
+\label{subsec:phase3_local_space_constraints}
+
+The local BLOM-Strict problem is defined on a finite-dimensional spline space.
+Let
+\[
+\mathbb P_{2s-1}
+\]
+denote the space of real polynomials of degree at most \(2s-1\).
+We define the local \(C^{s-1}\) spline space
+\begin{equation}
+\label{eq:phase3_local_spline_space}
+\mathcal S_{i,k}^{(s-1)}(T)
+:=
+\left\{
+u=(u_{L_i},\dots,u_{R_i})
+\ \middle|\
+\begin{aligned}
+& u_j\in \mathbb P_{2s-1},\qquad j=L_i,\dots,R_i,\\
+& u_j^{(\ell)}(T_j)=u_{j+1}^{(\ell)}(0),\\
+& \hspace{1.8cm}\ell=0,\dots,s-1,\quad j=L_i,\dots,R_i-1
+\end{aligned}
+\right\}.
+\end{equation}
+Thus the segmentwise functions are polynomial of degree at most \(2s-1\) and are \(C^{s-1}\) across all internal knots of the window.
+
+\paragraph{Interpolation constraints.}
+For every \(u\in\mathcal S_{i,k}^{(s-1)}(T)\), we impose exact waypoint interpolation at all window knots:
+\begin{equation}
+\label{eq:phase3_window_interpolation}
+u(\sigma_r)=q_r,
+\qquad r\in \Xi_{i,k}=\{L_i-1,\dots,R_i\}.
+\end{equation}
+
+\paragraph{Physical boundary inheritance.}
+If the local window touches a true global boundary, then BLOM-Strict inherits the physical boundary jet from Phase~1.
+Specifically:
+\begin{itemize}
+    \item if \(L_i=1\), then in addition to \(u(0)=q_0\) already enforced by \eqref{eq:phase3_window_interpolation}, we require
+    \begin{equation}
+    \label{eq:phase3_left_physical_jet}
+    u^{(\ell)}(0)=\zeta^-_\ell,
+    \qquad \ell=1,\dots,s-1;
+    \end{equation}
+    \item if \(R_i=M\), then in addition to \(u(\mathcal T_{i,k})=q_M\), we require
+    \begin{equation}
+    \label{eq:phase3_right_physical_jet}
+    u^{(\ell)}(\mathcal T_{i,k})=\zeta^+_\ell,
+    \qquad \ell=1,\dots,s-1.
+    \end{equation}
+\end{itemize}
+
+No derivative constraints are imposed at artificial window boundaries.
+The corresponding natural boundary conditions will instead be derived from first-order optimality.
+
+\begin{definition}[Local admissible set]
+\label{def:phase3_local_admissible}
+The BLOM-Strict admissible set for the window \(W(i,k)\) is
+\begin{equation}
+\label{eq:phase3_local_admissible}
+\mathcal A_{i,k}(q,T;\zeta^-,\zeta^+)
+:=
+\left\{
+u\in\mathcal S_{i,k}^{(s-1)}(T)
+\ \middle|\
+\eqref{eq:phase3_window_interpolation}\text{ holds, and }
+\eqref{eq:phase3_left_physical_jet},\eqref{eq:phase3_right_physical_jet}
+\text{ are imposed whenever applicable}
+\right\}.
+\end{equation}
+\end{definition}
+
+\begin{remark}[Why the window space is only \(C^{s-1}\) a priori]
+\label{rem:phase3_why_c_s_minus_1}
+The feasible space in \eqref{eq:phase3_local_spline_space} imposes only the continuity that is structurally required by the \(s\)-fold integrator chain, namely \(C^{s-1}\).
+The higher continuity \(C^{2s-2}\) will be derived from the optimality conditions, exactly as in the global MINCO mother theorem of Phase~1.
+This is essential: if one imposed \(C^{2s-2}\) and natural boundary conditions as hard constraints from the start, then the local variational problem would lose the precise analogy with the global MINCO construction.
+\end{remark}
+
+\subsection{The BLOM-Strict local variational problem}
+\label{subsec:phase3_local_problem}
+
+For each window \(W(i,k)\), define the local control effort functional
+\begin{equation}
+\label{eq:phase3_local_energy}
+J_{i,k}[u]
+:=
+\sum_{j=L_i}^{R_i}\int_{0}^{T_j}\bigl|u_j^{(s)}(\tau)\bigr|^2\,d\tau.
+\end{equation}
+
+\begin{definition}[BLOM-Strict local problem]
+\label{def:phase3_blom_strict_problem}
+The BLOM-Strict local problem on the window \(W(i,k)\) is
+\begin{equation}
+\label{eq:phase3_local_problem}
+\boxed{
+\min_{u\in\mathcal A_{i,k}(q,T;\zeta^-,\zeta^+)}
+J_{i,k}[u].
+}
+\end{equation}
+Its unique minimizer, when it exists, is denoted by
+\[
+u_{i,k}^\star.
+\]
+\end{definition}
+
+\subsection{Natural boundary conditions at artificial window boundaries}
+\label{subsec:phase3_natural_bc}
+
+We now derive the exact natural boundary conditions induced by \eqref{eq:phase3_local_problem}.
+
+\begin{proposition}[Natural boundary conditions for BLOM-Strict]
+\label{prop:phase3_natural_bc}
+Let \(u_{i,k}^\star\) be a local minimizer of \eqref{eq:phase3_local_problem}.
+Then:
+\begin{itemize}
+    \item if \(L_i>1\), i.e.\ the left boundary of the window is artificial, then
+    \begin{equation}
+    \label{eq:phase3_left_natural_bc}
+    \bigl(u_{i,k}^\star\bigr)^{(r)}(0)=0,
+    \qquad r=s,\dots,2s-2;
+    \end{equation}
+    \item if \(R_i<M\), i.e.\ the right boundary of the window is artificial, then
+    \begin{equation}
+    \label{eq:phase3_right_natural_bc}
+    \bigl(u_{i,k}^\star\bigr)^{(r)}(\mathcal T_{i,k})=0,
+    \qquad r=s,\dots,2s-2.
+    \end{equation}
+\end{itemize}
+\end{proposition}
+
+\begin{proof}
+We prove the left boundary statement; the right one is identical.
+
+Assume \(L_i>1\), so the left boundary is artificial.
+Let \(h\in \mathcal S_{i,k}^{(s-1)}(T)\) be any feasible variation of \(u_{i,k}^\star\), i.e.\ \(h\) satisfies the homogeneous form of all affine constraints.
+In particular,
+\[
+h(0)=0
+\]
+because the left endpoint value is fixed by interpolation, while
+\[
+h^{(\ell)}(0),\qquad \ell=1,\dots,s-1,
+\]
+are free because no derivative constraints are imposed at the artificial boundary.
+
+Since \(u_{i,k}^\star\) is a minimizer, the first variation vanishes:
+\[
+0
+=
+\delta J_{i,k}[u_{i,k}^\star;h]
+=
+2\sum_{j=L_i}^{R_i}\int_0^{T_j}
+(u_{i,k}^\star)_j^{(s)}(\tau)\, h_j^{(s)}(\tau)\,d\tau.
+\]
+Integrating by parts \(s\) times on the first segment and collecting the left boundary terms gives
+\[
+\sum_{r=0}^{s-1}
+(-1)^r
+\bigl(u_{i,k}^\star\bigr)^{(s+r)}(0)\,
+h^{(s-1-r)}(0).
+\]
+Because \(h(0)=0\), the term corresponding to \(r=s-1\) vanishes automatically.
+The remaining traces
+\[
+h^{(1)}(0),\dots,h^{(s-1)}(0)
+\]
+are free, hence the coefficients in front of them must vanish:
+\[
+\bigl(u_{i,k}^\star\bigr)^{(s)}(0)=\cdots=
+\bigl(u_{i,k}^\star\bigr)^{(2s-2)}(0)=0.
+\]
+This is exactly \eqref{eq:phase3_left_natural_bc}.
+\end{proof}
+
+\subsection{Window admissibility and the local nullspace obstruction}
+\label{subsec:phase3_window_admissibility}
+
+The strict convexity of the local problem depends on whether the zero-cost polynomial nullspace is killed by the local constraints.
+
+\begin{definition}[(\(s,k\))-admissible window]
+\label{def:phase3_window_admissible}
+A window \(W(i,k)\) is called \emph{(\(s,k\))-admissible} if either
+\begin{enumerate}
+    \item it touches at least one physical global boundary, i.e.\ \(L_i=1\) or \(R_i=M\); or
+    \item it is a purely interior window and
+    \begin{equation}
+    \label{eq:phase3_admissibility_condition}
+    |W(i,k)|=m_i\ge s-1.
+    \end{equation}
+\end{enumerate}
+\end{definition}
+
+\begin{remark}[Canonical specialization]
+\label{rem:phase3_canonical_admissibility}
+In the canonical setting \(s=4,\ k=2\), every interior window has size
+\[
+|W(i,2)|=3=s-1,
+\]
+so condition \eqref{eq:phase3_admissibility_condition} holds exactly at the threshold.
+Boundary windows are admissible by physical boundary inheritance.
+\end{remark}
+
+The reason for Definition~\ref{def:phase3_window_admissible} is the following nullspace lemma.
+
+\begin{lemma}[Triviality of the zero-cost nullspace]
+\label{lem:phase3_nullspace}
+Assume that \(W(i,k)\) is \((s,k)\)-admissible.
+Let \(h\in \mathcal A_{i,k}(0,T;0,0)\) be a homogeneous feasible direction, i.e.\ all interpolation data and all inherited boundary jet data are zero.
+If
+\begin{equation}
+\label{eq:phase3_zero_cost}
+J_{i,k}[h]=0,
+\end{equation}
+then \(h\equiv 0\) on the whole window.
+\end{lemma}
+
+\begin{proof}
+Condition \eqref{eq:phase3_zero_cost} implies
+\[
+h_j^{(s)}(\tau)=0
+\qquad
+\text{for every } j=L_i,\dots,R_i \text{ and all } \tau\in[0,T_j].
+\]
+Hence every segment \(h_j\) is a polynomial of degree at most \(s-1\).
+
+Since \(h\in \mathcal S_{i,k}^{(s-1)}(T)\), the derivatives of orders \(0,\dots,s-1\) match at every internal knot of the window.
+Therefore all segment polynomials are restrictions of one and the same global polynomial
+\[
+\pi\in \mathbb P_{s-1}
+\]
+defined on the local interval \([0,\mathcal T_{i,k}]\).
+
+We distinguish two cases.
+
+\paragraph{Case 1: the window touches a physical boundary.}
+Suppose \(L_i=1\).
+Then the homogeneous version of \eqref{eq:phase3_window_interpolation} and \eqref{eq:phase3_left_physical_jet} gives
+\[
+\pi^{(\ell)}(0)=0,
+\qquad
+\ell=0,1,\dots,s-1.
+\]
+Hence all coefficients of the degree-\((s-1)\) polynomial \(\pi\) vanish, so \(\pi\equiv 0\), and thus \(h\equiv 0\).
+The case \(R_i=M\) is identical.
+
+\paragraph{Case 2: the window is interior.}
+Then \(L_i>1\) and \(R_i<M\), and by admissibility \(m_i\ge s-1\).
+The homogeneous interpolation constraints imply that
+\[
+\pi(\sigma_r)=0,
+\qquad
+r=L_i-1,\dots,R_i.
+\]
+Thus \(\pi\) has \(m_i+1\) distinct roots.
+Since \(m_i+1\ge s\) and \(\deg \pi\le s-1\), it follows that \(\pi\equiv 0\).
+Therefore \(h\equiv 0\).
+\end{proof}
+
+\subsection{Theorem 2: existence, uniqueness, and optimality structure of BLOM-Strict}
+\label{subsec:phase3_theorem2}
+
+We can now state the main theorem of this phase.
+
+\begin{theorem}[BLOM-Strict existence, uniqueness, and local optimality structure]
+\label{thm:phase3_blom_strict_wellposedness}
+Assume that \(T_j>0\) for all \(j\in W(i,k)\) and that the window \(W(i,k)\) is \((s,k)\)-admissible in the sense of Definition~\ref{def:phase3_window_admissible}.
+Then the BLOM-Strict local problem \eqref{eq:phase3_local_problem} admits a unique minimizer
+\[
+u_{i,k}^\star \in \mathcal A_{i,k}(q,T;\zeta^-,\zeta^+).
+\]
+Moreover, the minimizer satisfies the following properties:
+
+\begin{enumerate}
+    \item \textbf{Polynomial structure.}
+    Each segment of \(u_{i,k}^\star\) is a polynomial of degree at most \(2s-1\) by construction.
+
+    \item \textbf{Interpolation and inherited boundary data.}
+    The minimizer satisfies all interpolation constraints \eqref{eq:phase3_window_interpolation}, and whenever the window touches a physical boundary it satisfies the inherited boundary jet conditions \eqref{eq:phase3_left_physical_jet} and/or \eqref{eq:phase3_right_physical_jet}.
+
+    \item \textbf{Natural boundary conditions at artificial boundaries.}
+    At every artificial window boundary, the natural conditions
+    \eqref{eq:phase3_left_natural_bc}--\eqref{eq:phase3_right_natural_bc} hold.
+
+    \item \textbf{Higher continuity inside the window.}
+    The minimizer is \(C^{2s-2}\) across every internal knot of the window, i.e.
+    \begin{equation}
+    \label{eq:phase3_high_continuity}
+    (u_{i,k}^\star)^{(r)}(\sigma_\ell^-)
+    =
+    (u_{i,k}^\star)^{(r)}(\sigma_\ell^+),
+    \qquad
+    r=0,\dots,2s-2,
+    \qquad
+    \ell=L_i,\dots,R_i-1.
+    \end{equation}
+\end{enumerate}
+
+Equivalently, in coefficient coordinates the problem is a strictly convex equality-constrained quadratic program whose reduced local linear system is nonsingular.
+\end{theorem}
+
+\begin{proof}
+The proof is divided into four steps.
+
+\paragraph{Step 1: nonemptiness of the admissible set.}
+We explicitly construct a feasible element.
+Choose derivative data of orders \(1,\dots,s-1\) at every internal knot inside the window to be zero.
+If the window touches a physical boundary, keep the prescribed boundary jet there; if not, set the artificial boundary derivatives of orders \(1,\dots,s-1\) to zero.
+Then, for each segment \(j\in W(i,k)\), the two endpoint values and the two endpoint derivative jets of orders \(1,\dots,s-1\) determine a unique Hermite polynomial of degree at most \(2s-1\).
+By construction, the resulting piecewise polynomial belongs to \(\mathcal S_{i,k}^{(s-1)}(T)\) and satisfies all affine constraints.
+Hence
+\[
+\mathcal A_{i,k}(q,T;\zeta^-,\zeta^+)\neq\varnothing.
+\]
+
+\paragraph{Step 2: strict convexity on the affine feasible set.}
+Let \(u,v\in \mathcal A_{i,k}(q,T;\zeta^-,\zeta^+)\), and let
+\[
+h:=u-v\in \mathcal A_{i,k}(0,T;0,0)
+\]
+be the corresponding homogeneous feasible direction.
+Since \(J_{i,k}\) is quadratic,
+\[
+J_{i,k}\!\left(\frac{u+v}{2}\right)
+=
+\frac{1}{2}J_{i,k}[u]+\frac{1}{2}J_{i,k}[v]-\frac{1}{4}J_{i,k}[h].
+\]
+Therefore strict convexity on the affine feasible set will follow once we prove:
+\[
+h\neq 0 \quad\Longrightarrow\quad J_{i,k}[h]>0.
+\]
+But if \(J_{i,k}[h]=0\), then Lemma~\ref{lem:phase3_nullspace} yields \(h\equiv 0\), contradiction.
+Hence \(J_{i,k}\) is strictly convex on \(\mathcal A_{i,k}(q,T;\zeta^-,\zeta^+)\).
+
+\paragraph{Step 3: existence and uniqueness.}
+Because \(\mathcal S_{i,k}^{(s-1)}(T)\) is finite-dimensional, the admissible set
+\[
+\mathcal A_{i,k}(q,T;\zeta^-,\zeta^+)
+\]
+is a finite-dimensional affine subspace.
+The functional \(J_{i,k}\) is continuous and strictly convex on this affine subspace.
+Hence it admits a unique minimizer \(u_{i,k}^\star\).
+
+\paragraph{Step 4: optimality conditions.}
+Let \(h\in \mathcal A_{i,k}(0,T;0,0)\) be any homogeneous feasible variation.
+Then the first variation vanishes:
+\[
+0
+=
+\delta J_{i,k}[u_{i,k}^\star;h]
+=
+2\sum_{j=L_i}^{R_i}\int_{0}^{T_j}
+(u_{i,k}^\star)_j^{(s)}(\tau)\,h_j^{(s)}(\tau)\,d\tau.
+\]
+Integrating by parts \(s\) times on each segment gives boundary terms at the internal knots and, if present, at artificial window boundaries.
+
+At an artificial window boundary, Proposition~\ref{prop:phase3_natural_bc} follows because
+\(h\) has fixed value but free derivatives of orders \(1,\dots,s-1\) there.
+
+At an internal knot \(\sigma_\ell\), the traces
+\[
+h^{(1)}(\sigma_\ell),\dots,h^{(s-1)}(\sigma_\ell)
+\]
+are arbitrary, because the feasible space imposes only \(C^{s-1}\) continuity.
+The knot terms obtained by integration by parts therefore force the jumps of the higher derivatives to vanish:
+\[
+\llbracket (u_{i,k}^\star)^{(s)} \rrbracket(\sigma_\ell)
+=
+\cdots
+=
+\llbracket (u_{i,k}^\star)^{(2s-2)} \rrbracket(\sigma_\ell)
+=0.
+\]
+Since \(u_{i,k}^\star\in \mathcal S_{i,k}^{(s-1)}(T)\) already has continuity of orders \(0,\dots,s-1\), this proves \eqref{eq:phase3_high_continuity}.
+The remaining claims are immediate from the definition of the admissible set.
+\end{proof}
+
+\subsection{Coefficient-space formulation and nonsingularity of the reduced local system}
+\label{subsec:phase3_coefficient_qp}
+
+Theorem~\ref{thm:phase3_blom_strict_wellposedness} implies that the local problem is a well-posed finite-dimensional quadratic program.
+
+For each segment \(j\in W(i,k)\), write
+\[
+u_j(\tau)=c_j^\top \beta_s(\tau),
+\qquad
+c_j\in\mathbb R^{2s},
+\qquad
+\beta_s(\tau)=(1,\tau,\dots,\tau^{2s-1})^\top.
+\]
+Stack the local coefficients into
+\[
+c_{i,k}^{\mathrm{loc}}
+=
+(c_{L_i}^\top,\dots,c_{R_i}^\top)^\top
+\in\mathbb R^{2s m_i}.
+\]
+Then the local objective takes the quadratic form
+\begin{equation}
+\label{eq:phase3_local_quadratic_form}
+J_{i,k}[u]
+=
+\frac{1}{2}\,(c_{i,k}^{\mathrm{loc}})^\top
+H_{i,k}(T)\,
+c_{i,k}^{\mathrm{loc}},
+\end{equation}
+where
+\begin{equation}
+\label{eq:phase3_local_hessian}
+H_{i,k}(T)
+=
+\operatorname{blkdiag}\!\bigl(Q_s(T_{L_i}),\dots,Q_s(T_{R_i})\bigr),
+\end{equation}
+and the per-segment Gram block is
+\begin{equation}
+\label{eq:phase3_gram_block}
+(Q_s(T))_{\alpha\beta}
+=
+\int_0^T
+\frac{d^s}{d\tau^s}\tau^{\alpha-1}\,
+\frac{d^s}{d\tau^s}\tau^{\beta-1}\,d\tau,
+\qquad
+\alpha,\beta=1,\dots,2s.
+\end{equation}
+
+All affine constraints can be written compactly as
+\begin{equation}
+\label{eq:phase3_local_constraints_matrix}
+G_{i,k}(T)\,c_{i,k}^{\mathrm{loc}}
+=
+d_{i,k}(q,T;\zeta^-,\zeta^+).
+\end{equation}
+Hence the local BLOM-Strict problem is
+\begin{equation}
+\label{eq:phase3_local_qp}
+\boxed{
+\min_{c_{i,k}^{\mathrm{loc}}\in\mathbb R^{2s m_i}}
+\frac{1}{2}\,(c_{i,k}^{\mathrm{loc}})^\top H_{i,k}(T)c_{i,k}^{\mathrm{loc}}
+\quad\text{s.t.}\quad
+G_{i,k}(T)c_{i,k}^{\mathrm{loc}}
+=
+d_{i,k}(q,T;\zeta^-,\zeta^+).
+}
+\end{equation}
+
+\begin{proposition}[Nonsingularity of the reduced local system]
+\label{prop:phase3_reduced_system}
+Assume the hypotheses of Theorem~\ref{thm:phase3_blom_strict_wellposedness}.
+Let \(c_p\) be any particular feasible coefficient vector satisfying
+\[
+G_{i,k}(T)c_p=d_{i,k}(q,T;\zeta^-,\zeta^+),
+\]
+and let \(N_{i,k}(T)\) be a basis matrix whose columns span \(\ker G_{i,k}(T)\).
+Then every feasible coefficient vector can be written as
+\[
+c_{i,k}^{\mathrm{loc}}=c_p+N_{i,k}(T)z,
+\]
+and the reduced Hessian
+\begin{equation}
+\label{eq:phase3_reduced_hessian}
+R_{i,k}(T):=
+N_{i,k}(T)^\top H_{i,k}(T)N_{i,k}(T)
+\end{equation}
+is symmetric positive definite.
+Consequently, the reduced local linear system
+\begin{equation}
+\label{eq:phase3_reduced_linear_system}
+R_{i,k}(T)z^\star
+=
+-
+N_{i,k}(T)^\top H_{i,k}(T)c_p
+\end{equation}
+is nonsingular and determines the unique local minimizer.
+\end{proposition}
+
+\begin{proof}
+Symmetry of \(R_{i,k}(T)\) is immediate from that of \(H_{i,k}(T)\).
+
+Let \(z\neq 0\), and set
+\[
+\delta c:=N_{i,k}(T)z\in \ker G_{i,k}(T).
+\]
+Let \(\delta u\) be the corresponding homogeneous feasible local spline.
+Then
+\[
+z^\top R_{i,k}(T)z
+=
+(\delta c)^\top H_{i,k}(T)\delta c
+=
+2J_{i,k}[\delta u].
+\]
+If \(z^\top R_{i,k}(T)z=0\), then \(J_{i,k}[\delta u]=0\), and Lemma~\ref{lem:phase3_nullspace} implies \(\delta u\equiv 0\).
+Hence \(\delta c=0\), and since the columns of \(N_{i,k}(T)\) are linearly independent, it follows that \(z=0\), contradiction.
+Therefore \(R_{i,k}(T)\) is positive definite and in particular nonsingular.
+The reduced system \eqref{eq:phase3_reduced_linear_system} therefore has a unique solution \(z^\star\), and hence a unique feasible minimizer \(c_p+N_{i,k}(T)z^\star\).
+\end{proof}
+
+\subsection{Definition of the BLOM trajectory class}
+\label{subsec:phase3_blom_trajectory_class}
+
+We can now define BLOM as a parameter-to-segment map, and therefore as a trajectory class.
+
+For each segment index \(i\), let
+\[
+u_{i,k}^\star
+\]
+be the unique local minimizer from Theorem~\ref{thm:phase3_blom_strict_wellposedness}, and let
+\[
+c_{i,k}^{\mathrm{loc},\star}
+=
+(c_{L_i}^\top,\dots,c_i^\top,\dots,c_{R_i}^\top)^\top
+\]
+be its local coefficient vector.
+Define the segment extraction operator
+\[
+\Pi_i:\mathbb R^{2s m_i}\to\mathbb R^{2s}
+\]
+that extracts the block corresponding to the central segment \(i\).
+The \(i\)-th BLOM-Strict segment coefficient is then
+\begin{equation}
+\label{eq:phase3_blom_segment_coeff}
+c_i^{\mathrm{BLOM},k}(q,T;\zeta^-,\zeta^+)
+:=
+\Pi_i\, c_{i,k}^{\mathrm{loc},\star}(q,T;\zeta^-,\zeta^+).
+\end{equation}
+The corresponding segment polynomial is
+\begin{equation}
+\label{eq:phase3_blom_segment_poly}
+p_i^{\mathrm{BLOM},k}(\tau)
+=
+\bigl(c_i^{\mathrm{BLOM},k}(q,T;\zeta^-,\zeta^+)\bigr)^\top \beta_s(\tau),
+\qquad
+\tau\in[0,T_i].
+\end{equation}
+
+\begin{definition}[BLOM trajectory class]
+\label{def:phase3_blom_class}
+For fixed \(k\), define
+\begin{equation}
+\label{eq:phase3_blom_class}
+\mathcal T_{\mathrm{BLOM},k}
+:=
+\left\{
+p=(p_1,\dots,p_M)
+\ \middle|\
+\exists\,(q,T,\zeta^-,\zeta^+)
+\text{ such that }
+p_i=p_i^{\mathrm{BLOM},k}(q,T;\zeta^-,\zeta^+)
+\ \forall i=1,\dots,M
+\right\}.
+\end{equation}
+\end{definition}
+
+\begin{remark}[What \(\mathcal T_{\mathrm{BLOM},k}\) means at this stage]
+\label{rem:phase3_blom_class_scope}
+Definition~\ref{def:phase3_blom_class} makes BLOM a mathematically precise map
+\[
+(q,T,\zeta^-,\zeta^+)\longmapsto (c_1^{\mathrm{BLOM},k},\dots,c_M^{\mathrm{BLOM},k}),
+\]
+and hence a legitimate trajectory class.
+However, at this stage we do \emph{not} claim that neighboring segments extracted from different local windows automatically enjoy global \(C^{2s-2}\) compatibility across the full trajectory.
+That issue is postponed to the later phase on global assembly and boundary consistency.
+Phase~3 only guarantees that each local window problem is well-defined and uniquely solvable.
+\end{remark}
+
+\subsection{Canonical specialization to the minimum-snap three-point case}
+\label{subsec:phase3_canonical_specialization}
+
+In the canonical setting of this work,
+\[
+s=4,\qquad k=2.
+\]
+Hence each interior window contains three segments:
+\[
+W(i,2)=\{i-1,i,i+1\},
+\qquad 2\le i\le M-1,
+\]
+and therefore
+\[
+|W(i,2)|=3=s-1.
+\]
+The admissibility condition of Definition~\ref{def:phase3_window_admissible} is satisfied at equality.
+Accordingly:
+\begin{itemize}
+    \item every interior BLOM-Strict local problem has a unique minimizer because the zero-cost nullspace consists of global cubics, and four window knots eliminate that nullspace;
+    \item boundary windows are uniquely solvable because they inherit the physical boundary jet from Phase~1.
+\end{itemize}
+Thus the canonical \(s=4,\ k=2\) BLOM-Strict construction is a mathematically well-posed object.
+
+\subsection{Logical role of Phase~3 in the full BLOM theory}
+\label{subsec:phase3_logical_role}
+
+Phase~2 proved that exact global optimality and exact finite local support are incompatible under the sparse waypoint parameterization of Phase~0/1.
+Phase~3 now provides the first rigorous replacement:
+instead of the exact global coefficient map
+\[
+(q,T)\longmapsto c^\star(q,T),
+\]
+we define a family of uniquely solvable local variational problems
+\[
+(q,T)\longmapsto c_i^{\mathrm{BLOM},k}(q,T).
+\]
+Therefore BLOM-Strict is not a heuristic interpolation rule, but a well-posed local optimal mapping.
+The next phase will convert this abstract local variational definition into an explicit analytic local system of the form
+\[
+A_k(T)x=B_k(q,T),
+\]
+which is the computational core needed for efficient evaluation and differentiation.
