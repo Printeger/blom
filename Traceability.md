@@ -329,3 +329,68 @@ Implemented deliverables under `phase_4/`:
 - `results/s2_sympy/`
 - `results/s4_numeric/`
 - `results/catmull_compare/`
+
+## Phase 5 Traceability
+
+This section maps the Phase 5 requirements in `phase_5/REQ-Phase5-boundary-jump-check.md`
+to the implemented global-assembly validation code, tests, and generated artifacts.
+
+### Scope
+
+Implemented Phase 5 object:
+
+- a unified jump-computation and jump-summary layer for assembled piecewise polynomials
+- three global assembly schemes: shared junction states, overlapping consensus, and raw central extraction
+- per-scheme plotting and CSV/JSON summary export
+- comparison and random-trial tooling for smoothness, locality, and stability diagnostics
+
+### Requirement Mapping
+
+| Requirement | Implementation | Verification |
+| --- | --- | --- |
+| Unified derivative jump computation `[[p^(ell)]](t_i)` up to order `2s-2` | `phase_5/blom_boundary_jump_check.py` -> `compute_jumps` | `phase_5/test_blom_boundary_jump_check.py`, scheme summaries under `phase_5/results/phase5_boundary_jump_check/` |
+| Unified jump statistics interface with max/mean/median/RMS/q95/zero-tolerance flags | `phase_5/blom_boundary_jump_check.py` -> `summarize_jumps` | `phase_5/test_blom_boundary_jump_check.py`, `jump_stats_scheme_*.csv` |
+| Scheme A shared-state assembly with global quadratic solve and Hermite reconstruction | `phase_5/blom_boundary_jump_check.py` -> `assemble_scheme_A`, `_build_scheme_a_system`, `_reconstruct_from_eta` | `phase_5/test_blom_boundary_jump_check.py`, `scheme_A/summary_scheme_A.json`, `scheme_A/jump_heatmap_scheme_A.png` |
+| Scheme B local-window predictions plus closed-form consensus projection | `phase_5/blom_boundary_jump_check.py` -> `assemble_scheme_B` | `phase_5/test_blom_boundary_jump_check.py`, `scheme_B/summary_scheme_B.json`, `scheme_B/scheme_B_consensus_improvement.png` |
+| Scheme C raw central-segment extraction and eta mismatch diagnostics | `phase_5/blom_boundary_jump_check.py` -> `assemble_scheme_C` | `phase_5/test_blom_boundary_jump_check.py`, `scheme_C/summary_scheme_C.json`, `scheme_C/scheme_C_eta_mismatch.png` |
+| High-level single-scheme runner and all-schemes comparison runner | `phase_5/blom_boundary_jump_check.py` -> `run_boundary_jump_check`, `run_compare_all_schemes` | `phase_5/examples/demo_compare_all.py`, `scheme_comparison_summary.csv`, `phase5_interpretation_summary.md` |
+| Randomized multi-trial evaluation | `phase_5/blom_boundary_jump_check.py` -> `run_random_trials` | `random_trials_summary.csv`, `random_trials_aggregate.json`, `jump_boxplot_random_trials.png` |
+| Example entry points for schemes A/B/C and the all-schemes comparison | `phase_5/examples/demo_scheme_A.py`, `phase_5/examples/demo_scheme_B.py`, `phase_5/examples/demo_scheme_C.py`, `phase_5/examples/demo_compare_all.py` | direct script execution |
+| Phase 5 README documenting scope, interfaces, and artifacts | `phase_5/README_phase5.md` | manual review |
+
+### Verification Summary
+
+Executed for Phase 5 implementation:
+
+- `python3 -m compileall phase_5`
+- `python3 -m phase_5.blom_boundary_jump_check`
+- `python3 -m phase_5.examples.demo_scheme_A`
+- `python3 -m phase_5.examples.demo_scheme_B`
+- `python3 -m phase_5.examples.demo_scheme_C`
+- `python3 -m phase_5.examples.demo_compare_all`
+- `python3 -m unittest phase_5.test_blom_boundary_jump_check`
+- `python3 -m unittest discover -s . -p 'test*.py'`
+
+Observed Phase 5 results:
+
+- Phase 5 unit tests: `5 passed`
+- Full repository test suite: `40 passed`
+- Scheme A representative max lower-order jump: `6.580e-12`
+- Scheme B representative max lower-order jump: `1.014e-11`
+- Scheme C representative position-jump max: `3.997e-15`
+- Scheme C representative velocity/acceleration/jerk jump max: `3.952e+01`
+- Scheme B representative max pre-consensus dispersion: `2.008e+01`
+- Random-trial success rate: `A=1.00, B=1.00, C=1.00`
+- Random-trial mean lower-order jump max: `A=1.307e-11, B=1.331e-11, C=1.976e+01`
+
+### Deliverables
+
+Implemented deliverables under `phase_5/`:
+
+- `REQ-Phase5-boundary-jump-check.md`
+- `__init__.py`
+- `blom_boundary_jump_check.py`
+- `test_blom_boundary_jump_check.py`
+- `examples/`
+- `README_phase5.md`
+- `results/phase5_boundary_jump_check/`

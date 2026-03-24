@@ -1,0 +1,4 @@
+scheme,max_jump_lower_orders,rms_jump_lower_orders,max_jump_higher_orders,reaches_Cs_minus_1,needs_global_variables,needs_consensus,locality_score,elapsed_sec
+A,6.579625733138528e-12,3.577411478916677e-12,1.1229985830141231e-09,true,true,false,low,0.001343265874311328
+B,1.014299755297543e-11,4.650664520885643e-12,252912.8821815843,true,false,true,medium-high,0.003295936854556203
+C,39.51770066270133,21.801407405011027,524.7551686569486,false,false,false,high,0.0029443928506225348

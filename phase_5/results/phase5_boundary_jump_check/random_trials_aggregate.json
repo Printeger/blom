@@ -1,0 +1,20 @@
+{
+  "A": {
+    "mean_elapsed_sec": 0.0016867816060160596,
+    "mean_higher_order_max": 1.19944772632626e-09,
+    "mean_lower_order_max": 1.3070283281605791e-11,
+    "success_rate": 1.0
+  },
+  "B": {
+    "mean_elapsed_sec": 0.005263533297693357,
+    "mean_higher_order_max": 225725.36478655436,
+    "mean_lower_order_max": 1.3307801619936535e-11,
+    "success_rate": 1.0
+  },
+  "C": {
+    "mean_elapsed_sec": 0.004828529364507024,
+    "mean_higher_order_max": 1197.9427582243081,
+    "mean_lower_order_max": 19.764570017017107,
+    "success_rate": 1.0
+  }
+}
