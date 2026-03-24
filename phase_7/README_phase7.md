@@ -24,6 +24,25 @@ Key APIs:
 - `run_convergence_vs_k(...)`
 - `run_random_trials(...)`
 
+## Extra experiments
+
+`phase_7/blom_phase7_extra_experiments.py`
+
+This follow-up module adds four post-Phase-7 experiment families:
+
+- larger-`M` sweep
+- uniform-time vs bounded-nonuniform split
+- interior-only vs full-error separation
+- light corrected variants of Scheme C
+
+Key APIs:
+
+- `run_large_M_sweep(...)`
+- `run_time_regime_split(...)`
+- `run_interior_vs_full(...)`
+- `run_schemeC_light_assembly(...)`
+- `run_phase7_extra_experiments(...)`
+
 ## Artifacts
 
 Saved under `phase_7/results/phase7_convergence_vs_k/`:
@@ -46,6 +65,14 @@ tables, including:
 - `summary_phase7_convergence.json`
 - `phase7_interpretation_summary.md`
 
+Saved under `phase_7/results/phase7_extra_experiments/`:
+
+- `exp1_large_M_sweep/`
+- `exp2_time_regime_split/`
+- `exp3_interior_vs_full/`
+- `exp4_schemeC_light_assembly/`
+- `compare_summary/`
+
 ## Important note on Scheme A
 
 The current Phase 5 implementation of Scheme A ignores the requested `k` and
@@ -62,4 +89,11 @@ python3 -m phase_7.examples.demo_compare_schemes
 python3 -m phase_7.examples.demo_ideal_vs_actual
 python3 -m phase_7.examples.demo_random_trials
 python3 -m unittest phase_7.test_blom_convergence_vs_k
+python3 -m phase_7.blom_phase7_extra_experiments
+python3 -m phase_7.examples.demo_exp1_large_M
+python3 -m phase_7.examples.demo_exp2_time_regime
+python3 -m phase_7.examples.demo_exp3_interior_vs_full
+python3 -m phase_7.examples.demo_exp4_schemeC_correction
+python3 -m phase_7.examples.demo_all_phase7_extra
+python3 -m unittest phase_7.test_blom_phase7_extra_experiments
 ```

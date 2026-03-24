@@ -535,3 +535,76 @@ Implemented deliverables under `phase_7/`:
 - `examples/`
 - `README_phase7.md`
 - `results/phase7_convergence_vs_k/`
+
+## Phase 7 Extra Experiments Traceability
+
+This section maps the extra Phase 7 experiment requirements in
+`phase_7/REQ-Phase7-extra-experiments-v2.md` to the implemented follow-up
+experiment toolbox, tests, and generated artifacts.
+
+### Scope
+
+Implemented Phase 7 extra object:
+
+- large-`M` convergence sweep over ideal truncation and actual BLOM families
+- time-regime split between uniform and bounded-nonuniform duration regimes
+- full-vs-interior coefficient and matching error separation
+- light corrected Scheme C variants with jump and locality tradeoff checks
+- cross-experiment overview table and automated interpretation summary
+
+### Requirement Mapping
+
+| Requirement | Implementation | Verification |
+| --- | --- | --- |
+| Standalone extra experiment module with unified runners | `phase_7/blom_phase7_extra_experiments.py` -> `run_large_M_sweep`, `run_time_regime_split`, `run_interior_vs_full`, `run_schemeC_light_assembly`, `run_phase7_extra_experiments` | `phase_7/test_blom_phase7_extra_experiments.py`, `python3 -m phase_7.blom_phase7_extra_experiments` |
+| Large-`M` sweep with saved figures, CSV, and JSON | `phase_7/blom_phase7_extra_experiments.py` -> `run_large_M_sweep` | `phase_7/examples/demo_exp1_large_M.py`, artifacts under `phase_7/results/phase7_extra_experiments/exp1_large_M_sweep/` |
+| Uniform-time vs bounded-nonuniform split with slope, matching, and cost-gap summaries | `phase_7/blom_phase7_extra_experiments.py` -> `run_time_regime_split` | `phase_7/examples/demo_exp2_time_regime.py`, artifacts under `phase_7/results/phase7_extra_experiments/exp2_time_regime_split/` |
+| Interior-only vs full-error separation with boundary-trim support | `phase_7/blom_phase7_extra_experiments.py` -> `compute_full_and_interior_errors`, `run_interior_vs_full` | `phase_7/examples/demo_exp3_interior_vs_full.py`, `summary_interior_vs_full.csv`, heatmap and boxplot artifacts |
+| Light corrected Scheme C variants `C1` and `C2` | `phase_7/blom_phase7_extra_experiments.py` -> `assemble_scheme_C_light`, `run_schemeC_light_assembly` | `phase_7/examples/demo_exp4_schemeC_correction.py`, `summary_schemeC_correction.csv`, correction comparison figures |
+| Locality-width comparison for raw and corrected Scheme C | `phase_7/blom_phase7_extra_experiments.py` -> `_scheme_c_q_bandwidth` | `schemeC_raw_vs_corrected_locality_tradeoff.png`, `RESULT_PHASE7_extra.md` |
+| Global cross-experiment overview and automated research-direction summary | `phase_7/blom_phase7_extra_experiments.py` -> `_build_overview_rows`, `_write_interpretation_summary`, `run_phase7_extra_experiments` | `compare_summary/final_experiment_overview.csv`, `compare_summary/phase7_extra_interpretation_summary.md`, `demo_all_phase7_extra.py` |
+| Extra experiment demos and regression tests | `phase_7/examples/demo_exp1_large_M.py`, `phase_7/examples/demo_exp2_time_regime.py`, `phase_7/examples/demo_exp3_interior_vs_full.py`, `phase_7/examples/demo_exp4_schemeC_correction.py`, `phase_7/examples/demo_all_phase7_extra.py`, `phase_7/test_blom_phase7_extra_experiments.py` | direct script execution and unit-test run |
+
+### Verification Summary
+
+Executed for Phase 7 extra experiments:
+
+- `python3 -m compileall phase_7`
+- `python3 -m phase_7.blom_phase7_extra_experiments`
+- `python3 -m phase_7.examples.demo_exp1_large_M`
+- `python3 -m phase_7.examples.demo_exp2_time_regime`
+- `python3 -m phase_7.examples.demo_exp3_interior_vs_full`
+- `python3 -m phase_7.examples.demo_exp4_schemeC_correction`
+- `python3 -m phase_7.examples.demo_all_phase7_extra`
+- `python3 -m unittest phase_7.test_blom_phase7_extra_experiments`
+- `python3 -m unittest phase_7.test_blom_convergence_vs_k`
+- `python3 -m unittest discover -s . -p 'test*.py'`
+
+Observed extra-experiment results:
+
+- Phase 7 extra unit tests: `5 passed`
+- Phase 7 original unit tests re-run: `5 passed`
+- Full repository test suite: `55 passed`
+- Large-`M` sweep median final Scheme C coefficient error: `6.263e-02`
+- Time-regime split median final Scheme C coefficient error: `1.713e-02`
+- Interior-only final Scheme C coefficient error at `k = 8`: `1.564`
+- Scheme C final coefficient error at `k = 8`: `3.469`
+- Corrected `C1` final coefficient error at `k = 8`: `5.984e+01`
+- Corrected `C2` final coefficient error at `k = 8`: `4.990e+01`
+- Raw Scheme C final `q` bandwidth: `5`
+- Corrected `C1` final `q` bandwidth: `6`
+- Corrected `C2` final `q` bandwidth: `6`
+
+### Deliverables
+
+Implemented extra-experiment deliverables under `phase_7/`:
+
+- `REQ-Phase7-extra-experiments-v2.md`
+- `blom_phase7_extra_experiments.py`
+- `test_blom_phase7_extra_experiments.py`
+- `examples/demo_exp1_large_M.py`
+- `examples/demo_exp2_time_regime.py`
+- `examples/demo_exp3_interior_vs_full.py`
+- `examples/demo_exp4_schemeC_correction.py`
+- `examples/demo_all_phase7_extra.py`
+- `results/phase7_extra_experiments/`

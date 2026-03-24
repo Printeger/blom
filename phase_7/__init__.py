@@ -1,2 +1,1 @@
-"""Phase 7 convergence validation package."""
-
+"""Phase 7 convergence validation and extra-experiment package."""
