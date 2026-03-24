@@ -1,0 +1,42 @@
+{
+  "case_name": "uniform_time",
+  "M": 8,
+  "eps": 1e-06,
+  "tol": 1e-10,
+  "system_residual_norm": 1.0954794401904095e-13,
+  "jacobian_comparison": {
+    "fro_error": 1.1794703841772456e-07,
+    "max_abs_error": 3.09126098052559e-08,
+    "relative_error": 6.04075768968253e-09,
+    "exact_fro_norm": 19.525206021618,
+    "fd_fro_norm": 19.525206030411727,
+    "per_column_error": [
+      2.7159752620694097e-08,
+      3.6195868513717276e-08,
+      7.505383733218682e-08,
+      3.590840687396021e-08,
+      4.8794093774054395e-08,
+      3.939549938999369e-08,
+      3.175452203548551e-08
+    ]
+  },
+  "bandwidth": {
+    "tol": 1e-10,
+    "max_effective_bandwidth": 7,
+    "mean_effective_bandwidth": 5.285714285714286,
+    "far_nonzero_ratio": 1.0,
+    "max_far_influence": 4.818996211622124,
+    "mean_far_influence": 1.246460825306184,
+    "num_far_entries_above_tol": 49,
+    "per_waypoint_bandwidth": [
+      7,
+      6,
+      5,
+      4,
+      4,
+      5,
+      6
+    ]
+  },
+  "target_waypoint_idx": 2
+}

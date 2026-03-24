@@ -1,0 +1,2 @@
+case_name,M,eps,fro_error,max_abs_error,relative_error
+nonuniform_time,8,1e-06,2.1779704695144896e-06,1.1174495649912686e-06,2.3967005153260997e-08

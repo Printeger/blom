@@ -128,3 +128,75 @@ Implemented deliverables under `phase_1/`:
 - `examples/demo_case_two_segment.py`
 - `examples/demo_case_random.py`
 - `README_phase1.md`
+
+## Phase 2 Traceability
+
+This section maps the Phase 2 requirements in `phase_2/REQ-Phase2-validation.md`
+to the implemented validation toolbox, result artifacts, and verification assets.
+
+### Scope
+
+Implemented Phase 2 object:
+
+- exact waypoint Jacobian extraction on top of the fixed Phase 1 global system
+- finite-difference Jacobian validation
+- block-level coefficient influence analysis
+- effective-bandwidth estimation as `M` scales
+- automatic saving of figures, CSV tables, and JSON logs
+
+### Requirement Mapping
+
+| Requirement | Implementation | Verification |
+| --- | --- | --- |
+| Waypoint selector `S_q` compatible with the Phase 1 system row ordering | `phase_2/phase2_validation.py` -> `build_waypoint_selector` | `phase_2/test_phase2_validation.py` |
+| Exact Jacobian extraction `J_q = A(T)^{-1} S_q` without explicit inverse | `phase_2/phase2_validation.py` -> `compute_exact_jacobian_q` | `phase_2/test_phase2_validation.py`, demo scripts |
+| Finite-difference Jacobian and exact-vs-FD comparison | `phase_2/phase2_validation.py` -> `finite_difference_jacobian_q`, `compare_exact_vs_fd_jacobian` | `phase_2/test_phase2_validation.py`, `phase_2/examples/demo_phase2_fd_check.py` |
+| Segment-wise block influence norms and single-waypoint influence profile | `phase_2/phase2_validation.py` -> `compute_segmentwise_influence_norms`, `compute_waypoint_influence_profile` | `phase_2/test_phase2_validation.py`, uniform/nonuniform demos |
+| Effective-bandwidth estimation and scaling-in-M analysis | `phase_2/phase2_validation.py` -> `estimate_effective_bandwidth`, `run_scaling_experiment` | `phase_2/test_phase2_validation.py`, `phase_2/examples/demo_phase2_scaling_M.py` |
+| Automatic validation suite with figure/table/log export | `phase_2/phase2_validation.py` -> `run_phase2_validation_suite`, `ensure_results_dirs` | `phase_2/test_phase2_validation.py`, demo scripts |
+| Matrix sparsity plot, Jacobian heatmap, block heatmap, influence profile, FD comparison, scaling plot | `phase_2/phase2_plotting.py` -> `visualize_matrix_sparsity`, `visualize_heatmap`, `visualize_block_sparsity_Jq`, `visualize_waypoint_influence_profile`, `visualize_jacobian_fd_compare`, `visualize_effective_bandwidth_vs_M` | saved artifacts under `phase_2/results/figures/` |
+| Example scripts for uniform time, nonuniform time, FD check, and scaling in `M` | `phase_2/examples/demo_phase2_uniform_time.py`, `phase_2/examples/demo_phase2_nonuniform_time.py`, `phase_2/examples/demo_phase2_fd_check.py`, `phase_2/examples/demo_phase2_scaling_M.py` | direct execution of each script |
+| Phase 2 README with purpose, interfaces, outputs, and run instructions | `phase_2/README_phase2.md` | manual review |
+
+### Verification Summary
+
+Executed for Phase 2 implementation:
+
+- `python3 -m compileall phase_2`
+- `python3 -m unittest phase_2.test_phase2_validation`
+- `python3 -m unittest discover -s . -p 'test*.py'`
+- `python3 -m phase_2.examples.demo_phase2_uniform_time`
+- `python3 -m phase_2.examples.demo_phase2_nonuniform_time`
+- `python3 -m phase_2.examples.demo_phase2_fd_check`
+- `python3 -m phase_2.examples.demo_phase2_scaling_M`
+
+Observed Phase 2 results:
+
+- Phase 2 unit tests: `5 passed`
+- Full repository test suite: `25 passed`
+- Uniform-time demo Frobenius Jacobian error: `1.179e-07`
+- Uniform-time demo max effective bandwidth at `M=8`: `7`
+- Nonuniform-time demo relative Jacobian error: `2.397e-08`
+- Nonuniform-time demo far-field ratio: `1.000e+00`
+- FD-check demo Frobenius Jacobian error: `2.168e-05`
+- FD-check demo max absolute Jacobian error: `1.069e-05`
+- Scaling demo max effective bandwidth sequence: `3, 7, 15, 31` for `M = 4, 8, 16, 32`
+
+### Deliverables
+
+Implemented deliverables under `phase_2/`:
+
+- `REQ-Phase2-validation.md`
+- `__init__.py`
+- `phase2_validation.py`
+- `phase2_plotting.py`
+- `test_phase2_validation.py`
+- `examples/__init__.py`
+- `examples/demo_phase2_uniform_time.py`
+- `examples/demo_phase2_nonuniform_time.py`
+- `examples/demo_phase2_scaling_M.py`
+- `examples/demo_phase2_fd_check.py`
+- `README_phase2.md`
+- `results/figures/`
+- `results/tables/`
+- `results/logs/`

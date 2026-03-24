@@ -1,0 +1,2 @@
+case_name,M,tol,max_effective_bandwidth,mean_effective_bandwidth,far_nonzero_ratio
+nonuniform_time,8,1e-10,7,5.285714285714286,1.0

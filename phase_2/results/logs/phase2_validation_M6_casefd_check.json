@@ -1,0 +1,38 @@
+{
+  "case_name": "fd_check",
+  "M": 6,
+  "eps": 1e-07,
+  "tol": 1e-10,
+  "system_residual_norm": 1.077606224488413e-13,
+  "jacobian_comparison": {
+    "fro_error": 2.1680506966869264e-05,
+    "max_abs_error": 1.0692300695058776e-05,
+    "relative_error": 1.3773347440725413e-07,
+    "exact_fro_norm": 157.4091342730798,
+    "fd_fro_norm": 157.4091287741596,
+    "per_column_error": [
+      5.737636178316559e-06,
+      1.5027953746746473e-05,
+      1.4127948166342108e-05,
+      9.78711565976986e-07,
+      3.275320425723529e-06
+    ]
+  },
+  "bandwidth": {
+    "tol": 1e-10,
+    "max_effective_bandwidth": 5,
+    "mean_effective_bandwidth": 3.8,
+    "far_nonzero_ratio": 1.0,
+    "max_far_influence": 21.896499703478703,
+    "mean_far_influence": 3.880504018928395,
+    "num_far_entries_above_tol": 25,
+    "per_waypoint_bandwidth": [
+      5,
+      4,
+      3,
+      3,
+      4
+    ]
+  },
+  "target_waypoint_idx": 1
+}

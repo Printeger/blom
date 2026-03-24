@@ -1,0 +1,42 @@
+{
+  "case_name": "nonuniform_time",
+  "M": 8,
+  "eps": 1e-06,
+  "tol": 1e-10,
+  "system_residual_norm": 1.8631960027791706e-12,
+  "jacobian_comparison": {
+    "fro_error": 2.1779704695144896e-06,
+    "max_abs_error": 1.1174495649912686e-06,
+    "relative_error": 2.3967005153260997e-08,
+    "exact_fro_norm": 90.87370139018603,
+    "fd_fro_norm": 90.87370242956808,
+    "per_column_error": [
+      1.1193369831665445e-06,
+      2.0933534244520172e-07,
+      4.387774665855705e-07,
+      1.526951553499092e-06,
+      5.089184222594167e-07,
+      4.5675951584639143e-07,
+      6.745997856865588e-07
+    ]
+  },
+  "bandwidth": {
+    "tol": 1e-10,
+    "max_effective_bandwidth": 7,
+    "mean_effective_bandwidth": 5.285714285714286,
+    "far_nonzero_ratio": 1.0,
+    "max_far_influence": 16.27751785310837,
+    "mean_far_influence": 2.0506292932734604,
+    "num_far_entries_above_tol": 49,
+    "per_waypoint_bandwidth": [
+      7,
+      6,
+      5,
+      4,
+      4,
+      5,
+      6
+    ]
+  },
+  "target_waypoint_idx": 2
+}
