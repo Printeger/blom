@@ -1,0 +1,16 @@
+radius_mode,k,r_k,boundary_energy_ratio
+half,2,1,0.5806106022627504
+half,4,2,0.6935796745452514
+half,6,3,0.6185081732199974
+half,8,4,0.5926987329674986
+half,10,5,1.0
+default,2,2,0.6010595867126589
+default,4,4,0.8909515390658909
+default,6,6,1.0
+default,8,8,1.0
+default,10,10,1.0
+one_and_half,2,3,0.8357465304109506
+one_and_half,4,6,1.0
+one_and_half,6,9,1.0
+one_and_half,8,12,1.0
+one_and_half,10,15,1.0

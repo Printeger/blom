@@ -1,0 +1,822 @@
+\section{Phase 8: Interior-First Matching and Boundary-Gap Decomposition}
+\label{sec:phase8_interior_matching}
+
+The purpose of this phase is to bridge the gap between the quantitative convergence theory of the idealized truncated BLOM-\(k\) map established in Phase~7 and the actual raw Scheme~C construction.
+At the current stage, the strongest rigorous convergence theorem is available for the idealized truncated coefficient map
+\[
+\tilde c^{(k)}(q,T),
+\]
+whereas the actual raw Scheme~C coefficient map
+\[
+c^{\mathrm{C},k}(q,T)
+\]
+still lacks a complete matching theorem.
+The numerical evidence accumulated so far suggests that:
+\begin{enumerate}
+    \item the idealized truncated map converges very cleanly to the global MINCO reference;
+    \item raw Scheme~C is the only actual \(k\)-family that exhibits a comparable downward trend;
+    \item the remaining discrepancy is strongly affected by boundary effects, but is not purely boundary-driven.
+\end{enumerate}
+Accordingly, this phase does not attempt to prove a full-domain matching theorem immediately.
+Instead, it develops an \emph{interior-first} matching framework and explicitly separates the global matching gap into interior and boundary contributions.
+
+Throughout this section, all notation is inherited from Phases~0--7.
+In particular,
+\[
+p:[0,\mathcal T]\to\mathbb R,\qquad
+s=4,\qquad
+\theta=(q_1,\dots,q_{M-1},T_1,\dots,T_M)^\top,
+\qquad
+T_i>0,
+\]
+and
+\[
+c^\star(q,T)\in\mathbb R^{2sM}
+\]
+denotes the exact global MINCO coefficient vector of Phase~1.
+The idealized truncated coefficient vector from Phase~7 is denoted by
+\[
+\tilde c^{(k)}(q,T)\in\mathbb R^{2sM},
+\]
+and the actual raw Scheme~C coefficient vector is denoted by
+\[
+c^{\mathrm{C},k}(q,T)\in\mathbb R^{2sM}.
+\]
+
+\subsection{Window notation and the interior index set}
+\label{subsec:phase8_interior_index}
+
+For each segment index \(i\in\{1,\dots,M\}\) and each even bandwidth parameter \(k\in 2\mathbb N\), define
+\[
+m_k:=\frac{k}{2},
+\qquad
+W(i,k):=\{\,i-m_k,\dots,i+m_k\,\}\cap\{1,\dots,M\}.
+\]
+Thus, for interior segments far from the global boundaries, the local window contains exactly \(k+1\) segments:
+\[
+W(i,k)=\{i-m_k,\dots,i+m_k\}.
+\]
+The associated local knot index set is
+\[
+\Xi(i,k):=\{\,L_i(k)-1,\dots,R_i(k)\,\},
+\qquad
+L_i(k):=\min W(i,k),\quad R_i(k):=\max W(i,k).
+\]
+
+The raw Scheme~C coefficient \(c_i^{\mathrm{C},k}\) is obtained by solving the BLOM local problem on the window \(W(i,k)\) and extracting the central segment \(i\).
+The idealized truncated coefficient \(\tilde c_i^{(k)}\) is the block \(i\) of the operator-theoretic truncation from Phase~7.
+
+To isolate the region where boundary asymmetry is absent, we introduce an abstract boundary-layer radius \(r(k)\in\mathbb N\), with the only structural requirement
+\begin{equation}
+\label{eq:phase8_radius_requirement}
+r(k)\ge m_k.
+\end{equation}
+The corresponding interior index set is
+\begin{equation}
+\label{eq:phase8_interior_set}
+\mathcal I_{\mathrm{int}}(k)
+:=
+\{\, i\in\{1,\dots,M\}: i-r(k)\ge 1,\ \ i+r(k)\le M \,\}.
+\end{equation}
+Its complement is the boundary-layer index set
+\begin{equation}
+\label{eq:phase8_boundary_set}
+\mathcal I_{\mathrm{bnd}}(k)
+:=
+\{1,\dots,M\}\setminus \mathcal I_{\mathrm{int}}(k).
+\end{equation}
+
+\begin{remark}
+\label{rem:phase8_radius_choice}
+The role of \(r(k)\) is not merely combinatorial.
+It is intended to be large enough to contain both:
+\begin{enumerate}
+    \item the explicit window half-width \(m_k\), and
+    \item the effective boundary influence range of the matching defect.
+\end{enumerate}
+At the present stage, \(r(k)\) should be treated as a design parameter of the theorem.
+A sharp minimal choice of \(r(k)\) is not yet established.
+\end{remark}
+
+\subsection{Augmented local problem with artificial boundary data}
+\label{subsec:phase8_augmented_local_problem}
+
+The main structural step of this phase is to generalize the BLOM local problem by allowing nonzero artificial boundary data at the two ends of the local window.
+This makes it possible to compare:
+\begin{itemize}
+    \item the actual raw Scheme~C solve, which uses natural artificial boundaries;
+    \item a reference-window solve, which uses boundary traces inherited from the exact global MINCO trajectory.
+\end{itemize}
+
+Fix \(i\) and \(k\), and consider the local window \(W(i,k)\).
+At the left artificial boundary knot \(L_i(k)-1\) and the right artificial boundary knot \(R_i(k)\), define the artificial high-order boundary trace vectors
+\begin{equation}
+\label{eq:phase8_gamma_left_right}
+\gamma^-_{i,k}
+:=
+\begin{bmatrix}
+p^{(s)}(t_{L_i(k)-1})\\
+\vdots\\
+p^{(2s-2)}(t_{L_i(k)-1})
+\end{bmatrix},
+\qquad
+\gamma^+_{i,k}
+:=
+\begin{bmatrix}
+p^{(s)}(t_{R_i(k)})\\
+\vdots\\
+p^{(2s-2)}(t_{R_i(k)})
+\end{bmatrix}.
+\end{equation}
+Collect them into the artificial boundary data vector
+\begin{equation}
+\label{eq:phase8_gamma}
+\gamma_{i,k}
+:=
+\begin{bmatrix}
+\gamma^-_{i,k}\\
+\gamma^+_{i,k}
+\end{bmatrix}
+\in\mathbb R^{2(s-1)}.
+\end{equation}
+
+In the raw Scheme~C local problem, the artificial boundaries are natural in the sense of Phase~3, namely
+\begin{equation}
+\label{eq:phase8_gamma_nat}
+\gamma_{i,k}^{\mathrm{nat}}=0.
+\end{equation}
+
+We now define the \emph{augmented} local quadratic program parameterized by \(\gamma_{i,k}\).
+
+\begin{definition}[Augmented local window problem]
+\label{def:phase8_augmented_local_problem}
+For fixed \((q,T)\), window \(W(i,k)\), and artificial boundary data \(\gamma_{i,k}\), define the augmented local coefficient vector
+\[
+c^{\mathrm{loc}}_{i,k}(\gamma_{i,k})\in\mathbb R^{2s|W(i,k)|}
+\]
+as the unique minimizer of the local BLOM quadratic program with:
+\begin{enumerate}
+    \item exact waypoint interpolation at all local knots in \(\Xi(i,k)\),
+    \item the internal continuity constraints of the BLOM local problem,
+    \item inherited physical endpoint jets whenever the window touches the true global boundary,
+    \item and the artificial boundary conditions
+    \[
+    p^{(r)}(t_{L_i(k)-1})=(\gamma^-_{i,k})_{r-s+1},
+    \qquad
+    p^{(r)}(t_{R_i(k)})=(\gamma^+_{i,k})_{r-s+1},
+    \qquad
+    r=s,\dots,2s-2,
+    \]
+    whenever the corresponding boundary is artificial.
+\end{enumerate}
+The central segment extraction is denoted by
+\begin{equation}
+\label{eq:phase8_central_extraction_gamma}
+c_{i,k}^{\mathrm{ctr}}(\gamma_{i,k})
+:=
+\Pi_i\,c^{\mathrm{loc}}_{i,k}(\gamma_{i,k}),
+\end{equation}
+where \(\Pi_i\) extracts the coefficient block of segment \(i\).
+\end{definition}
+
+\begin{remark}
+\label{rem:phase8_raw_and_reference_window}
+Two special cases of Definition~\ref{def:phase8_augmented_local_problem} are of immediate interest:
+\begin{enumerate}
+    \item the raw Scheme~C coefficient:
+    \[
+    c_i^{\mathrm{C},k}=c_{i,k}^{\mathrm{ctr}}(\gamma_{i,k}^{\mathrm{nat}})=c_{i,k}^{\mathrm{ctr}}(0);
+    \]
+    \item the reference-window coefficient:
+    \[
+    \hat c_i^{(k)}:=c_{i,k}^{\mathrm{ctr}}(\gamma_{i,k}^{\star}),
+    \]
+    where \(\gamma_{i,k}^{\star}\) is the artificial boundary trace vector extracted from the exact global MINCO trajectory \(c^\star(q,T)\).
+\end{enumerate}
+\end{remark}
+
+\subsection{Affine dependence on artificial boundary data}
+\label{subsec:phase8_affine_boundary_response}
+
+We first prove a fully rigorous structural fact: once the local problem is well posed, the central coefficient depends affinely on the artificial boundary data.
+
+\begin{proposition}[Affine boundary response of the augmented local map]
+\label{prop:phase8_affine_boundary_response}
+Fix \(i,k,(q,T)\), and assume the augmented local quadratic program of Definition~\ref{def:phase8_augmented_local_problem} is uniquely solvable.
+Then there exist matrices
+\[
+M_{i,k}(T)\in\mathbb R^{2s\times 2(s-1)},
+\qquad
+b_{i,k}(q,T)\in\mathbb R^{2s},
+\]
+such that
+\begin{equation}
+\label{eq:phase8_affine_map}
+c_{i,k}^{\mathrm{ctr}}(\gamma_{i,k})
+=
+b_{i,k}(q,T)+M_{i,k}(T)\,\gamma_{i,k}
+\qquad
+\text{for all admissible }\gamma_{i,k}.
+\end{equation}
+In particular,
+\begin{equation}
+\label{eq:phase8_c_diff_affine}
+c_{i,k}^{\mathrm{ctr}}(\gamma_{i,k})
+-
+c_{i,k}^{\mathrm{ctr}}(\gamma'_{i,k})
+=
+M_{i,k}(T)\,(\gamma_{i,k}-\gamma'_{i,k}).
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+Because the local problem is an equality-constrained quadratic program, its KKT system has the form
+\begin{equation}
+\label{eq:phase8_kkt}
+\begin{bmatrix}
+H_{i,k}(T) & G_{i,k}(T)^\top\\
+G_{i,k}(T) & 0
+\end{bmatrix}
+\begin{bmatrix}
+c^{\mathrm{loc}}_{i,k}(\gamma_{i,k})\\
+\lambda_{i,k}(\gamma_{i,k})
+\end{bmatrix}
+=
+\begin{bmatrix}
+0\\
+d_{i,k}(q,T)+E_{i,k}(T)\gamma_{i,k}
+\end{bmatrix},
+\end{equation}
+where:
+\begin{itemize}
+    \item \(H_{i,k}(T)\) is the local Hessian;
+    \item \(G_{i,k}(T)\) is the local constraint matrix;
+    \item \(d_{i,k}(q,T)\) collects all waypoint and inherited physical-boundary constraints;
+    \item \(E_{i,k}(T)\gamma_{i,k}\) is the affine contribution of the artificial boundary data.
+\end{itemize}
+By unique solvability, the KKT matrix in \eqref{eq:phase8_kkt} is invertible.
+Hence
+\[
+\begin{bmatrix}
+c^{\mathrm{loc}}_{i,k}(\gamma_{i,k})\\
+\lambda_{i,k}(\gamma_{i,k})
+\end{bmatrix}
+=
+\mathcal K_{i,k}(T)
+\begin{bmatrix}
+0\\
+d_{i,k}(q,T)+E_{i,k}(T)\gamma_{i,k}
+\end{bmatrix}
+\]
+for the inverse KKT operator \(\mathcal K_{i,k}(T)\).
+Therefore \(c^{\mathrm{loc}}_{i,k}(\gamma_{i,k})\) depends affinely on \(\gamma_{i,k}\), and after applying the block extractor \(\Pi_i\), the central coefficient satisfies
+\[
+c_{i,k}^{\mathrm{ctr}}(\gamma_{i,k})
+=
+\Pi_i \mathcal K_{i,k}(T)
+\begin{bmatrix}
+0\\
+d_{i,k}(q,T)
+\end{bmatrix}
++
+\Pi_i \mathcal K_{i,k}(T)
+\begin{bmatrix}
+0\\
+E_{i,k}(T)
+\end{bmatrix}
+\gamma_{i,k}.
+\]
+This is exactly \eqref{eq:phase8_affine_map}, with
+\[
+b_{i,k}(q,T)
+:=
+\Pi_i \mathcal K_{i,k}(T)
+\begin{bmatrix}
+0\\
+d_{i,k}(q,T)
+\end{bmatrix},
+\qquad
+M_{i,k}(T)
+:=
+\Pi_i \mathcal K_{i,k}(T)
+\begin{bmatrix}
+0\\
+E_{i,k}(T)
+\end{bmatrix}.
+\]
+Equation \eqref{eq:phase8_c_diff_affine} follows by subtraction.
+\end{proof}
+
+\begin{corollary}[Operator-norm boundary perturbation bound]
+\label{cor:phase8_boundary_lipschitz}
+Under the hypotheses of Proposition~\ref{prop:phase8_affine_boundary_response},
+\begin{equation}
+\label{eq:phase8_boundary_lipschitz}
+\bigl\|
+c_{i,k}^{\mathrm{ctr}}(\gamma_{i,k})
+-
+c_{i,k}^{\mathrm{ctr}}(\gamma'_{i,k})
+\bigr\|_2
+\le
+L_{i,k}(T)\,\|\gamma_{i,k}-\gamma'_{i,k}\|_2,
+\end{equation}
+where
+\[
+L_{i,k}(T):=\|M_{i,k}(T)\|_2.
+\]
+In particular,
+\begin{equation}
+\label{eq:phase8_raw_vs_reference_window}
+\|c_i^{\mathrm{C},k}-\hat c_i^{(k)}\|_2
+\le
+L_{i,k}(T)\,\|\gamma_{i,k}^{\star}\|_2.
+\end{equation}
+\end{corollary}
+
+\begin{proof}
+Equation \eqref{eq:phase8_boundary_lipschitz} follows directly from
+\eqref{eq:phase8_c_diff_affine} and the definition of the operator norm.
+Setting \(\gamma'_{i,k}=\gamma_{i,k}^{\mathrm{nat}}=0\) and \(\gamma_{i,k}=\gamma_{i,k}^{\star}\) gives \eqref{eq:phase8_raw_vs_reference_window}.
+\end{proof}
+
+\subsection{Reference-window map and exact matching decomposition}
+\label{subsec:phase8_reference_window_decomposition}
+
+We now introduce the auxiliary reference-window object that separates the matching defect into a boundary-induced part and a model-mismatch part.
+
+\begin{definition}[Reference-window coefficient]
+\label{def:phase8_reference_window}
+For each \(i,k\), define the reference-window coefficient by
+\begin{equation}
+\label{eq:phase8_reference_window}
+\hat c_i^{(k)}(q,T)
+:=
+c_{i,k}^{\mathrm{ctr}}(\gamma_{i,k}^{\star}),
+\end{equation}
+where \(\gamma_{i,k}^{\star}\) is obtained by evaluating the exact global MINCO trajectory \(c^\star(q,T)\) at the two artificial window boundaries:
+\[
+\gamma_{i,k}^{\star}
+=
+\begin{bmatrix}
+(p^\star)^{(s)}(t_{L_i(k)-1})\\
+\vdots\\
+(p^\star)^{(2s-2)}(t_{L_i(k)-1})\\
+(p^\star)^{(s)}(t_{R_i(k)})\\
+\vdots\\
+(p^\star)^{(2s-2)}(t_{R_i(k)})
+\end{bmatrix}.
+\]
+\end{definition}
+
+\begin{proposition}[Exact two-stage matching decomposition]
+\label{prop:phase8_two_stage_matching}
+For every \(i,k\),
+\begin{equation}
+\label{eq:phase8_two_stage_matching}
+c_i^{\mathrm{C},k}-\tilde c_i^{(k)}
+=
+\bigl(c_i^{\mathrm{C},k}-\hat c_i^{(k)}\bigr)
++
+\bigl(\hat c_i^{(k)}-\tilde c_i^{(k)}\bigr).
+\end{equation}
+Consequently,
+\begin{equation}
+\label{eq:phase8_two_stage_matching_norm}
+\|c_i^{\mathrm{C},k}-\tilde c_i^{(k)}\|_2
+\le
+\|c_i^{\mathrm{C},k}-\hat c_i^{(k)}\|_2
++
+\|\hat c_i^{(k)}-\tilde c_i^{(k)}\|_2.
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+Equation \eqref{eq:phase8_two_stage_matching} is an identity obtained by adding and subtracting \(\hat c_i^{(k)}\).
+Inequality \eqref{eq:phase8_two_stage_matching_norm} follows from the triangle inequality.
+\end{proof}
+
+\begin{remark}
+\label{rem:phase8_meaning_of_two_stage_matching}
+Proposition~\ref{prop:phase8_two_stage_matching} is purely algebraic, but conceptually crucial.
+It separates the raw matching gap into:
+\begin{enumerate}
+    \item a \emph{boundary-condition gap}
+    \[
+    c_i^{\mathrm{C},k}-\hat c_i^{(k)},
+    \]
+    caused by the use of natural artificial boundary conditions instead of exact inherited global traces;
+    \item a \emph{window-model gap}
+    \[
+    \hat c_i^{(k)}-\tilde c_i^{(k)},
+    \]
+    which measures the difference between the reference-window local solve and the idealized operator truncation.
+\end{enumerate}
+\end{remark}
+
+\subsection{Interior--boundary decomposition of the global matching error}
+\label{subsec:phase8_global_decomposition}
+
+We next formalize the decomposition of the full matching error into interior and boundary parts.
+
+Let
+\[
+e^{(k)}(q,T):=c^{\mathrm{C},k}(q,T)-\tilde c^{(k)}(q,T)\in\mathbb R^{2sM}.
+\]
+For the interior set \(\mathcal I_{\mathrm{int}}(k)\) and the boundary set \(\mathcal I_{\mathrm{bnd}}(k)\), define the corresponding block-coordinate projectors
+\[
+P_{\mathrm{int}}^{(k)},\qquad P_{\mathrm{bnd}}^{(k)},
+\]
+so that
+\[
+e^{(k)} = P_{\mathrm{int}}^{(k)} e^{(k)} + P_{\mathrm{bnd}}^{(k)} e^{(k)},
+\qquad
+P_{\mathrm{int}}^{(k)}P_{\mathrm{bnd}}^{(k)}=0.
+\]
+
+\begin{proposition}[Exact \(\ell_2\) interior--boundary decomposition]
+\label{prop:phase8_interior_boundary_decomp}
+For every \(k\),
+\begin{equation}
+\label{eq:phase8_l2_decomp}
+\|e^{(k)}\|_2^2
+=
+\|P_{\mathrm{int}}^{(k)} e^{(k)}\|_2^2
++
+\|P_{\mathrm{bnd}}^{(k)} e^{(k)}\|_2^2.
+\end{equation}
+Consequently,
+\begin{equation}
+\label{eq:phase8_l2_upper}
+\|e^{(k)}\|_2
+\le
+\|P_{\mathrm{int}}^{(k)} e^{(k)}\|_2
++
+\|P_{\mathrm{bnd}}^{(k)} e^{(k)}\|_2.
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+Because the two projectors act on disjoint block-coordinate sets,
+\[
+P_{\mathrm{int}}^{(k)} e^{(k)}
+\quad\text{and}\quad
+P_{\mathrm{bnd}}^{(k)} e^{(k)}
+\]
+have disjoint supports.
+Hence they are orthogonal in the Euclidean inner product:
+\[
+\langle P_{\mathrm{int}}^{(k)} e^{(k)},\, P_{\mathrm{bnd}}^{(k)} e^{(k)} \rangle = 0.
+\]
+Therefore
+\[
+\|e^{(k)}\|_2^2
+=
+\|P_{\mathrm{int}}^{(k)} e^{(k)} + P_{\mathrm{bnd}}^{(k)} e^{(k)}\|_2^2
+=
+\|P_{\mathrm{int}}^{(k)} e^{(k)}\|_2^2
++
+\|P_{\mathrm{bnd}}^{(k)} e^{(k)}\|_2^2.
+\]
+This proves \eqref{eq:phase8_l2_decomp}. Inequality \eqref{eq:phase8_l2_upper} is the standard triangle inequality.
+\end{proof}
+
+\begin{corollary}[Full error decomposition with respect to the exact MINCO reference]
+\label{cor:phase8_full_error_decomp}
+For every \(k\),
+\begin{equation}
+\label{eq:phase8_full_error_decomp}
+\|c^{\mathrm{C},k}-c^\star\|_2
+\le
+\|P_{\mathrm{int}}^{(k)}(c^{\mathrm{C},k}-\tilde c^{(k)})\|_2
++
+\|P_{\mathrm{bnd}}^{(k)}(c^{\mathrm{C},k}-\tilde c^{(k)})\|_2
++
+\|\tilde c^{(k)}-c^\star\|_2.
+\end{equation}
+\end{corollary}
+
+\begin{proof}
+Write
+\[
+c^{\mathrm{C},k}-c^\star
+=
+(c^{\mathrm{C},k}-\tilde c^{(k)})+(\tilde c^{(k)}-c^\star),
+\]
+apply the triangle inequality, and then use \eqref{eq:phase8_l2_upper} for the first term.
+\end{proof}
+
+\begin{remark}
+\label{rem:phase8_consequence_of_decomp}
+Corollary~\ref{cor:phase8_full_error_decomp} shows that the full-domain error can only be small if three quantities are simultaneously controlled:
+\begin{enumerate}
+    \item the interior matching error,
+    \item the boundary matching error,
+    \item and the idealized truncation error against the exact global reference.
+\end{enumerate}
+Phase~7 already controls the third term under spectral decay assumptions.
+The new task of the present phase is therefore to separate and understand the first two terms.
+\end{remark}
+
+\subsection{Interior-first matching theorem: rigorous conditional form}
+\label{subsec:phase8_conditional_matching}
+
+We now formulate the main target theorem of this phase.
+At the present stage, the theorem can be proved rigorously only in a \emph{conditional} form, because two key exponential-decay propositions are not yet fully established.
+
+First, we state the two target propositions explicitly.
+
+\begin{proposition}[Target proposition: exponential boundary-to-center attenuation]
+\label{prop:phase8_target_boundary_decay}
+For the raw Scheme~C local window problem in the interior regime, there exist constants
+\[
+C_{\mathrm{bd}}>0,\qquad \rho_{\mathrm{bd}}\in(0,1),
+\]
+such that for every \(i\in\mathcal I_{\mathrm{int}}(k)\),
+\begin{equation}
+\label{eq:phase8_target_boundary_decay}
+L_{i,k}(T)
+=
+\|M_{i,k}(T)\|_2
+\le
+C_{\mathrm{bd}}\rho_{\mathrm{bd}}^{\,k}.
+\end{equation}
+\textbf{Status: the proof of this proposition is not completed at the present stage.}
+\end{proposition}
+
+\begin{remark}
+\label{rem:phase8_target_boundary_decay_meaning}
+Proposition~\ref{prop:phase8_target_boundary_decay} is the precise mathematical form of the claim that the effect of artificial boundary data on the central segment decays exponentially as the window grows and the center moves away from the boundary.
+This is one of the key missing bridge results of the current BLOM theory.
+\end{remark}
+
+\begin{proposition}[Target proposition: reference-window / ideal-truncation consistency]
+\label{prop:phase8_target_ref_vs_ideal}
+There exist constants
+\[
+C_{\mathrm{ref}}>0,\qquad \rho_{\mathrm{ref}}\in(0,1),
+\]
+such that for every \(i\in\mathcal I_{\mathrm{int}}(k)\),
+\begin{equation}
+\label{eq:phase8_target_ref_vs_ideal}
+\|\hat c_i^{(k)}-\tilde c_i^{(k)}\|_2
+\le
+C_{\mathrm{ref}}\rho_{\mathrm{ref}}^{\,k}\,\|\bar q\|_\infty.
+\end{equation}
+\textbf{Status: the proof of this proposition is not completed at the present stage.}
+\end{proposition}
+
+\begin{remark}
+\label{rem:phase8_target_ref_vs_ideal_meaning}
+Proposition~\ref{prop:phase8_target_ref_vs_ideal} is the missing theorem that relates the exact operator-theoretic truncation of Phase~7 to the reference-window local variational object introduced in Definition~\ref{def:phase8_reference_window}.
+Without it, the idealized and actual BLOM theories cannot yet be fully merged.
+\end{remark}
+
+We now prove the conditional theorem that would follow once these two target propositions are available.
+
+\begin{theorem}[Conditional interior-first matching theorem, uniform-time form]
+\label{thm:phase8_conditional_uniform_matching}
+Assume:
+\begin{enumerate}
+    \item the uniform-time regime
+    \[
+    T_i\equiv h>0;
+    \]
+    \item the boundary attenuation estimate \eqref{eq:phase8_target_boundary_decay};
+    \item the reference-window / ideal-truncation consistency estimate \eqref{eq:phase8_target_ref_vs_ideal};
+    \item the exact global boundary traces are bounded by
+    \begin{equation}
+    \label{eq:phase8_gamma_star_bound}
+    \|\gamma_{i,k}^{\star}\|_2
+    \le
+    C_{\gamma}\,\|\bar q\|_\infty
+    \qquad
+    \text{for all } i\in\mathcal I_{\mathrm{int}}(k).
+    \end{equation}
+\end{enumerate}
+Then there exist constants \(C_{\mathrm{int}}>0\) and \(\rho_{\mathrm{int}}\in(0,1)\) such that
+\begin{equation}
+\label{eq:phase8_conditional_uniform_matching}
+\|c_i^{\mathrm{C},k}-\tilde c_i^{(k)}\|_2
+\le
+C_{\mathrm{int}}\rho_{\mathrm{int}}^{\,k}\,\|\bar q\|_\infty
+\qquad
+\text{for all } i\in\mathcal I_{\mathrm{int}}(k).
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+By Proposition~\ref{prop:phase8_two_stage_matching},
+\[
+\|c_i^{\mathrm{C},k}-\tilde c_i^{(k)}\|_2
+\le
+\|c_i^{\mathrm{C},k}-\hat c_i^{(k)}\|_2
++
+\|\hat c_i^{(k)}-\tilde c_i^{(k)}\|_2.
+\]
+Apply Corollary~\ref{cor:phase8_boundary_lipschitz} to the first term:
+\[
+\|c_i^{\mathrm{C},k}-\hat c_i^{(k)}\|_2
+\le
+L_{i,k}(T)\,\|\gamma_{i,k}^{\star}\|_2.
+\]
+Using \eqref{eq:phase8_target_boundary_decay} and \eqref{eq:phase8_gamma_star_bound},
+\[
+\|c_i^{\mathrm{C},k}-\hat c_i^{(k)}\|_2
+\le
+C_{\mathrm{bd}}C_{\gamma}\rho_{\mathrm{bd}}^{\,k}\|\bar q\|_\infty.
+\]
+Using \eqref{eq:phase8_target_ref_vs_ideal} for the second term gives
+\[
+\|c_i^{\mathrm{C},k}-\tilde c_i^{(k)}\|_2
+\le
+C_{\mathrm{bd}}C_{\gamma}\rho_{\mathrm{bd}}^{\,k}\|\bar q\|_\infty
++
+C_{\mathrm{ref}}\rho_{\mathrm{ref}}^{\,k}\|\bar q\|_\infty.
+\]
+Set
+\[
+\rho_{\mathrm{int}}:=\max(\rho_{\mathrm{bd}},\rho_{\mathrm{ref}})\in(0,1),
+\qquad
+C_{\mathrm{int}}:=C_{\mathrm{bd}}C_{\gamma}+C_{\mathrm{ref}}.
+\]
+Then
+\[
+\|c_i^{\mathrm{C},k}-\tilde c_i^{(k)}\|_2
+\le
+C_{\mathrm{int}}\rho_{\mathrm{int}}^{\,k}\|\bar q\|_\infty.
+\]
+This proves \eqref{eq:phase8_conditional_uniform_matching}.
+\end{proof}
+
+\begin{theorem}[Conditional interior-first matching theorem, bounded-nonuniform form]
+\label{thm:phase8_conditional_box_matching}
+Assume the bounded nonuniform time regime
+\[
+0<T_{\min}\le T_i\le T_{\max},
+\]
+and assume that the three estimates
+\eqref{eq:phase8_target_boundary_decay},
+\eqref{eq:phase8_target_ref_vs_ideal},
+and \eqref{eq:phase8_gamma_star_bound}
+hold uniformly with constants depending only on
+\[
+s,\ T_{\min},\ T_{\max}.
+\]
+Then there exist constants \(C_{\mathrm{box}}>0\) and \(\rho_{\mathrm{box}}\in(0,1)\) such that
+\begin{equation}
+\label{eq:phase8_conditional_box_matching}
+\|c_i^{\mathrm{C},k}-\tilde c_i^{(k)}\|_2
+\le
+C_{\mathrm{box}}\rho_{\mathrm{box}}^{\,k}\,\|\bar q\|_\infty
+\qquad
+\text{for all } i\in\mathcal I_{\mathrm{int}}(k).
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+The proof is identical to that of Theorem~\ref{thm:phase8_conditional_uniform_matching}, with constants now depending on \(T_{\min}\) and \(T_{\max}\).
+\end{proof}
+
+\subsection{How the full-domain error follows from interior and boundary terms}
+\label{subsec:phase8_full_from_interior_boundary}
+
+We now combine Phase~7 and the present decomposition to obtain the exact implication structure of a future full-domain theorem.
+
+\begin{theorem}[Conditional full-domain approximation bound]
+\label{thm:phase8_conditional_full_domain}
+Assume:
+\begin{enumerate}
+    \item the idealized truncation error against the global exact reference satisfies
+    \begin{equation}
+    \label{eq:phase8_ideal_to_exact}
+    \|\tilde c^{(k)}-c^\star\|_2
+    \le
+    C_{\mathrm{tr}}\rho_{\mathrm{tr}}^{\,k}\,\|\bar q\|_\infty,
+    \end{equation}
+    as provided by the idealized Phase~7 theory under its spectral assumptions;
+    \item the interior matching bound \eqref{eq:phase8_conditional_uniform_matching} or \eqref{eq:phase8_conditional_box_matching} holds;
+    \item the boundary-layer matching term satisfies
+    \begin{equation}
+    \label{eq:phase8_boundary_layer_bound}
+    \|P_{\mathrm{bnd}}^{(k)}(c^{\mathrm{C},k}-\tilde c^{(k)})\|_2
+    \le
+    B_k(q,T).
+    \end{equation}
+\end{enumerate}
+Then
+\begin{equation}
+\label{eq:phase8_full_domain_conditional}
+\|c^{\mathrm{C},k}-c^\star\|_2
+\le
+C_{\mathrm{int}}^{\sharp}\rho_{\mathrm{int}}^{\,k}\|\bar q\|_\infty
++
+B_k(q,T)
++
+C_{\mathrm{tr}}\rho_{\mathrm{tr}}^{\,k}\|\bar q\|_\infty,
+\end{equation}
+for a constant \(C_{\mathrm{int}}^{\sharp}>0\) depending on the interior theorem.
+\end{theorem}
+
+\begin{proof}
+By Corollary~\ref{cor:phase8_full_error_decomp},
+\[
+\|c^{\mathrm{C},k}-c^\star\|_2
+\le
+\|P_{\mathrm{int}}^{(k)}(c^{\mathrm{C},k}-\tilde c^{(k)})\|_2
++
+\|P_{\mathrm{bnd}}^{(k)}(c^{\mathrm{C},k}-\tilde c^{(k)})\|_2
++
+\|\tilde c^{(k)}-c^\star\|_2.
+\]
+The interior term is controlled by summing the per-segment interior bound over the block set \(\mathcal I_{\mathrm{int}}(k)\), which produces a bound of the form
+\[
+\|P_{\mathrm{int}}^{(k)}(c^{\mathrm{C},k}-\tilde c^{(k)})\|_2
+\le
+C_{\mathrm{int}}^{\sharp}\rho_{\mathrm{int}}^{\,k}\|\bar q\|_\infty.
+\]
+The boundary term is controlled by \eqref{eq:phase8_boundary_layer_bound}, and the truncation-to-exact term by \eqref{eq:phase8_ideal_to_exact}.
+Combining these three estimates proves \eqref{eq:phase8_full_domain_conditional}.
+\end{proof}
+
+\begin{remark}
+\label{rem:phase8_meaning_of_full_domain}
+Theorem~\ref{thm:phase8_conditional_full_domain} shows that the full-domain BLOM error will be closed only after two bridges are completed:
+\begin{enumerate}
+    \item the interior matching theorem,
+    \item and a separate theorem, or at least a sharp estimate, for the boundary-layer term \(B_k(q,T)\).
+\end{enumerate}
+This is why the present phase is deliberately organized as \emph{interior-first}.
+\end{remark}
+
+\subsection{Structural sources of the boundary gap}
+\label{subsec:phase8_boundary_sources}
+
+The previous results identify the boundary-layer term as a mathematically explicit object.
+We now record the main structural mechanisms that can generate it.
+
+\begin{enumerate}
+    \item \textbf{Asymmetric windows near the global boundary.}
+    For \(i\in\mathcal I_{\mathrm{bnd}}(k)\), the local window \(W(i,k)\) is no longer symmetric around the central segment, so the operator seen by the local solve is not the same as the interior operator.
+
+    \item \textbf{Natural artificial boundaries versus exact global traces.}
+    The raw Scheme~C solve imposes
+    \[
+    \gamma_{i,k}^{\mathrm{nat}}=0,
+    \]
+    whereas the exact global trajectory generally induces nonzero high-order traces
+    \[
+    \gamma_{i,k}^{\star}\neq 0.
+    \]
+    Their mismatch feeds directly into the first term of the two-stage decomposition.
+
+    \item \textbf{Central-segment extraction near the boundary.}
+    Even if the local solve is stable, the extraction of the central segment from a truncated and asymmetric window may amplify one-sided information deficits.
+
+    \item \textbf{Failure of exact equivalence between local and global inverse kernels at the boundary.}
+    The idealized truncated map \(\tilde c_i^{(k)}\) is defined by truncating the global operator kernel.
+    The raw local solve, by contrast, is defined through a local variational principle.
+    Their equivalence is most plausible in the interior, where translation-invariant structure is approximately restored, and least plausible at the true global boundaries.
+\end{enumerate}
+
+\begin{remark}
+\label{rem:phase8_boundary_future_direction}
+The discussion above suggests two possible future directions:
+\begin{enumerate}
+    \item prove a dedicated boundary correction theorem;
+    \item or formulate the main matching theorem explicitly as an interior theorem, and treat the boundary layer as a controlled remainder.
+\end{enumerate}
+At the present stage, the second route is mathematically safer.
+\end{remark}
+
+\subsection{What is fully proved and what remains open in Phase~8}
+\label{subsec:phase8_status}
+
+We summarize the exact status of the present chapter.
+
+\paragraph{Fully proved in this chapter.}
+\begin{enumerate}
+    \item the affine dependence of the local central coefficient on artificial boundary data (Proposition~\ref{prop:phase8_affine_boundary_response});
+    \item the operator-norm boundary perturbation estimate (Corollary~\ref{cor:phase8_boundary_lipschitz});
+    \item the exact two-stage matching decomposition (Proposition~\ref{prop:phase8_two_stage_matching});
+    \item the exact interior--boundary decomposition of the global matching error (Proposition~\ref{prop:phase8_interior_boundary_decomp});
+    \item the conditional implication from interior and boundary estimates to a full-domain error bound (Theorem~\ref{thm:phase8_conditional_full_domain}).
+\end{enumerate}
+
+\paragraph{Not yet proved, and explicitly left open.}
+\begin{enumerate}
+    \item the exponential boundary-to-center attenuation estimate \eqref{eq:phase8_target_boundary_decay};
+    \item the reference-window / ideal-truncation consistency estimate \eqref{eq:phase8_target_ref_vs_ideal};
+    \item a sharp theorem for the boundary-layer remainder \(B_k(q,T)\).
+\end{enumerate}
+
+Accordingly, the mathematically correct summary of Phase~8 is:
+\[
+\boxed{
+\text{the matching problem has now been reduced to three explicit bridge estimates,}
+}
+\]
+and
+\[
+\boxed{
+\text{the next rigorous target is the interior-first matching theorem, not the full-domain theorem.}
+}

@@ -608,3 +608,79 @@ Implemented extra-experiment deliverables under `phase_7/`:
 - `examples/demo_exp4_schemeC_correction.py`
 - `examples/demo_all_phase7_extra.py`
 - `results/phase7_extra_experiments/`
+
+## Phase 8 Traceability
+
+This section maps the Phase 8 requirements in
+`phase_8/REQ-Phase8-interior-matching-validation.md` to the implemented
+interior-first matching toolbox, tests, and generated artifacts.
+
+### Scope
+
+Implemented Phase 8 object:
+
+- interior-first matching validation for raw Scheme C versus ideal truncated BLOM-k
+- explicit interior / boundary block projectors with configurable radius `r(k)`
+- boundary-gap decomposition with projector statistics and radius sensitivity
+- augmented local window solve with artificial high-order boundary traces for reference-window experiments
+- uniform-time versus bounded-nonuniform regime split
+- unified suite runner, overview table, and automated interpretation summary
+
+### Requirement Mapping
+
+| Requirement | Implementation | Verification |
+| --- | --- | --- |
+| Shared Phase 8 utilities for `r(k)`, interior/boundary sets, block errors, and result serialization | `phase_8/phase8_common.py` -> `boundary_radius`, `make_interior_sets`, `compute_matching_error_blocks`, `project_interior_boundary_errors`, `ensure_results_dirs`, `save_csv`, `save_json` | `phase_8/test_blom_interior_matching_check.py`, `phase_8/test_blom_boundary_gap_decomposition.py` |
+| Augmented local window solve with artificial boundary traces `gamma` and reference-window extraction | `phase_8/phase8_common.py` -> `build_augmented_local_constraints`, `solve_augmented_local_window`, `extract_reference_gamma`, `compute_reference_window_coefficients`, `compute_boundary_response_matrix` | `phase_8/test_blom_boundary_gap_decomposition.py`, `boundary_gap_decomposition.csv` |
+| Script 1 interior-first matching runner and mandatory artifacts | `phase_8/blom_interior_matching_check.py` -> `make_interior_sets`, `compute_matching_error_blocks`, `summarize_interior_matching`, `run_interior_matching_check` | `python3 -m phase_8.blom_interior_matching_check`, `phase_8/results/phase8_validation/interior_matching/` |
+| Script 2 boundary-gap decomposition runner and radius sensitivity analysis | `phase_8/blom_boundary_gap_decomposition.py` -> `project_interior_boundary_errors`, `run_boundary_gap_decomposition` | `python3 -m phase_8.blom_boundary_gap_decomposition`, `phase_8/results/phase8_validation/boundary_gap/` |
+| Script 3 uniform-time versus bounded-nonuniform regime split | `phase_8/blom_uniform_vs_nonuniform_interior.py` -> `sample_uniform_time`, `sample_bounded_nonuniform_time`, `run_uniform_vs_nonuniform_interior` | `python3 -m phase_8.blom_uniform_vs_nonuniform_interior`, `phase_8/results/phase8_validation/uniform_vs_nonuniform/` |
+| Unified Phase 8 suite runner with overview CSV and interpretation summary | `phase_8/blom_phase8_validation_suite.py` -> `run_phase8_validation_suite` | `python3 -m phase_8.blom_phase8_validation_suite`, `phase_8/results/phase8_validation/compare/` |
+| Phase 8 examples for each experiment family and the full suite | `phase_8/examples/demo_interior_matching.py`, `phase_8/examples/demo_boundary_gap.py`, `phase_8/examples/demo_uniform_vs_nonuniform.py`, `phase_8/examples/demo_phase8_suite.py` | direct script execution |
+| Phase 8 README documenting interfaces, outputs, and interpretation target | `phase_8/README_phase8.md` | manual review |
+
+### Verification Summary
+
+Executed for Phase 8 implementation:
+
+- `python3 -m compileall phase_8`
+- `python3 -m phase_8.blom_interior_matching_check`
+- `python3 -m phase_8.blom_boundary_gap_decomposition`
+- `python3 -m phase_8.blom_uniform_vs_nonuniform_interior`
+- `python3 -m phase_8.blom_phase8_validation_suite`
+- `python3 -m phase_8.examples.demo_interior_matching`
+- `python3 -m phase_8.examples.demo_boundary_gap`
+- `python3 -m phase_8.examples.demo_uniform_vs_nonuniform`
+- `python3 -m phase_8.examples.demo_phase8_suite`
+- `python3 -m unittest phase_8.test_blom_interior_matching_check phase_8.test_blom_boundary_gap_decomposition phase_8.test_blom_uniform_vs_nonuniform_interior`
+- `python3 -m unittest discover -s . -p 'test*.py'`
+
+Observed Phase 8 results:
+
+- Phase 8 unit tests: `8 passed`
+- Full repository test suite: `63 passed`
+- Single-case interior matching full slope: `-0.446569`, `R^2 = 0.990902`
+- Single-case interior matching slope: `-5.265687`, `R^2 = 0.761420`
+- Mean boundary energy ratio: `0.898402`
+- Mean raw-vs-reference window gap: `4.042120e-14`
+- Mean reference-window-vs-ideal gap: `1.528579e+00`
+- Uniform-time mean interior slope: `-5.385500`
+- Bounded-nonuniform mean interior slope: `-5.309442`
+
+### Deliverables
+
+Implemented deliverables under `phase_8/`:
+
+- `REQ-Phase8-interior-matching-validation.md`
+- `__init__.py`
+- `phase8_common.py`
+- `blom_interior_matching_check.py`
+- `blom_boundary_gap_decomposition.py`
+- `blom_uniform_vs_nonuniform_interior.py`
+- `blom_phase8_validation_suite.py`
+- `test_blom_interior_matching_check.py`
+- `test_blom_boundary_gap_decomposition.py`
+- `test_blom_uniform_vs_nonuniform_interior.py`
+- `examples/`
+- `README_phase8.md`
+- `results/phase8_validation/`
