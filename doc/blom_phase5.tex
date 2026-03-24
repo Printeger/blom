@@ -1,0 +1,662 @@
+\section{Phase 5: Global Assembly Mechanisms for BLOM}
+\label{sec:phase5_global_assembly}
+
+Phase~3 and Phase~4 establish BLOM at the \emph{window level}:
+for each segment index \(i\), the local window problem is well posed, and its central segment coefficient can be computed analytically.
+However, this is still not a full trajectory theory.
+The missing step is a \emph{global assembly mechanism}.
+
+The core difficulty is that the \(C^{2s-2}\) continuity proven in Phase~3 is only a \emph{within-window} statement.
+It does \emph{not} imply that the central segment extracted from window \(W(i,k)\) and the central segment extracted from window \(W(i+1,k)\) automatically match up to order \(2s-2\) at their shared knot.
+Therefore, without an additional assembly rule, BLOM remains a collection of local variational objects rather than a mathematically complete trajectory class.
+
+In this section, we formalize three assembly mechanisms:
+
+\begin{itemize}
+    \item \textbf{Scheme A: Shared junction states.}
+    Neighboring windows share common knot-state variables and are assembled through a joint global quadratic program.
+    \item \textbf{Scheme B: Overlapping consensus.}
+    Each window is solved independently, and the overlapping knot-state predictions are reconciled by an explicit consensus projection.
+    \item \textbf{Scheme C: Central-segment extraction.}
+    Each window contributes only its central segment.
+    This is the cleanest realization of the ``local coefficient map'' view, but by itself it does not automatically guarantee derivative continuity.
+\end{itemize}
+
+The three schemes have different mathematical guarantees.
+The purpose of this section is not to force them into the same theorem, but to state precisely what each one does and does not guarantee.
+
+\subsection{Common notation and the jump operator}
+\label{subsec:phase5_common_notation}
+
+We retain the canonical setting fixed in Phase~0:
+\[
+p:[0,\mathcal T]\to\mathbb R,\qquad
+s=4,\qquad d_i=1,\qquad k=2,
+\qquad
+\theta=(q_1,\dots,q_{M-1},T_1,\dots,T_M)^\top,
+\]
+with
+\[
+q_0,q_1,\dots,q_M\in\mathbb R,
+\qquad
+T_i>0,
+\qquad
+\mathcal T=\sum_{i=1}^{M}T_i.
+\]
+For the present section, however, we keep the order \(s\ge 2\) symbolic whenever possible, and specialize to \(s=4\) when needed.
+
+\paragraph{Knot-state vector.}
+For every interior knot \(t_i\), define the lower-order knot-state vector
+\begin{equation}
+\label{eq:phase5_eta_i}
+\eta_i
+:=
+\begin{bmatrix}
+p^{(1)}(t_i)\\
+\vdots\\
+p^{(s-1)}(t_i)
+\end{bmatrix}
+\in \mathbb R^{s-1},
+\qquad i=1,\dots,M-1.
+\end{equation}
+In the canonical minimum-snap case \(s=4\),
+\begin{equation}
+\label{eq:phase5_eta_i_s4}
+\eta_i=
+\chi_i=
+\begin{bmatrix}
+v_i\\ a_i\\ j_i
+\end{bmatrix}
+\in\mathbb R^3,
+\end{equation}
+which is exactly the local jet variable introduced in Phase~4.
+
+\paragraph{Window-level extracted segment.}
+From Phase~4, for each segment \(i\) we have a locally computed segment polynomial
+\[
+p_i^{\mathrm{loc}}(\tau)
+=
+\bigl(c_i^{\mathrm{BLOM},k}\bigr)^\top \beta_s(\tau),
+\qquad \tau\in[0,T_i],
+\]
+where \(c_i^{\mathrm{BLOM},k}\) is the central-segment coefficient extracted from the local BLOM-Strict window.
+
+\paragraph{Left and right knot jets induced by extracted segments.}
+For every interior knot \(t_i\), define the knot jets induced by the two adjacent extracted segments:
+\begin{equation}
+\label{eq:phase5_eta_minus_plus}
+\eta_i^{-}
+:=
+\begin{bmatrix}
+\bigl(p_i^{\mathrm{loc}}\bigr)^{(1)}(T_i)\\
+\vdots\\
+\bigl(p_i^{\mathrm{loc}}\bigr)^{(s-1)}(T_i)
+\end{bmatrix},
+\qquad
+\eta_i^{+}
+:=
+\begin{bmatrix}
+\bigl(p_{i+1}^{\mathrm{loc}}\bigr)^{(1)}(0)\\
+\vdots\\
+\bigl(p_{i+1}^{\mathrm{loc}}\bigr)^{(s-1)}(0)
+\end{bmatrix}.
+\end{equation}
+Likewise, for any order \(\ell\ge 0\), define the derivative jump at \(t_i\) by
+\begin{equation}
+\label{eq:phase5_jump_def}
+\llbracket p^{(\ell)}\rrbracket(t_i)
+:=
+\bigl(p_i\bigr)^{(\ell)}(T_i)-\bigl(p_{i+1}\bigr)^{(\ell)}(0),
+\qquad i=1,\dots,M-1.
+\end{equation}
+
+\paragraph{Target global continuity order.}
+For BLOM as a trajectory representation, the physically essential continuity order is usually
+\begin{equation}
+\label{eq:phase5_target_r}
+r_\star:=s-1.
+\end{equation}
+In the canonical minimum-snap case \(s=4\), this is \(r_\star=3\), i.e.\ continuity of position, velocity, acceleration, and jerk.
+The stronger within-window continuity \(C^{2s-2}\) from Phase~3 is a local optimality consequence, but not automatically a global assembly consequence.
+
+\subsection{A universal single-segment Hermite reconstruction map}
+\label{subsec:phase5_single_segment_hermite}
+
+All three assembly schemes will reconstruct the final global trajectory segment by segment from endpoint values and lower-order knot states.
+We therefore first define the universal single-segment reconstruction operator.
+
+Consider a single segment of duration \(T_i\) joining \(q_{i-1}\) to \(q_i\), with lower-order endpoint jets
+\[
+\eta_{i-1}\in\mathbb R^{s-1},
+\qquad
+\eta_i\in\mathbb R^{s-1}.
+\]
+Let
+\[
+\widetilde y_i
+=
+\begin{bmatrix}
+q_{i-1}\\
+D_s(T_i)\eta_{i-1}\\
+q_i\\
+D_s(T_i)\eta_i
+\end{bmatrix}
+\in\mathbb R^{2s},
+\]
+where
+\begin{equation}
+\label{eq:phase5_Ds}
+D_s(T_i):=\operatorname{diag}(T_i,T_i^2,\dots,T_i^{s-1}).
+\end{equation}
+Let \(C_s\in\mathbb R^{2s\times 2s}\) denote the normalized degree-\((2s-1)\) Hermite interpolation matrix, and \(H_s:=C_s^{-1}\).
+Let
+\begin{equation}
+\label{eq:phase5_lambda_2s}
+\Lambda_{2s}(T_i):=\operatorname{diag}(1,T_i^{-1},\dots,T_i^{-(2s-1)}).
+\end{equation}
+Then the exact physical coefficient vector of the segment is
+\begin{equation}
+\label{eq:phase5_segment_reconstruction}
+c_i
+=
+\mathcal H_i(q_{i-1},q_i,T_i,\eta_{i-1},\eta_i)
+:=
+\Lambda_{2s}(T_i)\,H_s\,\widetilde y_i.
+\end{equation}
+This is the same Hermite reconstruction principle already used in Phase~4, written now in general order \(s\).
+
+\begin{proposition}[Exact segment interpolation and \(C^{s-1}\)-compatibility criterion]
+\label{prop:phase5_basic_hermite}
+For every segment \(i\), the coefficient vector \eqref{eq:phase5_segment_reconstruction} defines the unique polynomial of degree at most \(2s-1\) satisfying
+\[
+p_i(0)=q_{i-1},\qquad p_i(T_i)=q_i,
+\qquad
+p_i^{(\ell)}(0)=\eta_{i-1}^{(\ell)},
+\qquad
+p_i^{(\ell)}(T_i)=\eta_i^{(\ell)},
+\quad \ell=1,\dots,s-1.
+\]
+Consequently, if the assembled global trajectory uses the same shared knot-state \(\eta_i\) on both sides of the interior knot \(t_i\), then
+\[
+\llbracket p^{(\ell)}\rrbracket(t_i)=0,
+\qquad \ell=0,1,\dots,s-1.
+\]
+\end{proposition}
+
+\begin{proof}
+Existence and uniqueness follow from unisolvence of Hermite interpolation of degree \(2s-1\) with endpoint derivatives of orders \(0,\dots,s-1\).
+The jump conclusion follows immediately, because both adjacent segments are reconstructed with the same endpoint value \(q_i\) and the same lower-order knot-state \(\eta_i\).
+\end{proof}
+
+\subsection{Scheme A: shared junction states}
+\label{subsec:phase5_schemeA}
+
+Scheme~A introduces global shared knot states as primary assembly variables.
+This is the cleanest optimization-based global assembly mechanism, but it slightly weakens the purely local character of BLOM because neighboring windows are coupled through shared variables.
+
+\subsubsection{Definition of the shared-state assembly energy}
+\label{subsubsec:phase5_schemeA_definition}
+
+For each interior knot \(i\in\{1,\dots,M-1\}\), introduce a global unknown
+\[
+\eta_i\in\mathbb R^{s-1}.
+\]
+Let
+\[
+\eta:=(\eta_1^\top,\dots,\eta_{M-1}^\top)^\top\in\mathbb R^{(s-1)(M-1)}.
+\]
+For every window \(W(r,k)\), define the local BLOM-Strict minimum energy under prescribed internal knot states:
+\begin{equation}
+\label{eq:phase5_local_energy_A}
+\mathcal E_{r,k}^{A}(\eta;q,T)
+:=
+\min_{u\in\mathcal A_{r,k}^{A}(\eta;q,T)} J_{r,k}[u],
+\end{equation}
+where \(\mathcal A_{r,k}^{A}(\eta;q,T)\) is the Phase~3 admissible set augmented with the constraints
+\begin{equation}
+\label{eq:phase5_shared_state_constraints}
+u^{(\ell)}(t_j)=\eta_j^{(\ell)},
+\qquad
+\ell=1,\dots,s-1,
+\qquad
+j\in \{L_r,\dots,R_r-1\}.
+\end{equation}
+Here \(L_r=\min W(r,k)\) and \(R_r=\max W(r,k)\), and the derivative values are interpreted at the corresponding local knots of the window.
+
+Because the local problem is quadratic and all added constraints are affine, \(\mathcal E_{r,k}^{A}\) is a quadratic function of the subset of \(\eta\) that appears in window \(W(r,k)\):
+\begin{equation}
+\label{eq:phase5_local_energy_A_quad}
+\mathcal E_{r,k}^{A}(\eta;q,T)
+=
+\frac{1}{2}\eta^\top H_{r,k}^{A}(T)\eta
+-
+\eta^\top g_{r,k}^{A}(q,T)
++
+\gamma_{r,k}^{A}(q,T),
+\end{equation}
+where \(H_{r,k}^{A}(T)\) is sparse and supported only on the block indices belonging to the window.
+
+We then define the global Scheme~A assembly problem by
+\begin{equation}
+\label{eq:phase5_schemeA_global_problem}
+\boxed{
+\min_{\eta\in\mathbb R^{(s-1)(M-1)}}
+\mathcal J_A(\eta;q,T)
+:=
+\sum_{r=1}^{M}\mathcal E_{r,k}^{A}(\eta;q,T).
+}
+\end{equation}
+
+\subsubsection{Resulting assembled trajectory}
+\label{subsubsec:phase5_schemeA_reconstruction}
+
+Given a minimizer \(\eta^\star\) of \eqref{eq:phase5_schemeA_global_problem}, define the assembled segment coefficients by the universal Hermite map
+\begin{equation}
+\label{eq:phase5_schemeA_ci}
+c_i^{A}
+=
+\mathcal H_i(q_{i-1},q_i,T_i,\eta_{i-1}^\star,\eta_i^\star),
+\qquad i=1,\dots,M,
+\end{equation}
+with the convention that the boundary jet is inherited from Phase~1 at \(i=0\) and \(i=M\).
+The resulting assembled trajectory is denoted by
+\[
+p^{A}=(p_1^A,\dots,p_M^A).
+\]
+
+\subsubsection{Continuity theorem for Scheme A}
+\label{subsubsec:phase5_schemeA_theorem}
+
+\begin{theorem}[Scheme A yields exact global \(C^{s-1}\) continuity]
+\label{thm:phase5_schemeA_continuity}
+Assume that the quadratic program \eqref{eq:phase5_schemeA_global_problem} admits a unique minimizer \(\eta^\star\).
+Then the assembled trajectory \(p^A\) defined by \eqref{eq:phase5_schemeA_ci} satisfies
+\[
+\llbracket (p^A)^{(\ell)} \rrbracket(t_i)=0,
+\qquad
+\ell=0,1,\dots,s-1,
+\qquad
+i=1,\dots,M-1.
+\]
+Hence \(p^A\in C^{s-1}([0,\mathcal T])\).
+\end{theorem}
+
+\begin{proof}
+By construction, both segment \(i\) and segment \(i+1\) are reconstructed using the same shared knot state \(\eta_i^\star\) at the knot \(t_i\), together with the same waypoint value \(q_i\).
+The claim therefore follows directly from Proposition~\ref{prop:phase5_basic_hermite}.
+\end{proof}
+
+\begin{theorem}[Scheme A existence and uniqueness under positive definiteness]
+\label{thm:phase5_schemeA_existence}
+Assume that the assembled Hessian
+\begin{equation}
+\label{eq:phase5_HA}
+H_A(T):=\sum_{r=1}^{M} H_{r,k}^{A}(T)
+\end{equation}
+is symmetric positive definite.
+Then the global Scheme~A problem \eqref{eq:phase5_schemeA_global_problem} admits a unique minimizer
+\[
+\eta^\star = H_A(T)^{-1}\,g_A(q,T),
+\qquad
+g_A(q,T):=\sum_{r=1}^{M} g_{r,k}^{A}(q,T).
+\]
+\end{theorem}
+
+\begin{proof}
+Under the stated assumption, \(\mathcal J_A(\eta;q,T)\) is a strictly convex quadratic function of \(\eta\).
+Hence it has a unique minimizer characterized by the linear system
+\[
+H_A(T)\eta^\star=g_A(q,T).
+\]
+\end{proof}
+
+\begin{remark}[Marked limitation for Scheme A]
+\label{rem:phase5_schemeA_limitation}
+A \emph{general}, assumption-free proof that \(H_A(T)\) is automatically positive definite for arbitrary \((s,k,M)\) is \textbf{not completed in this chapter}.
+What is completed here is:
+\begin{enumerate}
+    \item the exact definition of Scheme~A,
+    \item the explicit global quadratic assembly objective,
+    \item the exact \(C^{s-1}\) continuity theorem,
+    \item and the existence/uniqueness theorem under the explicit condition \(H_A(T)\succ 0\).
+\end{enumerate}
+This is the correct rigorous statement at the current stage.
+\end{remark}
+
+\subsection{Scheme B: overlapping consensus}
+\label{subsec:phase5_schemeB}
+
+Scheme~B is closest to the sliding-window philosophy:
+each window is solved independently, and the overlapping knot predictions are reconciled afterwards.
+Unlike Scheme~A, the independent local windows are never coupled during the local solve phase.
+
+\subsubsection{Independent local predictions}
+\label{subsubsec:phase5_schemeB_local_predictions}
+
+For every window \(W(r,k)\), let
+\[
+u_{r,k}^\star
+\]
+be the unique BLOM-Strict local minimizer from Phase~3.
+Whenever an interior knot \(t_i\) lies inside that window, define the window-specific prediction of the lower-order knot state by
+\begin{equation}
+\label{eq:phase5_local_eta_prediction}
+\widehat\eta_i^{(r)}
+:=
+\begin{bmatrix}
+\bigl(u_{r,k}^\star\bigr)^{(1)}(t_i)\\
+\vdots\\
+\bigl(u_{r,k}^\star\bigr)^{(s-1)}(t_i)
+\end{bmatrix}
+\in\mathbb R^{s-1}.
+\end{equation}
+Let
+\[
+\mathcal I(i):=\{\,r\in\{1,\dots,M\}: t_i \text{ is an internal knot of } W(r,k)\,\}
+\]
+be the set of windows that provide a prediction for knot \(i\).
+
+\subsubsection{Consensus projection}
+\label{subsubsec:phase5_schemeB_consensus}
+
+Choose positive weights
+\[
+\omega_i^{(r)}>0,\qquad r\in\mathcal I(i),
+\]
+and define the consensus objective
+\begin{equation}
+\label{eq:phase5_schemeB_consensus_obj}
+\mathcal J_B(\eta)
+:=
+\frac12\sum_{i=1}^{M-1}\sum_{r\in\mathcal I(i)}
+\omega_i^{(r)}
+\bigl\|\eta_i-\widehat\eta_i^{(r)}\bigr\|_2^2.
+\end{equation}
+Because this objective is separable in the knot index \(i\), the minimizer is given in closed form.
+
+\begin{proposition}[Closed-form consensus state]
+\label{prop:phase5_schemeB_closed_form}
+The unique minimizer of \eqref{eq:phase5_schemeB_consensus_obj} is
+\begin{equation}
+\label{eq:phase5_schemeB_closed_form}
+\eta_i^\star
+=
+\frac{\sum_{r\in\mathcal I(i)} \omega_i^{(r)}\,\widehat\eta_i^{(r)}}
+{\sum_{r\in\mathcal I(i)} \omega_i^{(r)}},
+\qquad i=1,\dots,M-1.
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+For each fixed \(i\), the objective contribution is
+\[
+\mathcal J_{B,i}(\eta_i)
+=
+\frac12\sum_{r\in\mathcal I(i)} \omega_i^{(r)}
+\|\eta_i-\widehat\eta_i^{(r)}\|_2^2.
+\]
+Differentiating gives
+\[
+\nabla_{\eta_i}\mathcal J_{B,i}(\eta_i)
+=
+\left(\sum_{r\in\mathcal I(i)}\omega_i^{(r)}\right)\eta_i
+-
+\sum_{r\in\mathcal I(i)}\omega_i^{(r)}\widehat\eta_i^{(r)}.
+\]
+Since all weights are positive, the coefficient matrix is a positive scalar multiple of the identity, hence invertible.
+Setting the gradient to zero yields \eqref{eq:phase5_schemeB_closed_form}.
+\end{proof}
+
+\subsubsection{Reconstruction and continuity}
+\label{subsubsec:phase5_schemeB_reconstruction}
+
+Using the consensus knot states \(\eta^\star\), define the assembled segment coefficients exactly as in Scheme~A:
+\begin{equation}
+\label{eq:phase5_schemeB_ci}
+c_i^{B}
+=
+\mathcal H_i(q_{i-1},q_i,T_i,\eta_{i-1}^\star,\eta_i^\star),
+\qquad i=1,\dots,M.
+\end{equation}
+The corresponding assembled trajectory is
+\[
+p^B=(p_1^B,\dots,p_M^B).
+\]
+
+\begin{theorem}[Scheme B yields exact global \(C^{s-1}\) continuity]
+\label{thm:phase5_schemeB_continuity}
+The assembled trajectory \(p^B\) satisfies
+\[
+\llbracket (p^B)^{(\ell)} \rrbracket(t_i)=0,
+\qquad
+\ell=0,1,\dots,s-1,
+\qquad
+i=1,\dots,M-1.
+\]
+Hence \(p^B\in C^{s-1}([0,\mathcal T])\).
+\end{theorem}
+
+\begin{proof}
+The proof is identical to that of Theorem~\ref{thm:phase5_schemeA_continuity}.
+Both neighboring segments are reconstructed from the same consensus knot state \(\eta_i^\star\) and the same waypoint \(q_i\), so the jump vanishes up to order \(s-1\).
+\end{proof}
+
+\begin{remark}[What Scheme B guarantees and what it does not]
+\label{rem:phase5_schemeB_scope}
+Scheme~B guarantees exact global \(C^{s-1}\) continuity after the consensus projection.
+It does \emph{not} imply that the raw independent window solutions already agree in higher derivatives.
+In particular, no automatic \(C^{2s-2}\) theorem is claimed at the global level.
+\end{remark}
+
+\subsection{Scheme C: central-segment extraction}
+\label{subsec:phase5_schemeC}
+
+Scheme~C is the cleanest realization of the local-map interpretation of BLOM:
+each window is solved independently, and only its central segment is kept.
+No extra global variables and no consensus step are introduced.
+
+\subsubsection{Definition}
+\label{subsubsec:phase5_schemeC_definition}
+
+For each segment \(i\), let
+\[
+c_i^{C}:=c_i^{\mathrm{BLOM},k}
+\]
+be the coefficient vector extracted directly from the local window \(W(i,k)\), as defined in Phase~4.
+Define the assembled piecewise trajectory
+\begin{equation}
+\label{eq:phase5_schemeC_trajectory}
+p^C(t):=p_i^C(t-t_{i-1}),
+\qquad
+t\in[t_{i-1},t_i),
+\qquad
+p_i^C(\tau):=(c_i^C)^\top\beta_s(\tau).
+\end{equation}
+
+\subsubsection{Exact interpolation and the guaranteed \(C^0\) property}
+\label{subsubsec:phase5_schemeC_C0}
+
+\begin{theorem}[Scheme C always preserves exact waypoint interpolation]
+\label{thm:phase5_schemeC_C0}
+The raw central-segment extraction trajectory \(p^C\) satisfies
+\[
+p^C(t_i^-)=p^C(t_i^+)=q_i,
+\qquad i=1,\dots,M-1.
+\]
+Hence \(p^C\in C^0([0,\mathcal T])\).
+\end{theorem}
+
+\begin{proof}
+By Phase~3 and Phase~4, every locally extracted central segment interpolates its two endpoint waypoints exactly.
+Therefore segment \(i\) ends at \(q_i\), and segment \(i+1\) starts at \(q_i\).
+Thus the value jump at every interior knot is zero.
+\end{proof}
+
+\subsubsection{Jump formulas}
+\label{subsubsec:phase5_schemeC_jump_formula}
+
+For the raw extraction trajectory, derivative continuity beyond order \(0\) is not automatic.
+Define the left and right endpoint jet maps induced by the extracted segments:
+\begin{equation}
+\label{eq:phase5_schemeC_endpoint_maps}
+\Gamma_i^{-}(q,T)
+:=
+\begin{bmatrix}
+\bigl(p_i^C\bigr)^{(1)}(T_i)\\
+\vdots\\
+\bigl(p_i^C\bigr)^{(s-1)}(T_i)
+\end{bmatrix},
+\qquad
+\Gamma_i^{+}(q,T)
+:=
+\begin{bmatrix}
+\bigl(p_{i+1}^C\bigr)^{(1)}(0)\\
+\vdots\\
+\bigl(p_{i+1}^C\bigr)^{(s-1)}(0)
+\end{bmatrix}.
+\end{equation}
+Then
+\begin{equation}
+\label{eq:phase5_schemeC_jump_lower}
+\begin{bmatrix}
+\llbracket (p^C)^{(1)}\rrbracket(t_i)\\
+\vdots\\
+\llbracket (p^C)^{(s-1)}\rrbracket(t_i)
+\end{bmatrix}
+=
+\Gamma_i^{-}(q,T)-\Gamma_i^{+}(q,T).
+\end{equation}
+Likewise, for any \(\ell\in\{s,\dots,2s-2\}\), the higher-order jump is
+\begin{equation}
+\label{eq:phase5_schemeC_jump_higher}
+\llbracket (p^C)^{(\ell)}\rrbracket(t_i)
+=
+B^{(\ell)}(T_i)c_i^C - B^{(\ell)}(0)c_{i+1}^C,
+\end{equation}
+where \(B^{(\ell)}(\tau)\) is the derivative row operator introduced in Phase~1.
+
+\begin{proposition}[Sufficient condition for higher continuity in Scheme C]
+\label{prop:phase5_schemeC_sufficient}
+Fix an integer \(r\in\{1,\dots,s-1\}\).
+If, for every interior knot \(t_i\),
+\begin{equation}
+\label{eq:phase5_schemeC_compatibility}
+\Gamma_i^{-}(q,T)=\Gamma_i^{+}(q,T)
+\quad\text{up to order }r,
+\end{equation}
+then the raw central extraction trajectory \(p^C\) belongs to \(C^r([0,\mathcal T])\).
+\end{proposition}
+
+\begin{proof}
+Equation \eqref{eq:phase5_schemeC_jump_lower} shows that the derivative jumps of orders \(1,\dots,r\) vanish exactly under the compatibility assumption \eqref{eq:phase5_schemeC_compatibility}.
+Combined with Theorem~\ref{thm:phase5_schemeC_C0}, this yields \(C^r\).
+\end{proof}
+
+\begin{remark}[Marked limitation for Scheme C]
+\label{rem:phase5_schemeC_limitation}
+A theorem asserting that \emph{raw} central-segment extraction automatically achieves \(C^r\) for any \(r\ge 1\) is \textbf{not completed here}, and should \textbf{not} be claimed in general.
+In fact, without an additional compatibility mechanism, such a theorem is generally false:
+adjacent extracted segments come from different local windows, and their endpoint jets need not coincide.
+Therefore Scheme~C, in its raw form, is rigorously guaranteed only to be \(C^0\), plus whatever higher regularity can be certified by the explicit jump formulas \eqref{eq:phase5_schemeC_jump_lower}--\eqref{eq:phase5_schemeC_jump_higher}.
+\end{remark}
+
+\subsection{Comparison of the three schemes}
+\label{subsec:phase5_comparison}
+
+We now summarize the precise mathematical guarantees.
+
+\begin{table}[t]
+\centering
+\caption{Mathematical guarantees of the three BLOM assembly schemes.}
+\label{tab:phase5_scheme_compare}
+\begin{tabular}{lccc}
+\hline
+Property & Scheme A & Scheme B & Scheme C \\
+\hline
+No extra global variables & No & Yes & Yes \\
+Independent local window solves & No & Yes & Yes \\
+Closed-form global assembly step & Linear system & Weighted average & None \\
+Guaranteed global \(C^0\) & Yes & Yes & Yes \\
+Guaranteed global \(C^{s-1}\) & Yes & Yes & No (conditional only) \\
+Guaranteed global \(C^{2s-2}\) & No claim & No claim & No claim \\
+Theorem completed here & Conditional & Yes & Partial \\
+\hline
+\end{tabular}
+\end{table}
+
+\paragraph{Interpretation.}
+Scheme~A is the most theoretically coherent optimization-based assembly mechanism, but it weakens pure locality by introducing shared variables and, in full generality, still needs an external positive-definiteness condition for the assembled Hessian.
+Scheme~B is the cleanest way to preserve sliding-window independence while still guaranteeing exact global \(C^{s-1}\) continuity after the projection step.
+Scheme~C is the purest embodiment of the BLOM local-map philosophy, but by itself it only guarantees exact \(C^0\) continuity.
+
+\subsection{Which scheme should be preferred?}
+\label{subsec:phase5_preference}
+
+If the main objective is a mathematically closed and practically implementable assembly mechanism with exact global \(C^{s-1}\) continuity, then Scheme~B is the safest choice:
+it separates local computation from global projection and admits an explicit closed-form assembly rule.
+
+If the main objective is to preserve the interpretation
+\[
+\text{``each local window defines only its central segment''},
+\]
+then Scheme~C is conceptually the most faithful.
+However, in that case one must accept that higher-order continuity is no longer automatic and must be diagnosed explicitly through jump statistics.
+
+Scheme~A is the most elegant in terms of variational structure, but at the present stage its complete unconditional theory is not yet as closed as that of Scheme~B.
+
+\subsection{Canonical specialization to \texorpdfstring{$s=4,\ k=2$}{s=4,k=2}}
+\label{subsec:phase5_canonical_s4k2}
+
+In the canonical setting of this work,
+\[
+s=4,\qquad k=2.
+\]
+Hence
+\[
+\eta_i=\chi_i=
+\begin{bmatrix}
+v_i\\ a_i\\ j_i
+\end{bmatrix}\in\mathbb R^3.
+\]
+The target global continuity order is
+\[
+r_\star=s-1=3.
+\]
+Accordingly:
+\begin{itemize}
+    \item Scheme~A and Scheme~B both guarantee
+    \[
+    \llbracket p\rrbracket(t_i)=
+    \llbracket p'\rrbracket(t_i)=
+    \llbracket p''\rrbracket(t_i)=
+    \llbracket p^{(3)}\rrbracket(t_i)=0,
+    \]
+    provided their assembly problems are solved as defined above;
+    \item Scheme~C guarantees only
+    \[
+    \llbracket p\rrbracket(t_i)=0
+    \]
+    unconditionally, while
+    \[
+    \llbracket p'\rrbracket(t_i),\ 
+    \llbracket p''\rrbracket(t_i),\ 
+    \llbracket p^{(3)}\rrbracket(t_i)
+    \]
+    must be checked explicitly through \eqref{eq:phase5_schemeC_jump_lower};
+    \item none of the three schemes, in the present chapter, is claimed to guarantee automatic global \(C^6\) continuity.
+\end{itemize}
+
+\subsection{Numerical consequence and Phase~5 validation target}
+\label{subsec:phase5_validation_target}
+
+The central numerical diagnostic of Phase~5 is the jump statistic
+\[
+\llbracket p^{(\ell)}\rrbracket(t_i),
+\qquad
+\ell=0,\dots,2s-2,
+\qquad
+i=1,\dots,M-1.
+\]
+For Scheme~A and Scheme~B, the theory predicts exact cancellation for \(\ell=0,\dots,s-1\).
+For Scheme~C, only \(\ell=0\) is guaranteed exactly, while \(\ell\ge 1\) should generally be treated as a diagnostic quantity.
+This makes the boundary-jump checker the primary numerical witness for deciding which global assembly mechanism is appropriate for the intended BLOM application.
