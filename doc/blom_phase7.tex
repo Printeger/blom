@@ -1,0 +1,1047 @@
+\section{Phase 7: Quantitative Convergence Theory for BLOM}
+\label{sec:phase7_convergence}
+
+The previous phases established BLOM as a well-posed local representation with exact locality, exact interpolation, and scheme-dependent global continuity.
+What is still missing is a \emph{quantitative approximation theorem}: how close is BLOM-\(k\) to the exact global MINCO reference as the window size grows?
+
+This section develops the first rigorous convergence theory for BLOM.
+The main idea is to exploit the exponential off-diagonal decay of the inverse of the global banded optimality operator.
+That decay, already identified in Phase~2 as the algebraic reason why exact localization is impossible, now becomes the source of quantitative approximation guarantees.
+
+However, a distinction must be made between two objects:
+
+\begin{enumerate}
+	\item the \emph{idealized truncated map}, obtained by directly truncating the exact global sensitivity kernel;
+	\item the \emph{actual BLOM-\(k\)} map, obtained from local window optimization and analytic reconstruction.
+\end{enumerate}
+
+The convergence theory completed in this chapter is fully rigorous for the first object, and becomes rigorous for the second object under an additional \emph{matching assumption}.
+This limitation is made explicit below.
+
+\subsection{Global exact coefficient map and centered sensitivity kernel}
+\label{subsec:phase7_global_kernel}
+
+We adopt the notation of Phases~1--2.
+For fixed \(q,T\), the exact global MINCO coefficient vector is
+\[
+c^\star(q,T)\in\mathbb R^{2sM},
+\]
+and satisfies
+\begin{equation}
+	\label{eq:phase7_global_system}
+	A(T)c^\star(q,T)=b(q,T),
+\end{equation}
+where \(A(T)\in\mathbb R^{2sM\times 2sM}\) is nonsingular and banded.
+
+As in Phase~2, write the interior waypoint vector as
+\[
+\bar q:=(q_1,\dots,q_{M-1})^\top\in\mathbb R^{M-1},
+\]
+and decompose
+\begin{equation}
+	\label{eq:phase7_rhs_affine}
+	b(q,T)=b_0(T)+S_q\,\bar q,
+\end{equation}
+where \(S_q\in\mathbb R^{2sM\times(M-1)}\) is the sparse selector matrix.
+Define the centered exact coefficient map
+\begin{equation}
+	\label{eq:phase7_centered_c}
+	\delta c^\star(\bar q,T)
+	:=
+	c^\star(\bar q,T)-c^\star(0,T).
+\end{equation}
+By Lemma~\ref{lem:phase2_exact_sensitivity} from Phase~2,
+\begin{equation}
+	\label{eq:phase7_centered_linear}
+	\delta c^\star(\bar q,T)
+	=
+	A(T)^{-1}S_q\,\bar q.
+\end{equation}
+
+We now partition
+\[
+G(T):=A(T)^{-1}S_q \in \mathbb R^{2sM\times(M-1)}
+\]
+into block rows:
+\begin{equation}
+	\label{eq:phase7_G_blocks}
+	G(T)=
+	\begin{bmatrix}
+		G_1(T)\\
+		\vdots\\
+		G_M(T)
+	\end{bmatrix},
+	\qquad
+	G_i(T)\in\mathbb R^{2s\times(M-1)}.
+\end{equation}
+Let \(G_{ij}(T)\in\mathbb R^{2s\times 1}\) denote the \(j\)-th column block of \(G_i(T)\), so that
+\begin{equation}
+	\label{eq:phase7_ci_exact_kernel}
+	\delta c_i^\star(\bar q,T)
+	=
+	\sum_{j=1}^{M-1} G_{ij}(T)\,q_j,
+	\qquad i=1,\dots,M.
+\end{equation}
+
+Equation~\eqref{eq:phase7_ci_exact_kernel} is the exact global sensitivity expansion of the \(i\)-th coefficient block with respect to the sparse waypoint vector.
+
+\subsection{Idealized truncated BLOM-\texorpdfstring{$k$}{k}}
+\label{subsec:phase7_idealized_truncation}
+
+The impossibility theorem of Phase~2 states that the exact map \eqref{eq:phase7_ci_exact_kernel} is not finitely local in general.
+Nevertheless, if the kernel \(G_{ij}(T)\) decays exponentially in \(|i-j|\), then truncating the sum to a finite window yields an exponentially accurate local approximation.
+
+\begin{definition}[Idealized truncated coefficient map]
+	\label{def:phase7_idealized_truncation}
+	For \(k\in\mathbb N\), define the index neighborhood
+	\begin{equation}
+		\label{eq:phase7_Nk}
+		\mathcal N_k(i):=\{\,j\in\{1,\dots,M-1\}: |j-i|\le k\,\}.
+	\end{equation}
+	The idealized \(k\)-truncated coefficient of segment \(i\) is defined by
+	\begin{equation}
+		\label{eq:phase7_idealized_ck}
+		\delta \tilde c_i^{(k)}(\bar q,T)
+		:=
+		\sum_{j\in\mathcal N_k(i)} G_{ij}(T)\,q_j.
+	\end{equation}
+	Equivalently,
+	\begin{equation}
+		\label{eq:phase7_idealized_ck_full}
+		\tilde c_i^{(k)}(\bar q,T)
+		=
+		c_i^\star(0,T)+\delta \tilde c_i^{(k)}(\bar q,T).
+	\end{equation}
+\end{definition}
+
+\begin{remark}
+	\label{rem:phase7_idealized_truncation}
+	The map \eqref{eq:phase7_idealized_ck} is the exact operator-theoretic BLOM-\(k\) surrogate suggested by Phase~2.
+	It is not yet the same object as the actual BLOM-\(k\) produced by the local variational problems of Phases~3--4.
+	Bridging the two requires an additional matching theorem; see Subsection~\ref{subsec:phase7_matching}.
+\end{remark}
+
+\subsection{Classical inverse-decay input}
+\label{subsec:phase7_inverse_decay_input}
+
+The main external tool of this section is a classical inverse-decay theorem for banded positive definite matrices.
+
+\begin{theorem}[Classical inverse decay for banded positive definite matrices]
+	\label{thm:phase7_demko}
+	Let \(A\in\mathbb R^{n\times n}\) be symmetric positive definite and banded with scalar half-bandwidth \(\beta\).
+	Assume that the spectrum of \(A\) is contained in \([\lambda_{\min},\lambda_{\max}]\) with
+	\[
+	0<\lambda_{\min}\le \lambda_{\max}<\infty.
+	\]
+	Then there exist constants
+	\[
+	C_0>0,
+	\qquad
+	\rho\in(0,1),
+	\]
+	depending only on \(\beta\) and the spectral condition number
+	\[
+	\kappa:=\frac{\lambda_{\max}}{\lambda_{\min}},
+	\]
+	such that
+	\begin{equation}
+		\label{eq:phase7_demko_scalar}
+		|(A^{-1})_{ab}|
+		\le
+		C_0\,\rho^{|a-b|}
+		\qquad
+		\text{for all } a,b.
+	\end{equation}
+	By block embedding, the same conclusion holds at the block level: if \(A=[A_{ij}]_{i,j=1}^{M}\) is block-banded with fixed block size \(2s\), then
+	\begin{equation}
+		\label{eq:phase7_demko_block}
+		\| (A^{-1})_{ij} \|_2
+		\le
+		C_1\,\rho^{|i-j|}
+		\qquad
+		\text{for all } i,j,
+	\end{equation}
+	for constants \(C_1>0\), \(\rho\in(0,1)\) depending only on the block bandwidth and spectral condition number.
+\end{theorem}
+
+\begin{remark}[Marked limitation]
+	\label{rem:phase7_demko_limitation}
+	Theorem~\ref{thm:phase7_demko} is used here as a \emph{classical external input}.
+	Its proof is not reproduced in this chapter.
+	What is proved below is how the inverse-decay estimate \eqref{eq:phase7_demko_block} implies quantitative BLOM error bounds.
+\end{remark}
+
+We next transfer the inverse-decay bound from \(A(T)^{-1}\) to the waypoint sensitivity kernel \(G(T)=A(T)^{-1}S_q\).
+
+\begin{lemma}[Exponential decay of the waypoint sensitivity kernel]
+	\label{lem:phase7_G_decay}
+	Assume that the block inverse bound \eqref{eq:phase7_demko_block} holds for \(A(T)^{-1}\).
+	Then there exist constants \(C_G>0\) and \(\rho\in(0,1)\) such that
+	\begin{equation}
+		\label{eq:phase7_G_decay}
+		\|G_{ij}(T)\|_2
+		\le
+		C_G\,\rho^{|i-j|}
+		\qquad
+		\text{for all } i=1,\dots,M,\ j=1,\dots,M-1.
+	\end{equation}
+\end{lemma}
+
+\begin{proof}
+	Let \(s_j\in\mathbb R^{2sM}\) denote the \(j\)-th column of \(S_q\).
+	By the Phase~1 construction, each interior waypoint \(q_j\) enters exactly one interpolation row block of the right-hand side.
+	Therefore \(s_j\) is supported in exactly one block row, say \(r(j)\), and
+	\[
+	\|s_j\|_2 = 1.
+	\]
+	Moreover, the block-row index \(r(j)\) differs from the knot index \(j\) by at most a fixed offset \(\delta_q\) independent of \(M\) (indeed, in the canonical ordering one may take \(\delta_q=0\) or \(1\), depending on the precise block convention).
+	Now
+	\[
+	G_{ij}(T)
+	=
+	\bigl(A(T)^{-1}S_q\bigr)_{ij}
+	=
+	(A(T)^{-1})_{i,r(j)}\,s_j.
+	\]
+	Hence
+	\[
+	\|G_{ij}(T)\|_2
+	\le
+	\|(A(T)^{-1})_{i,r(j)}\|_2\,\|s_j\|_2
+	\le
+	C_1\,\rho^{|i-r(j)|}.
+	\]
+	Using \(|i-r(j)|\ge |i-j|-\delta_q\), we obtain
+	\[
+	\|G_{ij}(T)\|_2
+	\le
+	C_1\,\rho^{-\delta_q}\rho^{|i-j|}
+	=
+	C_G\,\rho^{|i-j|},
+	\]
+	where \(C_G:=C_1\rho^{-\delta_q}\).
+\end{proof}
+
+\subsection{Level 1: uniform time allocation}
+\label{subsec:phase7_uniform_time}
+
+We first consider the easiest regime:
+\[
+T_i\equiv h>0.
+\]
+In this case, the exact global matrix becomes a banded matrix family depending only on the common step length \(h\) and the problem size \(M\).
+To obtain an error bound uniform in \(M\), one needs uniform spectral control of that family.
+
+\begin{assumption}[Uniform-time spectral stability]
+	\label{ass:phase7_uniform_spectral}
+	Fix \(s\) and \(h>0\).
+	For every \(M\), let \(A_h^{(M)}\) denote the exact global coefficient matrix of the Phase~1 mother problem under
+	\[
+	T_1=\cdots=T_M=h.
+	\]
+	Assume that there exist constants
+	\[
+	0<\underline\lambda_h\le \overline\lambda_h<\infty
+	\]
+	independent of \(M\) such that
+	\begin{equation}
+		\label{eq:phase7_uniform_spectral}
+		\underline\lambda_h I \preceq A_h^{(M)} \preceq \overline\lambda_h I
+		\qquad
+		\text{for all } M.
+	\end{equation}
+\end{assumption}
+
+\begin{remark}[Marked limitation]
+	\label{rem:phase7_uniform_spectral_limitation}
+	A complete proof of Assumption~\ref{ass:phase7_uniform_spectral} from first principles --- for general \(s\) and with an explicit closed-form decay factor \(\rho_h\) --- is \textbf{not completed in this chapter}.
+	What is completed is the implication
+	\[
+	\text{uniform spectral stability}
+	\Longrightarrow
+	\text{exponential BLOM-\(k\) approximation}.
+	\]
+\end{remark}
+
+\begin{theorem}[Uniform-time coefficient error bound for idealized BLOM-\(k\)]
+	\label{thm:phase7_uniform_error}
+	Assume Assumption~\ref{ass:phase7_uniform_spectral}.
+	Then there exist constants
+	\[
+	C_h>0,\qquad \rho_h\in(0,1),
+	\]
+	depending only on \(s\) and \(h\), such that for every \(M\), every interior segment \(i\), every \(k\in\mathbb N\), and every interior waypoint vector \(\bar q\),
+	\begin{equation}
+		\label{eq:phase7_uniform_error}
+		\bigl\|
+		\delta \tilde c_i^{(k)}(\bar q,h)-\delta c_i^\star(\bar q,h)
+		\bigr\|_2
+		\le
+		C_h\,\rho_h^{\,k}\,\|\bar q\|_\infty .
+	\end{equation}
+\end{theorem}
+
+\begin{proof}
+	By Assumption~\ref{ass:phase7_uniform_spectral}, the condition numbers of the family \(A_h^{(M)}\) are uniformly bounded:
+	\[
+	\kappa(A_h^{(M)})\le \frac{\overline\lambda_h}{\underline\lambda_h}=: \kappa_h.
+	\]
+	Since the block bandwidth is fixed once \(s\) is fixed, Theorem~\ref{thm:phase7_demko} yields constants \(C_G>0\) and \(\rho_h\in(0,1)\), independent of \(M\), such that
+	\[
+	\|G_{ij}(h)\|_2\le C_G \rho_h^{|i-j|}.
+	\]
+	Using \eqref{eq:phase7_ci_exact_kernel} and \eqref{eq:phase7_idealized_ck},
+	\begin{align}
+		\delta c_i^\star-\delta \tilde c_i^{(k)}
+		&=
+		\sum_{j\notin\mathcal N_k(i)} G_{ij}(h)\,q_j.
+		\label{eq:phase7_tail_start}
+	\end{align}
+	Taking norms and using \(\|q_j\|=|q_j|\le \|\bar q\|_\infty\),
+	\begin{align}
+		\bigl\|
+		\delta c_i^\star-\delta \tilde c_i^{(k)}
+		\bigr\|_2
+		&\le
+		\sum_{j\notin\mathcal N_k(i)}
+		\|G_{ij}(h)\|_2\,|q_j|
+		\notag\\
+		&\le
+		C_G\|\bar q\|_\infty
+		\sum_{j\notin\mathcal N_k(i)}
+		\rho_h^{|i-j|}.
+		\label{eq:phase7_tail_bound_1}
+	\end{align}
+	For each distance \(r\ge k+1\), there are at most two indices \(j\) such that \(|i-j|=r\).
+	Hence
+	\begin{align}
+		\sum_{j\notin\mathcal N_k(i)} \rho_h^{|i-j|}
+		&\le
+		2\sum_{r=k+1}^{\infty}\rho_h^{r}
+		=
+		2\frac{\rho_h^{k+1}}{1-\rho_h}.
+		\label{eq:phase7_geometric_tail}
+	\end{align}
+	Substituting \eqref{eq:phase7_geometric_tail} into \eqref{eq:phase7_tail_bound_1} gives
+	\[
+	\bigl\|
+	\delta c_i^\star-\delta \tilde c_i^{(k)}
+	\bigr\|_2
+	\le
+	\frac{2C_G\rho_h}{1-\rho_h}\,\rho_h^k\,\|\bar q\|_\infty.
+	\]
+	Setting
+	\[
+	C_h:=\frac{2C_G\rho_h}{1-\rho_h}
+	\]
+	proves \eqref{eq:phase7_uniform_error}.
+\end{proof}
+
+\subsection{Level 2: bounded nonuniform times}
+\label{subsec:phase7_bounded_nonuniform}
+
+We next generalize the previous result to bounded nonuniform time allocations:
+\[
+0<T_{\min}\le T_i\le T_{\max}.
+\]
+As before, the key issue is whether the exact global matrix family remains uniformly well-conditioned as \(M\) varies.
+
+\begin{assumption}[Uniform spectral stability on a bounded time box]
+	\label{ass:phase7_box_spectral}
+	Fix \(s\), \(T_{\min}>0\), and \(T_{\max}>T_{\min}\).
+	Assume that there exist constants
+	\[
+	0<\underline\lambda_\ast\le \overline\lambda_\ast<\infty
+	\]
+	such that for every \(M\) and every
+	\[
+	T\in[T_{\min},T_{\max}]^M,
+	\]
+	the corresponding Phase~1 global coefficient matrix satisfies
+	\begin{equation}
+		\label{eq:phase7_box_spectral}
+		\underline\lambda_\ast I \preceq A(T) \preceq \overline\lambda_\ast I.
+	\end{equation}
+\end{assumption}
+
+\begin{remark}[Marked limitation]
+	\label{rem:phase7_box_spectral_limitation}
+	A fully general proof of Assumption~\ref{ass:phase7_box_spectral}, uniform in \(M\), is \textbf{not completed in this chapter}.
+	For each fixed \(M\), continuity of eigenvalues on the compact box \([T_{\min},T_{\max}]^M\) gives existence of positive lower and upper spectral bounds.
+	What remains open here is the proof that such bounds can be chosen uniformly over the entire family in \(M\).
+\end{remark}
+
+\begin{theorem}[Bounded-nonuniform coefficient error bound for idealized BLOM-\(k\)]
+	\label{thm:phase7_box_error}
+	Assume Assumption~\ref{ass:phase7_box_spectral}.
+	Then there exist constants
+	\[
+	C_\ast>0,\qquad \rho_\ast\in(0,1),
+	\]
+	depending only on \(s\), \(T_{\min}\), and \(T_{\max}\), such that for every \(M\), every admissible \(T\in[T_{\min},T_{\max}]^M\), every interior segment \(i\), every \(k\in\mathbb N\), and every \(\bar q\),
+	\begin{equation}
+		\label{eq:phase7_box_error}
+		\bigl\|
+		\delta \tilde c_i^{(k)}(\bar q,T)-\delta c_i^\star(\bar q,T)
+		\bigr\|_2
+		\le
+		C_\ast\,\rho_\ast^{\,k}\,\|\bar q\|_\infty.
+	\end{equation}
+\end{theorem}
+
+\begin{proof}
+	The proof is identical to that of Theorem~\ref{thm:phase7_uniform_error}.
+	By Assumption~\ref{ass:phase7_box_spectral}, all admissible matrices \(A(T)\) have condition numbers uniformly bounded by
+	\[
+	\kappa_\ast:=\frac{\overline\lambda_\ast}{\underline\lambda_\ast}.
+	\]
+	Hence Theorem~\ref{thm:phase7_demko} and Lemma~\ref{lem:phase7_G_decay} provide constants \(C_G^\ast>0\) and \(\rho_\ast\in(0,1)\) such that
+	\[
+	\|G_{ij}(T)\|_2\le C_G^\ast \rho_\ast^{|i-j|}
+	\]
+	uniformly for all admissible \(T\).
+	The same geometric-tail argument as in \eqref{eq:phase7_tail_start}--\eqref{eq:phase7_geometric_tail} then yields \eqref{eq:phase7_box_error}.
+\end{proof}
+
+\subsection{From idealized truncation to actual BLOM-\texorpdfstring{$k$}{k}}
+\label{subsec:phase7_matching}
+
+Theorems~\ref{thm:phase7_uniform_error} and \ref{thm:phase7_box_error} are rigorous statements for the idealized truncated map \(\tilde c_i^{(k)}\).
+To transfer them to the actual BLOM-\(k\) obtained from local window optimization, one needs a comparison theorem between the two constructions.
+
+\begin{assumption}[Matching of actual BLOM-\(k\) to the idealized truncation]
+	\label{ass:phase7_matching}
+	Assume that for the actual BLOM-\(k\) coefficient map \(c_i^{\mathrm{BLOM},k}\), there exist constants
+	\[
+	C_{\mathrm{match}}>0,\qquad \rho_{\mathrm{match}}\in(0,1),
+	\]
+	such that
+	\begin{equation}
+		\label{eq:phase7_matching}
+		\bigl\|
+		c_i^{\mathrm{BLOM},k}(\bar q,T)-\tilde c_i^{(k)}(\bar q,T)
+		\bigr\|_2
+		\le
+		C_{\mathrm{match}}\,\rho_{\mathrm{match}}^{\,k}\,\|\bar q\|_\infty
+	\end{equation}
+	for all admissible data.
+\end{assumption}
+
+\begin{remark}[Marked limitation]
+	\label{rem:phase7_matching_limitation}
+	A proof of Assumption~\ref{ass:phase7_matching} for the fully general actual BLOM-\(k\) constructed from the windowwise local variational problems of Phases~3--4 is \textbf{not completed in this chapter}.
+	This is the principal missing step between the idealized truncation theory and a full convergence theorem for the implemented BLOM-\(k\).
+\end{remark}
+
+\begin{corollary}[Conditional convergence of actual BLOM-\(k\)]
+	\label{cor:phase7_actual_convergence}
+	Assume either the hypotheses of Theorem~\ref{thm:phase7_uniform_error} or those of Theorem~\ref{thm:phase7_box_error}, together with Assumption~\ref{ass:phase7_matching}.
+	Then there exist constants \(C_{\mathrm{tot}}>0\) and \(\rho_{\mathrm{tot}}\in(0,1)\) such that
+	\begin{equation}
+		\label{eq:phase7_actual_error}
+		\bigl\|
+		c_i^{\mathrm{BLOM},k}(\bar q,T)-c_i^\star(\bar q,T)
+		\bigr\|_2
+		\le
+		C_{\mathrm{tot}}\,\rho_{\mathrm{tot}}^{\,k}\,\|\bar q\|_\infty.
+	\end{equation}
+\end{corollary}
+
+\begin{proof}
+	By the triangle inequality,
+	\begin{align*}
+		\bigl\|
+		c_i^{\mathrm{BLOM},k}-c_i^\star
+		\bigr\|_2
+		&\le
+		\bigl\|
+		c_i^{\mathrm{BLOM},k}-\tilde c_i^{(k)}
+		\bigr\|_2
+		+
+		\bigl\|
+		\tilde c_i^{(k)}-c_i^\star
+		\bigr\|_2.
+	\end{align*}
+	The first term is bounded by \eqref{eq:phase7_matching}; the second is bounded by either \eqref{eq:phase7_uniform_error} or \eqref{eq:phase7_box_error}.
+	Thus
+	\[
+	\bigl\|
+	c_i^{\mathrm{BLOM},k}-c_i^\star
+	\bigr\|_2
+	\le
+	C_1\rho_1^k\|\bar q\|_\infty + C_2\rho_2^k\|\bar q\|_\infty.
+	\]
+	Let
+	\[
+	\rho_{\mathrm{tot}}:=\max(\rho_1,\rho_2)\in(0,1),
+	\qquad
+	C_{\mathrm{tot}}:=C_1+C_2.
+	\]
+	Then
+	\[
+	\bigl\|
+	c_i^{\mathrm{BLOM},k}-c_i^\star
+	\bigr\|_2
+	\le
+	C_{\mathrm{tot}}\,\rho_{\mathrm{tot}}^{\,k}\,\|\bar q\|_\infty.
+	\]
+\end{proof}
+
+\subsection{Level 3: suboptimality of the control cost}
+\label{subsec:phase7_cost_bound}
+
+We now turn coefficient error bounds into cost bounds.
+This requires additional care: the exact MINCO coefficient vector \(c^\star\) is the minimizer of the Phase~1 mother problem over its global affine feasible set.
+Hence the quadratic cost orthogonality formula is valid only if the BLOM-\(k\) candidate is itself \emph{globally feasible for that same affine set}.
+
+For fixed \((q,T)\), let
+\[
+\mathcal F(q,T)\subset \mathbb R^{2sM}
+\]
+denote the affine feasible coefficient set of the Phase~1 global mother problem.
+Choose an orthonormal basis matrix \(N(T)\) of the corresponding homogeneous tangent subspace, so every feasible coefficient vector can be written uniquely as
+\begin{equation}
+	\label{eq:phase7_feasible_param}
+	c=c_p(q,T)+N(T)z,
+	\qquad
+	z\in\mathbb R^{d_T},
+\end{equation}
+for some feasible anchor \(c_p(q,T)\).
+Let the global minimum-control cost be
+\begin{equation}
+	\label{eq:phase7_global_cost}
+	J(c,T)=\frac12\,c^\top H(T)c,
+\end{equation}
+where \(H(T)\succeq 0\) is the segmentwise snap Gram matrix from Phase~1.
+Then on the feasible affine set,
+\begin{equation}
+	\label{eq:phase7_reduced_cost}
+	\widehat J(z;q,T)
+	=
+	J(c_p+Nz,T)
+	=
+	\frac12 z^\top R(T) z + r(q,T)^\top z + \gamma(q,T),
+\end{equation}
+where
+\begin{equation}
+	\label{eq:phase7_reduced_H}
+	R(T):=N(T)^\top H(T)N(T)\succeq 0.
+\end{equation}
+Because the global minimum is unique, \(R(T)\) is in fact positive definite on the reduced feasible coordinates.
+
+Let \(z^\star\) be the exact MINCO reduced coordinate and \(z^{(k)}\) any other feasible reduced coordinate.
+Set
+\[
+e_z:=z^{(k)}-z^\star.
+\]
+
+\begin{lemma}[Exact quadratic cost gap on the feasible affine set]
+	\label{lem:phase7_exact_cost_gap}
+	If both \(c^\star\) and \(c^{(k)}\) belong to the same feasible affine set \(\mathcal F(q,T)\), then
+	\begin{equation}
+		\label{eq:phase7_exact_cost_gap}
+		J(c^{(k)},T)-J(c^\star,T)
+		=
+		\frac12\, e_z^\top R(T)e_z.
+	\end{equation}
+\end{lemma}
+
+\begin{proof}
+	Since \(z^\star\) minimizes \(\widehat J(z;q,T)\), it satisfies the first-order optimality condition
+	\[
+	R(T)z^\star + r(q,T)=0.
+	\]
+	Now expand \(\widehat J(z^\star+e_z;q,T)\):
+	\begin{align*}
+		\widehat J(z^\star+e_z;q,T)
+		&=
+		\frac12(z^\star+e_z)^\top R(z^\star+e_z)
+		+
+		r^\top(z^\star+e_z)
+		+
+		\gamma \\
+		&=
+		\left(\frac12 z^{\star\top}Rz^\star+r^\top z^\star+\gamma\right)
+		+
+		e_z^\top(Rz^\star+r)
+		+
+		\frac12 e_z^\top R e_z.
+	\end{align*}
+	The middle term vanishes by optimality:
+	\[
+	Rz^\star+r=0.
+	\]
+	Hence
+	\[
+	\widehat J(z^\star+e_z;q,T)-\widehat J(z^\star;q,T)
+	=
+	\frac12 e_z^\top R e_z.
+	\]
+	Since \(\widehat J\) is exactly the restriction of \(J\) to the feasible affine set, this proves \eqref{eq:phase7_exact_cost_gap}.
+\end{proof}
+
+\begin{theorem}[Absolute cost gap bound]
+	\label{thm:phase7_absolute_cost_gap}
+	Assume that a BLOM-\(k\) coefficient vector \(c^{\mathrm{BLOM},k}(q,T)\) is globally feasible for the same affine set \(\mathcal F(q,T)\) as the Phase~1 mother problem.
+	Assume further that its coefficient error satisfies
+	\begin{equation}
+		\label{eq:phase7_error_for_cost}
+		\bigl\|
+		c^{\mathrm{BLOM},k}(q,T)-c^\star(q,T)
+		\bigr\|_2
+		\le
+		C_e\,\rho^k\,\|\bar q\|_\infty.
+	\end{equation}
+	Then
+	\begin{equation}
+		\label{eq:phase7_absolute_cost_bound}
+		0
+		\le
+		J^{\mathrm{BLOM},k}(q,T)-J^{\mathrm{MINCO}}(q,T)
+		\le
+		\frac12\,\lambda_{\max}(R(T))\,C_e^2\,\rho^{2k}\,\|\bar q\|_\infty^2.
+	\end{equation}
+\end{theorem}
+
+\begin{proof}
+	Because \(N(T)\) is chosen with orthonormal columns, the coefficient error inside the feasible affine set satisfies
+	\[
+	c^{\mathrm{BLOM},k}-c^\star = N(T)e_z,
+	\]
+	and therefore
+	\[
+	\|e_z\|_2 = \|c^{\mathrm{BLOM},k}-c^\star\|_2.
+	\]
+	By Lemma~\ref{lem:phase7_exact_cost_gap},
+	\[
+	J^{\mathrm{BLOM},k}-J^{\mathrm{MINCO}}
+	=
+	\frac12 e_z^\top R(T)e_z
+	\le
+	\frac12 \lambda_{\max}(R(T))\|e_z\|_2^2.
+	\]
+	Substituting \eqref{eq:phase7_error_for_cost} gives
+	\[
+	J^{\mathrm{BLOM},k}-J^{\mathrm{MINCO}}
+	\le
+	\frac12 \lambda_{\max}(R(T))\,C_e^2\,\rho^{2k}\,\|\bar q\|_\infty^2.
+	\]
+	Nonnegativity follows because \(c^\star\) is the global minimizer over \(\mathcal F(q,T)\).
+\end{proof}
+
+\begin{corollary}[Relative cost bound]
+	\label{cor:phase7_relative_cost}
+	Under the assumptions of Theorem~\ref{thm:phase7_absolute_cost_gap}, assume in addition that on the admissible set of interest there exists a constant \(\underline\alpha>0\) such that
+	\begin{equation}
+		\label{eq:phase7_minco_lower_bound}
+		J^{\mathrm{MINCO}}(q,T)\ge \underline\alpha\,\|\bar q\|_\infty^2.
+	\end{equation}
+	Then
+	\begin{equation}
+		\label{eq:phase7_relative_cost_bound}
+		\frac{J^{\mathrm{BLOM},k}(q,T)}{J^{\mathrm{MINCO}}(q,T)}
+		\le
+		1+
+		\frac{\lambda_{\max}(R(T))\,C_e^2}{2\underline\alpha}\,\rho^{2k}.
+	\end{equation}
+	In particular,
+	\[
+	\frac{J^{\mathrm{BLOM},k}}{J^{\mathrm{MINCO}}}
+	=
+	1+O(\rho^{2k}).
+	\]
+\end{corollary}
+
+\begin{proof}
+	Divide \eqref{eq:phase7_absolute_cost_bound} by \(J^{\mathrm{MINCO}}(q,T)\), then use the lower bound \eqref{eq:phase7_minco_lower_bound}.
+\end{proof}
+
+\begin{remark}[Marked limitation for the cost theorem]
+	\label{rem:phase7_cost_limitation}
+	Theorem~\ref{thm:phase7_absolute_cost_gap} and Corollary~\ref{cor:phase7_relative_cost} are \textbf{conditional} on global feasibility with respect to the Phase~1 mother problem.
+	At the current stage, the Phase~5 assembly schemes A/B/C do not yet come with a theorem guaranteeing that their assembled trajectories belong to the exact global feasible set of Phase~1 (which involves stronger global compatibility than the currently proved \(C^{s-1}\) continuity).
+	Therefore, the relative cost bound is rigorously proved here only as a \emph{conditional theorem}.
+	A full application of it to the present assembled BLOM trajectories remains open.
+\end{remark}
+
+\subsection{Interpretation of the three levels}
+\label{subsec:phase7_interpretation}
+
+The three levels of convergence theory established in this chapter should be interpreted as follows.
+
+\paragraph{Level 1 (uniform times).}
+If the global coefficient matrix family is spectrally stable under
+\[
+T_i\equiv h,
+\]
+then the idealized BLOM truncation converges exponentially with rate \(\rho_h^k\).
+The proof is rigorous modulo the classical inverse-decay theorem and the spectral stability assumption.
+An explicit closed-form formula for \(\rho_h\) is \textbf{not completed here}.
+
+\paragraph{Level 2 (bounded nonuniform times).}
+If the global coefficient matrix family remains uniformly spectrally stable on the time box
+\[
+[T_{\min},T_{\max}]^M,
+\]
+then the same exponential convergence holds uniformly:
+\[
+\bigl\|
+\delta \tilde c_i^{(k)}-\delta c_i^\star
+\bigr\|
+\le
+C_\ast \rho_\ast^k \|\bar q\|_\infty.
+\]
+Again, this theorem is rigorous under the explicit assumption of family-wise spectral stability.
+
+\paragraph{Level 3 (cost suboptimality).}
+If, in addition, actual BLOM-\(k\) is both:
+\begin{enumerate}
+	\item exponentially close to the idealized truncation, and
+	\item globally feasible for the Phase~1 mother problem,
+\end{enumerate}
+then its control effort is relatively optimal up to an \(O(\rho^{2k})\) multiplicative factor.
+
+\subsection{What has and has not been proved in Phase~7}
+\label{subsec:phase7_status}
+
+We summarize the exact status of the present convergence theory.
+
+\begin{enumerate}
+	\item \textbf{Fully proved in this chapter:}
+	\begin{itemize}
+		\item the idealized truncated BLOM-\(k\) error bound under exponential kernel decay;
+		\item the transfer from inverse decay to coefficient truncation error;
+		\item the conditional cost gap and relative cost bound on the common feasible affine set.
+	\end{itemize}
+	
+	\item \textbf{Proved only under explicit assumptions:}
+	\begin{itemize}
+		\item uniform-time convergence, under family-wise spectral stability;
+		\item bounded-nonuniform convergence, under uniform spectral stability on the admissible time box;
+		\item convergence of the actual BLOM-\(k\), under the matching assumption to the idealized truncation.
+	\end{itemize}
+	
+	\item \textbf{Not completed in this chapter:}
+	\begin{itemize}
+		\item a general proof that the family \(A(T)\) is uniformly spectrally stable over all \(M\);
+		\item an explicit closed-form formula for the decay factor \(\rho\) in the canonical minimum-snap case;
+		\item a general proof that the actual BLOM-\(k\) constructed in Phases~3--4 satisfies the matching estimate \eqref{eq:phase7_matching};
+		\item a proof that the currently assembled BLOM trajectories of Phase~5 are globally feasible for the exact Phase~1 mother problem.
+	\end{itemize}
+\end{enumerate}
+
+Accordingly, the mathematically correct summary of Phase~7 is:
+\[
+\boxed{
+	\text{BLOM admits a rigorous exponential approximation theory at the idealized truncated-kernel level,}
+}
+\]
+and
+\[
+\boxed{
+	\text{the same rate transfers to actual BLOM-\(k\) and to cost suboptimality once the matching and feasibility steps are proved.}
+}
+\]
+
+\section{Unfinished Proofs: Their Impact, Priority, and Technical Bottlenecks}
+\label{sec:unfinished_proofs_discussion}
+
+This section summarizes the current status of the main proofs that are not yet fully completed in the BLOM theory.
+The purpose is not to conceal the gaps, but to state clearly:
+\begin{enumerate}
+	\item what each missing proof is supposed to establish,
+	\item how its absence affects the overall theory,
+	\item whether it is worth pursuing immediately,
+	\item and where the present mathematical bottleneck lies.
+\end{enumerate}
+
+The discussion below is intentionally written in plain language, but kept in an academically precise form.
+
+\subsection{Overview: not all missing proofs have the same importance}
+\label{subsec:unfinished_overview}
+
+At the current stage, the unfinished proofs do \emph{not} all affect the theory at the same level.
+Their importance is stratified as follows:
+
+\begin{itemize}
+	\item The most important missing proof is the \emph{matching theorem} between actual BLOM-\(k\) and the idealized truncated BLOM-\(k\).
+	Without it, the convergence theory proved in Phase~7 applies rigorously only to an idealized object, not yet to the exact algorithmic object implemented in BLOM.
+	
+	\item The second most important missing proof is the \emph{global feasibility theorem} showing that the current Phase~5 assembled BLOM trajectories automatically belong to the Phase~1 feasible set.
+	Without it, the coefficient approximation theory can still stand, but the control-cost suboptimality theorem remains conditional.
+	
+	\item The proof of \emph{family-wise spectral stability for arbitrary \(M\)} is important for turning the convergence theory into a uniform theorem with constants independent of trajectory length.
+	However, its absence does not invalidate the local-approximation idea itself.
+	
+	\item The derivation of an \emph{explicit closed-form decay factor \(\rho\)} in the canonical minimum-snap case is the least urgent.
+	Its absence affects the sharpness and interpretability of the theory, but not the main qualitative convergence conclusion.
+\end{itemize}
+
+Thus, the correct strategic reading is:
+
+\begin{quote}
+	The unfinished proofs do not all threaten the same part of the theory.
+	Some block the transfer from ideal theory to the actual BLOM construction; others only prevent the theory from being fully general or aesthetically complete.
+\end{quote}
+
+\subsection{Family-wise spectral stability for general \texorpdfstring{$M$}{M}}
+\label{subsec:unfinished_spectral_stability}
+
+\paragraph{What this proof is supposed to show.}
+The goal is to prove that the global MINCO coefficient matrix family
+\[
+A(T)\in\mathbb R^{2sM\times 2sM}
+\]
+remains uniformly well conditioned as the number of segments \(M\) varies, provided the duration vector \(T\) stays in a bounded admissible set.
+More concretely, one wants uniform constants
+\[
+0<\underline\lambda\le \lambda_{\min}(A(T))\le \lambda_{\max}(A(T))\le \overline\lambda<\infty
+\]
+that do not deteriorate as \(M\to\infty\).
+
+\paragraph{Why this matters.}
+If such a theorem were available, then the inverse-decay constants in Phase~7 could be chosen uniformly over all problem sizes.
+This would upgrade the convergence theorem from a ``fixed-size or assumption-based result'' to a true family-wise theorem.
+
+\paragraph{What happens if this proof is missing.}
+Without this theorem, one can still prove convergence:
+\begin{itemize}
+	\item for fixed \(M\),
+	\item or under an explicit spectral-stability assumption,
+	\item or with strong numerical evidence over a large but finite range of \(M\).
+\end{itemize}
+Therefore, the theory does \emph{not} collapse.
+What is lost is the clean statement that a single pair of constants \((C,\rho)\) works uniformly for all sufficiently large problem sizes.
+
+\paragraph{Should this be pursued immediately?}
+Not necessarily.
+At the present stage, this proof is not the one that most directly decides whether BLOM is mathematically meaningful.
+It is better viewed as a \emph{generalization and strengthening theorem}, rather than the first theorem that must be closed.
+
+\paragraph{Where the bottleneck is.}
+For each fixed \(M\), compactness and continuity arguments are enough to control the spectrum.
+The real difficulty is the passage to ``uniformly in \(M\)''.
+That step requires additional structure, such as:
+\begin{itemize}
+	\item block Toeplitz or asymptotically Toeplitz analysis,
+	\item discrete coercivity estimates,
+	\item uniform Poincar\'e-type inequalities,
+	\item or symbol-based spectral theory.
+\end{itemize}
+In other words, the obstruction is not algebraic bookkeeping, but the lack of a genuinely \emph{family-level} spectral argument.
+
+\subsection{Matching theorem: actual BLOM-\texorpdfstring{$k$}{k} versus idealized truncated BLOM-\texorpdfstring{$k$}{k}}
+\label{subsec:unfinished_matching}
+
+\paragraph{What this proof is supposed to show.}
+Phase~7 proves exponential convergence for the idealized truncated object
+\[
+\tilde c_i^{(k)},
+\]
+which is obtained by truncating the exact global sensitivity kernel
+\[
+A(T)^{-1}S_q.
+\]
+The missing matching theorem would show that the actual BLOM-\(k\) coefficient
+\[
+c_i^{\mathrm{BLOM},k}
+\]
+satisfies
+\[
+\|c_i^{\mathrm{BLOM},k}-\tilde c_i^{(k)}\|\le C\rho^k\|\bar q\|,
+\]
+or at least an estimate of the same order.
+
+\paragraph{Why this matters.}
+This is the single most important unfinished proof.
+Without it, the rigorous Phase~7 convergence theory applies to the \emph{idealized truncated kernel model}, but not yet fully to the actual BLOM map generated from:
+\begin{itemize}
+	\item local variational windows,
+	\item natural boundary conditions,
+	\item analytic local solves,
+	\item and segment extraction / assembly.
+\end{itemize}
+
+\paragraph{What happens if this proof is missing.}
+Then the theory is forced into the following weaker but honest form:
+\begin{quote}
+	We have a rigorous convergence theorem for an idealized BLOM-like truncation, and strong numerical evidence that actual BLOM-\(k\) appears to behave the same way.
+\end{quote}
+This is still meaningful, but it leaves a gap between the \emph{theoretical object} and the \emph{algorithmic object}.
+
+\paragraph{Should this be pursued immediately?}
+Yes.
+Among all unfinished proofs, this is the one most worth attacking first.
+It directly determines whether the theory established in Phase~7 is genuinely a theorem \emph{about BLOM}, rather than about a nearby idealization.
+
+\paragraph{Where the bottleneck is.}
+The bottleneck is conceptual:
+the actual BLOM-\(k\) construction is not defined by truncating the global inverse kernel.
+It is defined by:
+\begin{itemize}
+	\item solving a local variational problem,
+	\item imposing natural boundary conditions,
+	\item reconstructing a local polynomial,
+	\item and extracting the central segment.
+\end{itemize}
+The idealized truncated map, by contrast, is defined directly by cutting off the exact global linear sensitivity operator.
+The two constructions are intuitively close, but they are not literally the same formula.
+
+Therefore, proving the matching theorem likely requires a new bridge, for example:
+\begin{itemize}
+	\item a Schur-complement interpretation of the local window solve,
+	\item a Green's-function localization identity,
+	\item or a consistency theorem relating the local Euler--Lagrange solution to the truncated global influence kernel.
+\end{itemize}
+At present, that bridge has not yet been built.
+
+\subsection{Automatic feasibility of the Phase~5 assembled BLOM trajectories in the Phase~1 feasible set}
+\label{subsec:unfinished_feasibility}
+
+\paragraph{What this proof is supposed to show.}
+The cost comparison theorem of Phase~7 is sharp only if both the exact MINCO solution and the BLOM-\(k\) candidate lie in the same affine feasible set of the Phase~1 mother problem.
+Thus, the missing theorem would show that the assembled BLOM trajectory produced in Phase~5 automatically belongs to the exact global feasible set used in Phase~1.
+
+\paragraph{Why this matters.}
+This proof is essential if one wants to claim not only coefficient closeness, but also rigorous control-cost near-optimality:
+\[
+\frac{J^{\mathrm{BLOM}-k}}{J^{\mathrm{MINCO}}}\le 1+O(\rho^{2k}).
+\]
+
+\paragraph{What happens if this proof is missing.}
+Without it, the coefficient approximation theory can still stand.
+One may still prove statements of the form
+\[
+\|c^{(k)}-c^\star\|\le C\rho^k\|\bar q\|.
+\]
+However, one can no longer directly invoke the exact quadratic orthogonality identity behind the global cost-gap theorem.
+Thus:
+\begin{itemize}
+	\item the coefficient theory survives,
+	\item but the strongest cost-theoretic theorem remains conditional.
+\end{itemize}
+
+\paragraph{Should this be pursued immediately?}
+It depends on the intended claim of the paper.
+If the paper is positioned primarily as:
+\begin{quote}
+	a local, differentiable, sparse, MINCO-compatible trajectory representation,
+\end{quote}
+then this theorem can be postponed.
+If the paper is positioned as:
+\begin{quote}
+	a quantitatively near-optimal replacement for global MINCO in control effort,
+\end{quote}
+then this theorem becomes high priority.
+
+\paragraph{Where the bottleneck is.}
+The bottleneck is structural, not technical.
+The current Phase~5 assembly schemes prove:
+\begin{itemize}
+	\item Scheme A/B: global \(C^{s-1}\),
+	\item Scheme C: exact \(C^0\), and conditional higher continuity.
+\end{itemize}
+But the exact Phase~1 feasible set is tied to the global MINCO mother problem, which has stronger compatibility structure than the presently proved assembly properties.
+So the issue is not simply that the proof is long; it is that the currently assembled BLOM object and the exact Phase~1 feasible object are not yet manifestly the same mathematical object.
+At this point, one must either:
+\begin{enumerate}
+	\item strengthen the assembly mechanism, or
+	\item weaken the comparison theorem to a relaxed feasible set.
+\end{enumerate}
+
+\subsection{Explicit formula for the decay factor \texorpdfstring{$\rho$}{rho} in the canonical minimum-snap case}
+\label{subsec:unfinished_explicit_rho}
+
+\paragraph{What this proof is supposed to show.}
+The current convergence theorems assert the existence of a decay factor
+\[
+\rho\in(0,1)
+\]
+such that the error behaves like \(O(\rho^k)\).
+A stronger theorem would derive an explicit or semi-explicit formula for \(\rho\) in the canonical minimum-snap case.
+
+\paragraph{Why this matters.}
+An explicit \(\rho\) would improve:
+\begin{itemize}
+	\item interpretability,
+	\item predictive power,
+	\item and the ability to estimate how much window growth improves accuracy.
+\end{itemize}
+It would make the convergence theory much more informative.
+
+\paragraph{What happens if this proof is missing.}
+The qualitative theory still stands.
+One can still state:
+\[
+\|c_i^{(k)}-c_i^\star\|\le C\rho^k\|\bar q\|
+\]
+for some \(\rho\in(0,1)\).
+Thus, the missing explicit formula affects the \emph{sharpness} and \emph{readability} of the theorem, not its essential validity.
+
+\paragraph{Should this be pursued immediately?}
+No.
+Among the unfinished proofs, this is the least urgent.
+It is a strengthening result, not a foundational one.
+
+\paragraph{Where the bottleneck is.}
+The matrix family in the canonical minimum-snap problem is not a simple scalar tridiagonal Toeplitz matrix.
+It is:
+\begin{itemize}
+	\item block-banded,
+	\item induced by Hermite and Gram structures,
+	\item and perturbed by boundary effects.
+\end{itemize}
+The inverse-decay theorem guarantees existence of some \(\rho\), but extracting a closed-form \(\rho\) requires substantially finer spectral analysis:
+\begin{itemize}
+	\item block symbol analysis,
+	\item infinite periodic extension,
+	\item or explicit spectral radius bounds.
+\end{itemize}
+This is mathematically deep, but not the first obstacle blocking the main BLOM theory.
+
+\subsection{Priority ranking}
+\label{subsec:unfinished_priority}
+
+The unfinished proofs should be prioritized as follows.
+
+\begin{enumerate}
+	\item \textbf{Highest priority: matching theorem.}
+	This determines whether the convergence theorem is truly about actual BLOM-\(k\).
+	
+	\item \textbf{Second priority: feasibility theorem.}
+	This determines whether the strongest control-cost near-optimality theorem can be stated unconditionally.
+	
+	\item \textbf{Third priority: family-wise spectral stability.}
+	This upgrades the theory from a conditional or fixed-size result to a uniform family theorem.
+	
+	\item \textbf{Lowest priority: explicit \(\rho\) formula.}
+	This improves sharpness and interpretability, but is not needed to make the main theory stand.
+\end{enumerate}
+
+\subsection{Practical interpretation}
+\label{subsec:unfinished_practical_interpretation}
+
+The most practical way to interpret the current status is the following:
+
+\begin{quote}
+	The BLOM theory is already strong enough to justify continued development, numerical validation, and implementation.
+	What remains incomplete are primarily the bridge theorems that connect the ideal operator-theoretic picture to the exact algorithmic BLOM construction, and the strongest cost-optimality claims.
+\end{quote}
+
+Therefore, the unfinished proofs do \emph{not} imply that the project should stop.
+They imply only that the strongest final theorems should not yet be declared as closed.
+A good immediate strategy is:
+\begin{enumerate}
+	\item continue numerical validation of Phase~7,
+	\item use the results to decide whether actual BLOM behaves like the ideal truncation,
+	\item and then decide whether to invest further effort into the matching theorem and the feasibility theorem.
+\end{enumerate}
+
+\subsection{Summary}
+\label{subsec:unfinished_summary}
+
+In one sentence:
+
+\begin{quote}
+	The missing matching theorem is the main unresolved bridge between the proven idealized convergence theory and the actual BLOM algorithm; the missing feasibility theorem is the main unresolved bridge between coefficient approximation and rigorous control-cost near-optimality; the remaining two missing proofs mainly affect generality and sharpness rather than the basic validity of the BLOM program.
+\end{quote}
