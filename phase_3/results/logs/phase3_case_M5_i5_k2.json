@@ -1,0 +1,24 @@
+{
+  "M": 5,
+  "i": 5,
+  "k": 2,
+  "window_type": "right",
+  "segments": [
+    4,
+    5
+  ],
+  "kkt_objective": 931.2997365158136,
+  "reduced_objective": 931.2997365156916,
+  "coeff_diff_norm": 4.1915328768134175e-12,
+  "summary": {
+    "max_interp_error": 3.6637359812630166e-15,
+    "max_Cs_minus_1_jump": 3.552713678800501e-15,
+    "max_C2s_minus_2_jump": 2.4570567802584264e-11,
+    "max_boundary_jet_error": 6.217248937900877e-15,
+    "max_natural_bc_residual": 2.6545247599153835e-12
+  },
+  "reduced_hessian_min_eig": 5.036610016405353,
+  "reduced_hessian_cond": 185.8892626280144,
+  "multistart_max_pairwise_coeff_diff": 1.722541524051364e-14,
+  "multistart_objective_std": 6.261382790496671e-13
+}

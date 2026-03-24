@@ -200,3 +200,66 @@ Implemented deliverables under `phase_2/`:
 - `results/figures/`
 - `results/tables/`
 - `results/logs/`
+
+## Phase 3 Traceability
+
+This section maps the Phase 3 requirements in `phase_3/REQ-Phase3-validation.md`
+to the implemented BLOM-Strict local QP toolbox, validation artifacts, and verification assets.
+
+### Scope
+
+Implemented Phase 3 object:
+
+- BLOM-Strict local variational problem under the canonical setting `s = 4`, `k = 2`
+- explicit local feasible-set construction
+- equality-constrained local QP solve by both KKT and reduced-space methods
+- natural-boundary, higher-continuity, perturbation-continuity, and multistart-uniqueness validation
+- automatic export of Phase 3 figures, CSV tables, and JSON logs
+
+### Requirement Mapping
+
+| Requirement | Implementation | Verification |
+| --- | --- | --- |
+| Local window definition `W(i,k)` and main local problem assembly | `phase_3/blom_strict_local_qp.py` -> `build_window`, `build_local_problem`, `extract_segment_coeff` | `phase_3/test_phase3_blom_strict.py`, `python3 -m phase_3.validate_phase3_blom_strict` |
+| Explicit feasible local spline showing admissible-set nonemptiness | `phase_3/blom_strict_feasible_init.py` -> `build_feasible_local_spline` | `phase_3/test_phase3_blom_strict.py`, feasibility rows in `phase_3/results/tables/table_feasibility_summary.csv` |
+| Local Hessian, affine constraints, KKT solve, and reduced-space solve | `phase_3/blom_strict_local_kkt.py` -> `build_local_hessian`, `build_local_constraints`, `solve_kkt`, `solve_reduced_qp` | `phase_3/test_phase3_blom_strict.py`, case logs under `phase_3/results/logs/` |
+| Natural-boundary, interpolation, boundary-jet, and continuity diagnostics | `phase_3/blom_strict_local_qp.py` -> `compute_interpolation_errors`, `compute_continuity_jumps`, `compute_boundary_jet_errors`, `compute_natural_boundary_residuals`, `summarize_solution` | feasibility table, case logs, `RESULT_PHASE3.md` |
+| Batch validation over left / interior / right windows, perturbation continuity, multistart uniqueness, and full-window Phase 1 comparison | `phase_3/validate_phase3_blom_strict.py` -> `run_phase3_validation`, `_run_perturbation_continuity`, `_run_multistart`, `_full_window_phase1_comparison` | `python3 -m phase_3.validate_phase3_blom_strict`, `phase_3/results/tables/*.csv`, `phase_3/results/logs/phase3_validation_summary.json` |
+| Required Phase 3 figures for window layout, local trajectory, continuity jumps, natural BC residuals, perturbation response, and multistart uniqueness | `phase_3/phase3_plotting.py` -> `plot_window_layout`, `plot_local_trajectory`, `plot_continuity_jumps`, `plot_natural_bc_residuals`, `plot_perturbation_response`, `plot_uniqueness_multistart` | saved artifacts under `phase_3/results/figures/` |
+| Phase 3 README describing BLOM-Strict scope, interfaces, run commands, artifact locations, and interpretation of the four diagnostic families | `phase_3/README_phase3.md` | manual review |
+
+### Verification Summary
+
+Executed for Phase 3 implementation:
+
+- `python3 -m compileall phase_3`
+- `python3 -m unittest phase_3.test_phase3_blom_strict`
+- `python3 -m unittest discover -s . -p 'test*.py'`
+- `python3 -m phase_3.validate_phase3_blom_strict`
+
+Observed Phase 3 results:
+
+- Phase 3 unit tests: `5 passed`
+- Full repository test suite: `30 passed`
+- Batch validation cases: `6`
+- Max interpolation error across Phase 3 cases: `1.701e-14`
+- Max natural-boundary residual across Phase 3 cases: `8.983e-11`
+- Max multistart coefficient difference across Phase 3 cases: `4.609e-12`
+- Full-window local-vs-Phase-1 coefficient difference: `3.781e-11`
+
+### Deliverables
+
+Implemented deliverables under `phase_3/`:
+
+- `REQ-Phase3-validation.md`
+- `__init__.py`
+- `blom_strict_local_qp.py`
+- `blom_strict_local_kkt.py`
+- `blom_strict_feasible_init.py`
+- `phase3_plotting.py`
+- `validate_phase3_blom_strict.py`
+- `test_phase3_blom_strict.py`
+- `README_phase3.md`
+- `results/figures/`
+- `results/tables/`
+- `results/logs/`
