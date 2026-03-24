@@ -1,0 +1,10 @@
+{
+  "ctrl_drop": 2687.9372045725095,
+  "final_objective": 10.137931695036569,
+  "grad_norm_drop": 12428.744811723349,
+  "initial_objective": 2696.3349503701593,
+  "objective_drop": 2686.1970186751228,
+  "obs_drop": -1.5439205605590818,
+  "time_drop": -0.19626533682777136,
+  "touches_T_min": false
+}
