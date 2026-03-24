@@ -1,0 +1,759 @@
+\section{Phase 9: A Minimal Differentiable Optimization Loop for Raw Scheme C}
+\label{sec:phase9_minimal_differentiable_loop}
+
+The purpose of this phase is not yet to construct a full planning framework, but to verify that BLOM already functions as a \emph{differentiable trajectory representation} that can be inserted into an optimization loop.
+At the present stage, the only admissible optimization object is the raw Scheme~C map in the canonical setting:
+\[
+s=4,\qquad k=2.
+\]
+The optimization loop considered in this phase is therefore deliberately minimal:
+\[
+\theta=(\bar q,T)
+\ \longmapsto\
+c(\theta)=c^{\mathrm{C},2}(\bar q,T)
+\ \longmapsto\
+K(c,T)
+\ \longmapsto\
+\nabla_\theta J(\theta),
+\qquad
+J(\theta):=K(c(\theta),T).
+\]
+The goal is to prove that this chain is mathematically well defined, differentiable, exactly implementable in block-banded form, and capable of producing a descent step under standard smoothness assumptions.
+
+Throughout this section, all notation is inherited from Phases~0--8.
+In particular,
+\[
+q_0,q_1,\dots,q_M\in\mathbb R,
+\qquad
+\bar q:=(q_1,\dots,q_{M-1})^\top\in\mathbb R^{M-1},
+\qquad
+T=(T_1,\dots,T_M)^\top\in\mathbb R_{>0}^M,
+\]
+and
+\[
+\theta:=(\bar q,T)\in\mathbb R^{M-1}\times \mathbb R_{>0}^{M}.
+\]
+The raw Scheme~C coefficient vector is
+\[
+c(\theta)=c^{\mathrm{C},2}(\bar q,T)\in\mathbb R^{2sM}=\mathbb R^{8M},
+\]
+with segment blocks
+\[
+c(\theta)=
+\begin{bmatrix}
+c_1(\theta)\\
+\vdots\\
+c_M(\theta)
+\end{bmatrix},
+\qquad
+c_i(\theta)\in\mathbb R^{2s}=\mathbb R^8.
+\]
+
+\subsection{Optimization scope and admissible parameter domain}
+\label{subsec:phase9_scope}
+
+This phase only considers the raw Scheme~C map and excludes:
+\begin{itemize}
+    \item Scheme~A and Scheme~B assembly,
+    \item corrected variants such as C1/C2,
+    \item and any full \(k\)-family planner.
+\end{itemize}
+The admissible parameter domain is
+\begin{equation}
+\label{eq:phase9_theta_adm}
+\Theta_{\mathrm{adm}}(T_{\min})
+:=
+\Bigl\{
+(\bar q,T)\in \mathbb R^{M-1}\times \mathbb R^M
+\ \Big|\
+T_i>T_{\min}>0,\ \forall i
+\Bigr\}.
+\end{equation}
+The strict positivity margin \(T_{\min}\) is introduced so that local time perturbations remain admissible during optimization.
+
+\subsection{Minimal objective functional}
+\label{subsec:phase9_objective}
+
+We define a minimal objective
+\begin{equation}
+\label{eq:phase9_total_objective}
+J(\theta):=
+K(c(\theta),T)
+=
+K_{\mathrm{ctrl}}(c,T)
++
+\lambda_T K_{\mathrm{time}}(T)
++
+\lambda_{\mathrm{obs}} K_{\mathrm{soft\mbox{-}obs}}(c,T),
+\end{equation}
+where \(\lambda_T\ge 0\) and \(\lambda_{\mathrm{obs}}\ge 0\) are fixed weights.
+
+\subsubsection{Control cost}
+\label{subsubsec:phase9_control_cost}
+
+For each segment \(i\), let \(H_i(T_i)\in\mathbb R^{2s\times 2s}\) be the positive semidefinite segment Gram matrix associated with the minimum-\(s\)-th-derivative cost, as in Phase~1.
+Define
+\begin{equation}
+\label{eq:phase9_Kctrl}
+K_{\mathrm{ctrl}}(c,T)
+:=
+\frac12\sum_{i=1}^{M} c_i^\top H_i(T_i)c_i.
+\end{equation}
+In the canonical minimum-snap case \(s=4\), \(H_i(T_i)\) is the segment snap Gram matrix.
+
+\subsubsection{Time regularization}
+\label{subsubsec:phase9_time_cost}
+
+Define
+\begin{equation}
+\label{eq:phase9_Ktime}
+K_{\mathrm{time}}(T):=\sum_{i=1}^{M}T_i.
+\end{equation}
+
+\subsubsection{Soft obstacle penalty}
+\label{subsubsec:phase9_soft_obs}
+
+Fix a finite set of normalized sample locations
+\[
+0\le \alpha_1,\dots,\alpha_{N_s}\le 1,
+\qquad
+w_1,\dots,w_{N_s}>0.
+\]
+Let \(\beta_s(\tau)\in\mathbb R^{2s}\) be the monomial basis vector from the previous phases, and define the row operator
+\[
+B^{(0)}(\tau):=\beta_s(\tau)^\top\in \mathbb R^{1\times 2s}.
+\]
+For segment \(i\) and sample index \(\nu\), define the sampled state
+\begin{equation}
+\label{eq:phase9_xinu}
+x_{i,\nu}(c_i,T_i)
+:=
+B^{(0)}(\alpha_\nu T_i)c_i.
+\end{equation}
+Let
+\[
+\varphi_{\mathrm{obs}}:\mathbb R\to\mathbb R_{\ge 0}
+\]
+be any \(C^1\) smooth penalty function.
+Then define
+\begin{equation}
+\label{eq:phase9_Kobs}
+K_{\mathrm{soft\mbox{-}obs}}(c,T)
+:=
+\sum_{i=1}^{M}\sum_{\nu=1}^{N_s}
+w_\nu \,\varphi_{\mathrm{obs}}(x_{i,\nu}(c_i,T_i)).
+\end{equation}
+
+\begin{remark}
+\label{rem:phase9_obs_scope}
+In the scalar canonical setting, \(\varphi_{\mathrm{obs}}\) should be interpreted as a minimal smooth spatial penalty.
+The present phase does not attempt to model full geometric collision handling in \(\mathbb R^d\); that is deferred to Phase~10.
+\end{remark}
+
+\subsection{Differentiability of the minimal objective}
+\label{subsec:phase9_diff}
+
+The first task is to verify that the composite map
+\[
+\theta\mapsto c(\theta)\mapsto K(c(\theta),T)
+\]
+is differentiable.
+
+\begin{proposition}[Differentiability of the raw Scheme~C objective]
+\label{prop:phase9_differentiability}
+Assume:
+\begin{enumerate}
+    \item the raw Scheme~C map \(c(\theta)=c^{\mathrm{C},2}(\theta)\) is \(C^1\) on \(\Theta_{\mathrm{adm}}(T_{\min})\);
+    \item each segment Gram map \(T_i\mapsto H_i(T_i)\) is \(C^1\) on \((T_{\min},\infty)\);
+    \item the obstacle penalty \(\varphi_{\mathrm{obs}}\) is \(C^1\).
+\end{enumerate}
+Then the objective \(J(\theta)\) defined by \eqref{eq:phase9_total_objective} is \(C^1\) on \(\Theta_{\mathrm{adm}}(T_{\min})\).
+\end{proposition}
+
+\begin{proof}
+By assumption, \(c(\theta)\) is \(C^1\).
+The control term \eqref{eq:phase9_Kctrl} is a finite sum of functions of the form
+\[
+(c_i,T_i)\mapsto \frac12 c_i^\top H_i(T_i)c_i,
+\]
+which are \(C^1\) because \(H_i\) is \(C^1\).
+The time term \eqref{eq:phase9_Ktime} is linear in \(T\), hence \(C^\infty\).
+For the obstacle term, each sampled state
+\[
+(c_i,T_i)\mapsto x_{i,\nu}(c_i,T_i)=B^{(0)}(\alpha_\nu T_i)c_i
+\]
+is \(C^1\), because \(B^{(0)}(\tau)\) is polynomial in \(\tau\).
+Since \(\varphi_{\mathrm{obs}}\in C^1\), each summand
+\[
+(c_i,T_i)\mapsto w_\nu\varphi_{\mathrm{obs}}(x_{i,\nu}(c_i,T_i))
+\]
+is \(C^1\), and so is their finite sum.
+Therefore \(K(c,T)\) is \(C^1\) in \((c,T)\), and by composition with the \(C^1\) map \(\theta\mapsto(c(\theta),T)\), the objective \(J(\theta)\) is \(C^1\).
+\end{proof}
+
+\subsection{Block derivatives of the objective with respect to \texorpdfstring{$c$}{c} and \texorpdfstring{$T$}{T}}
+\label{subsec:phase9_block_derivatives}
+
+We next compute the exact block gradients of \(K(c,T)\).
+
+\subsubsection{Derivative with respect to the coefficient blocks}
+\label{subsubsec:phase9_dKdc}
+
+Define the block gradient
+\[
+g_c(c,T)
+:=
+\frac{\partial K}{\partial c}(c,T)
+=
+\begin{bmatrix}
+g_{c,1}(c,T)\\
+\vdots\\
+g_{c,M}(c,T)
+\end{bmatrix},
+\qquad
+g_{c,i}(c,T)\in\mathbb R^{2s}.
+\]
+
+\begin{proposition}[Exact formula for \texorpdfstring{$\partial K/\partial c$}{dK/dc}]
+\label{prop:phase9_dKdc}
+For each segment \(i\),
+\begin{equation}
+\label{eq:phase9_gc_block}
+g_{c,i}(c,T)
+=
+H_i(T_i)c_i
++
+\lambda_{\mathrm{obs}}
+\sum_{\nu=1}^{N_s}
+w_\nu\,
+\varphi_{\mathrm{obs}}'(x_{i,\nu}(c_i,T_i))
+\,B^{(0)}(\alpha_\nu T_i)^\top.
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+Differentiate the control term:
+\[
+\frac{\partial}{\partial c_i}
+\left(\frac12 c_i^\top H_i(T_i)c_i\right)
+=
+H_i(T_i)c_i,
+\]
+because \(H_i(T_i)\) is symmetric.
+The time term does not depend on \(c_i\), so its derivative is zero.
+For the obstacle term, each summand is
+\[
+w_\nu \varphi_{\mathrm{obs}}(x_{i,\nu}),
+\qquad
+x_{i,\nu}=B^{(0)}(\alpha_\nu T_i)c_i.
+\]
+By the scalar chain rule,
+\[
+\frac{\partial}{\partial c_i}
+\bigl(w_\nu \varphi_{\mathrm{obs}}(x_{i,\nu})\bigr)
+=
+w_\nu \varphi_{\mathrm{obs}}'(x_{i,\nu})
+\frac{\partial x_{i,\nu}}{\partial c_i}.
+\]
+Since \(x_{i,\nu}\) is linear in \(c_i\),
+\[
+\frac{\partial x_{i,\nu}}{\partial c_i}
+=
+B^{(0)}(\alpha_\nu T_i).
+\]
+As a column gradient, this contributes
+\[
+w_\nu \varphi_{\mathrm{obs}}'(x_{i,\nu})B^{(0)}(\alpha_\nu T_i)^\top.
+\]
+Summing over \(\nu\) and multiplying by \(\lambda_{\mathrm{obs}}\) gives \eqref{eq:phase9_gc_block}.
+\end{proof}
+
+\subsubsection{Derivative with respect to the time variables}
+\label{subsubsec:phase9_dKdT}
+
+Define
+\[
+g_T(c,T):=
+\frac{\partial K}{\partial T}(c,T)
+=
+\begin{bmatrix}
+g_{T,1}(c,T)\\
+\vdots\\
+g_{T,M}(c,T)
+\end{bmatrix}
+\in\mathbb R^M.
+\]
+
+Let
+\[
+B^{(1)}(\tau):=\frac{d}{d\tau}\beta_s(\tau)^\top\in\mathbb R^{1\times 2s}.
+\]
+
+\begin{proposition}[Exact formula for \texorpdfstring{$\partial K/\partial T$}{dK/dT}]
+\label{prop:phase9_dKdT}
+For each segment \(i\),
+\begin{equation}
+\label{eq:phase9_gT_block}
+g_{T,i}(c,T)
+=
+\frac12 c_i^\top H_i'(T_i)c_i
++
+\lambda_T
++
+\lambda_{\mathrm{obs}}
+\sum_{\nu=1}^{N_s}
+w_\nu\,
+\varphi_{\mathrm{obs}}'(x_{i,\nu}(c_i,T_i))
+\,
+\alpha_\nu B^{(1)}(\alpha_\nu T_i)c_i.
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+Differentiate the control term:
+\[
+\frac{\partial}{\partial T_i}
+\left(\frac12 c_i^\top H_i(T_i)c_i\right)
+=
+\frac12 c_i^\top H_i'(T_i)c_i.
+\]
+Differentiate the time term:
+\[
+\frac{\partial}{\partial T_i}\lambda_T\sum_{r=1}^{M}T_r=\lambda_T.
+\]
+For the obstacle term, each summand is
+\[
+w_\nu \varphi_{\mathrm{obs}}(x_{i,\nu}),
+\qquad
+x_{i,\nu}=B^{(0)}(\alpha_\nu T_i)c_i.
+\]
+Again by the chain rule,
+\[
+\frac{\partial}{\partial T_i}
+\bigl(w_\nu \varphi_{\mathrm{obs}}(x_{i,\nu})\bigr)
+=
+w_\nu \varphi_{\mathrm{obs}}'(x_{i,\nu})
+\frac{\partial x_{i,\nu}}{\partial T_i}.
+\]
+Because \(x_{i,\nu}=B^{(0)}(\tau)c_i\) with \(\tau=\alpha_\nu T_i\),
+\[
+\frac{\partial x_{i,\nu}}{\partial T_i}
+=
+\alpha_\nu B^{(1)}(\alpha_\nu T_i)c_i.
+\]
+Summing over \(\nu\) and adding all contributions yields \eqref{eq:phase9_gT_block}.
+\end{proof}
+
+\subsection{Exact reverse differentiation through the raw Scheme~C map}
+\label{subsec:phase9_reverse_diff}
+
+We now derive the exact chain rule for \(J(\theta)=K(c(\theta),T)\).
+
+Write the Jacobians of the raw Scheme~C map as
+\[
+J_{c\bar q}(\theta)
+:=
+\frac{\partial c}{\partial \bar q}(\theta)
+\in\mathbb R^{2sM\times(M-1)},
+\qquad
+J_{cT}(\theta)
+:=
+\frac{\partial c}{\partial T}(\theta)
+\in\mathbb R^{2sM\times M}.
+\]
+
+\begin{theorem}[Exact chain rule for the raw Scheme~C optimization loop]
+\label{thm:phase9_chain_rule}
+Under the assumptions of Proposition~\ref{prop:phase9_differentiability},
+the gradient of \(J(\theta)=K(c(\theta),T)\) is
+\begin{align}
+\label{eq:phase9_grad_q}
+\nabla_{\bar q}J(\theta)
+&=
+J_{c\bar q}(\theta)^\top\, g_c(c(\theta),T),\\
+\label{eq:phase9_grad_T}
+\nabla_{T}J(\theta)
+&=
+J_{cT}(\theta)^\top\, g_c(c(\theta),T)
++
+g_T(c(\theta),T).
+\end{align}
+Equivalently,
+\begin{equation}
+\label{eq:phase9_full_grad}
+\nabla_\theta J(\theta)
+=
+\begin{bmatrix}
+J_{c\bar q}^\top g_c\\
+J_{cT}^\top g_c+g_T
+\end{bmatrix}.
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+Take an arbitrary differential \((d\bar q,dT)\).
+By definition of the differential of a composite map,
+\[
+dJ
+=
+\left(\frac{\partial K}{\partial c}\right)^\top dc
++
+\left(\frac{\partial K}{\partial T}\right)^\top dT.
+\]
+Because \(c=c(\bar q,T)\),
+\[
+dc
+=
+J_{c\bar q}\,d\bar q
++
+J_{cT}\,dT.
+\]
+Substitute this into the previous expression:
+\begin{align*}
+dJ
+&=
+g_c^\top(J_{c\bar q}d\bar q + J_{cT}dT)
++
+g_T^\top dT\\
+&=
+(J_{c\bar q}^\top g_c)^\top d\bar q
++
+(J_{cT}^\top g_c + g_T)^\top dT.
+\end{align*}
+Since \(d\bar q\) and \(dT\) are arbitrary, the coefficients of these two differentials are exactly the gradients \(\nabla_{\bar q}J\) and \(\nabla_T J\), which proves \eqref{eq:phase9_grad_q}--\eqref{eq:phase9_grad_T}.
+\end{proof}
+
+\subsection{Exact block-banded backward accumulation}
+\label{subsec:phase9_banded_accumulation}
+
+The key computational advantage of raw Scheme~C is that the Jacobians \(J_{c\bar q}\) and \(J_{cT}\) are exactly banded, as proved in Phase~6.
+
+In the canonical \(k=2\) setting, Phase~6 gives
+\[
+\frac{\partial c_i}{\partial q_j}=0
+\qquad\text{for } j\notin\{i-2,i-1,i,i+1\},
+\]
+and
+\[
+\frac{\partial c_i}{\partial T_j}=0
+\qquad\text{for } j\notin\{i-1,i,i+1\}.
+\]
+
+\begin{proposition}[Local backward accumulation formulas]
+\label{prop:phase9_local_accumulation}
+For each interior waypoint index \(j=1,\dots,M-1\),
+\begin{equation}
+\label{eq:phase9_local_accum_q}
+\frac{\partial J}{\partial q_j}
+=
+\sum_{i=\max(1,j-1)}^{\min(M,j+2)}
+\left(\frac{\partial c_i}{\partial q_j}\right)^\top g_{c,i}.
+\end{equation}
+For each time index \(j=1,\dots,M\),
+\begin{equation}
+\label{eq:phase9_local_accum_T}
+\frac{\partial J}{\partial T_j}
+=
+g_{T,j}
++
+\sum_{i=\max(1,j-1)}^{\min(M,j+1)}
+\left(\frac{\partial c_i}{\partial T_j}\right)^\top g_{c,i}.
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+From \eqref{eq:phase9_grad_q},
+\[
+\frac{\partial J}{\partial q_j}
+=
+\sum_{i=1}^{M}
+\left(\frac{\partial c_i}{\partial q_j}\right)^\top g_{c,i}.
+\]
+By the exact local-support result of Phase~6,
+\[
+\frac{\partial c_i}{\partial q_j}=0
+\quad\text{unless}\quad
+j\in\{i-2,i-1,i,i+1\}.
+\]
+Equivalently,
+\[
+\frac{\partial c_i}{\partial q_j}=0
+\quad\text{unless}\quad
+i\in\{j-1,j,j+1,j+2\}.
+\]
+Therefore all other terms in the sum vanish, yielding \eqref{eq:phase9_local_accum_q}.
+
+Likewise, from \eqref{eq:phase9_grad_T},
+\[
+\frac{\partial J}{\partial T_j}
+=
+g_{T,j}
++
+\sum_{i=1}^{M}
+\left(\frac{\partial c_i}{\partial T_j}\right)^\top g_{c,i}.
+\]
+Again by Phase~6,
+\[
+\frac{\partial c_i}{\partial T_j}=0
+\quad\text{unless}\quad
+j\in\{i-1,i,i+1\},
+\]
+equivalently
+\[
+i\in\{j-1,j,j+1\}.
+\]
+Hence all other terms vanish, and \eqref{eq:phase9_local_accum_T} follows.
+\end{proof}
+
+\begin{corollary}[Exact equivalence of dense and banded reverse accumulation]
+\label{cor:phase9_dense_banded_equiv}
+The gradient produced by the block-banded accumulation formulas
+\eqref{eq:phase9_local_accum_q}--\eqref{eq:phase9_local_accum_T}
+is exactly equal to the dense chain-rule gradient
+\eqref{eq:phase9_full_grad}.
+\end{corollary}
+
+\begin{proof}
+The banded formulas are obtained from the dense formulas by removing only those summands that are exactly zero by local support.
+Therefore the two expressions are identical.
+\end{proof}
+
+\subsection{Complexity of the minimal differentiable loop}
+\label{subsec:phase9_complexity}
+
+We now state the exact complexity result for the \emph{canonical minimal loop} of this phase.
+Because \(s=4\), \(k=2\), and the number of obstacle samples \(N_s\) is fixed, all per-segment operations are \(O(1)\).
+
+\begin{theorem}[Linear-time complexity of the canonical minimal loop]
+\label{thm:phase9_linear_complexity}
+Assume:
+\begin{enumerate}
+    \item \(s=4\), \(k=2\), and \(N_s\) is fixed;
+    \item each local coefficient block \(c_i(\theta)\) and its nonzero Jacobian blocks
+    \[
+    \frac{\partial c_i}{\partial q_j},\qquad
+    \frac{\partial c_i}{\partial T_j}
+    \]
+    are available in \(O(1)\) time per admissible index pair;
+    \item the obstacle penalty \(\varphi_{\mathrm{obs}}\) and its derivative are evaluable in \(O(1)\) time.
+\end{enumerate}
+Then one evaluation of:
+\begin{enumerate}
+    \item the objective \(J(\theta)\),
+    \item the block gradients \(g_c(c(\theta),T)\) and \(g_T(c(\theta),T)\),
+    \item and the full parameter gradient \(\nabla_\theta J(\theta)\)
+\end{enumerate}
+can be computed in
+\begin{equation}
+\label{eq:phase9_linear_complexity}
+O(M)
+\end{equation}
+time and \(O(M)\) memory.
+\end{theorem}
+
+\begin{proof}
+We count the operations component by component.
+
+\paragraph{Step 1: coefficient evaluation.}
+Since the raw Scheme~C map is local and \(k=2\) is fixed, each segment coefficient \(c_i(\theta)\in\mathbb R^8\) is computed from a fixed-size local system, hence in \(O(1)\) time.
+Over all \(M\) segments, this costs \(O(M)\).
+
+\paragraph{Step 2: objective evaluation.}
+For each segment, the control term \(\frac12 c_i^\top H_i(T_i)c_i\) requires \(O(1)\) operations because the block size is fixed.
+The time term contributes \(O(1)\) per segment.
+The obstacle term uses \(N_s\) fixed samples per segment, hence also \(O(1)\) per segment.
+Therefore the total objective evaluation costs \(O(M)\).
+
+\paragraph{Step 3: block gradients with respect to \(c\) and \(T\).}
+By \eqref{eq:phase9_gc_block} and \eqref{eq:phase9_gT_block}, each block \(g_{c,i}\) and scalar \(g_{T,i}\) is computed from a fixed number of fixed-size matrix-vector and scalar operations.
+Thus this step is also \(O(M)\).
+
+\paragraph{Step 4: reverse accumulation to \(\bar q\) and \(T\).}
+For each waypoint index \(j\), formula \eqref{eq:phase9_local_accum_q} sums at most four nonzero contributions.
+For each time index \(j\), formula \eqref{eq:phase9_local_accum_T} sums at most three nonzero contributions plus one local term \(g_{T,j}\).
+Hence each gradient component is accumulated in \(O(1)\), and the total reverse sweep is \(O(M)\).
+
+\paragraph{Step 5: memory.}
+All block quantities
+\[
+c_i,\quad g_{c,i},\quad g_{T,i},
+\]
+and the gradient vectors have size \(O(M)\), while each block has fixed dimension.
+Thus the memory footprint is \(O(M)\).
+
+Combining all steps proves \eqref{eq:phase9_linear_complexity}.
+\end{proof}
+
+\begin{remark}[Marked limitation]
+\label{rem:phase9_complexity_limitation}
+The full \(O(k^2M)\) complexity theorem for general \(k\), together with a complete block-banded implementation theorem for the full BLOM framework, is \textbf{not completed in this phase}.
+That statement belongs to Phase~10.
+Phase~9 proves only the canonical linear-time result for the minimal raw Scheme~C loop.
+\end{remark}
+
+\subsection{A rigorous local descent guarantee}
+\label{subsec:phase9_descent}
+
+The goal of Phase~9 is not to prove global convergence of a nonconvex planner.
+It is sufficient to prove that, once the exact gradient is available, the minimal loop admits a valid descent step.
+
+\begin{theorem}[Local descent under exact gradient and smoothness]
+\label{thm:phase9_descent}
+Assume that \(J\in C^1(\Theta_{\mathrm{adm}}(T_{\min}))\) and that \(\nabla J\) is Lipschitz continuous with constant \(L>0\) on a convex neighborhood \(U\subset\Theta_{\mathrm{adm}}(T_{\min})\) of a point \(\theta\in U\).
+Define the negative-gradient direction
+\[
+d(\theta):=-\nabla J(\theta).
+\]
+Let
+\begin{equation}
+\label{eq:phase9_alpha_feas}
+\alpha_{\mathrm{feas}}(\theta)
+:=
+\inf\left\{
+\alpha>0:
+T_i-\alpha \nabla_{T_i}J(\theta)\le T_{\min}
+\text{ for some } i
+\right\},
+\end{equation}
+with the convention \(\alpha_{\mathrm{feas}}(\theta)=+\infty\) if the set is empty.
+Then for every step size
+\[
+0<\alpha<\min\{\alpha_{\mathrm{feas}}(\theta),\,1/L\},
+\]
+the point
+\[
+\theta^+ := \theta-\alpha \nabla J(\theta)
+\]
+remains in \(\Theta_{\mathrm{adm}}(T_{\min})\) and satisfies
+\begin{equation}
+\label{eq:phase9_descent_ineq}
+J(\theta^+)
+\le
+J(\theta)
+-
+\frac{\alpha}{2}\|\nabla J(\theta)\|_2^2.
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+By the definition of \(\alpha_{\mathrm{feas}}(\theta)\), any \(0<\alpha<\alpha_{\mathrm{feas}}(\theta)\) guarantees
+\[
+T_i-\alpha \nabla_{T_i}J(\theta)>T_{\min}
+\qquad
+\forall i,
+\]
+so \(\theta^+\in \Theta_{\mathrm{adm}}(T_{\min})\).
+
+Because \(\nabla J\) is Lipschitz with constant \(L\) on \(U\), the descent lemma gives
+\[
+J(\theta^+)
+\le
+J(\theta)
++
+\nabla J(\theta)^\top(\theta^+-\theta)
++
+\frac{L}{2}\|\theta^+-\theta\|_2^2.
+\]
+Since \(\theta^+-\theta=-\alpha \nabla J(\theta)\),
+\[
+J(\theta^+)
+\le
+J(\theta)
+-
+\alpha \|\nabla J(\theta)\|_2^2
++
+\frac{L}{2}\alpha^2 \|\nabla J(\theta)\|_2^2.
+\]
+Factor out the gradient norm:
+\[
+J(\theta^+)
+\le
+J(\theta)
+-
+\alpha\left(1-\frac{L\alpha}{2}\right)\|\nabla J(\theta)\|_2^2.
+\]
+If \(\alpha<1/L\), then
+\[
+1-\frac{L\alpha}{2}>\frac12,
+\]
+hence
+\[
+J(\theta^+)
+\le
+J(\theta)
+-
+\frac{\alpha}{2}\|\nabla J(\theta)\|_2^2.
+\]
+This proves \eqref{eq:phase9_descent_ineq}.
+\end{proof}
+
+\begin{remark}[Marked limitation]
+\label{rem:phase9_global_opt_limitation}
+A global convergence theorem for repeated optimization iterates in the full nonconvex setting is \textbf{not completed at the present stage}.
+Phase~9 proves only that the exact differentiable loop admits valid descent steps, which is the mathematically correct level of guarantee for a minimal optimization phase.
+\end{remark}
+
+\subsection{Dense checker versus banded implementation}
+\label{subsec:phase9_dense_checker}
+
+For practical verification, it is useful to distinguish between:
+\begin{enumerate}
+    \item a dense checker implementation, which forms the full Jacobians \(J_{c\bar q}\) and \(J_{cT}\) explicitly;
+    \item the true block-banded implementation, which only visits the nonzero Jacobian blocks from Proposition~\ref{prop:phase9_local_accumulation}.
+\end{enumerate}
+
+\begin{proposition}[Dense checker and banded implementation are mathematically identical]
+\label{prop:phase9_dense_checker}
+Suppose the dense checker uses the exact Jacobians \(J_{c\bar q}\) and \(J_{cT}\), while the banded implementation uses only the nonzero block entries guaranteed by raw Scheme~C local support.
+Then both implementations produce exactly the same value of \(\nabla_\theta J(\theta)\).
+\end{proposition}
+
+\begin{proof}
+This is an immediate consequence of Corollary~\ref{cor:phase9_dense_banded_equiv}.
+The banded implementation removes only entries that are exactly zero.
+Therefore the accumulated sums are identical to the dense chain-rule expressions.
+\end{proof}
+
+\subsection{What is proved and what remains open in Phase~9}
+\label{subsec:phase9_status}
+
+We summarize the exact status of this phase.
+
+\paragraph{Fully proved in this chapter.}
+\begin{enumerate}
+    \item the differentiability of the minimal raw Scheme~C objective;
+    \item the exact formulas for \(\partial K/\partial c\) and \(\partial K/\partial T\);
+    \item the exact reverse-differentiation chain rule
+    \[
+    \nabla_\theta J
+    =
+    \begin{bmatrix}
+    J_{c\bar q}^\top g_c\\
+    J_{cT}^\top g_c+g_T
+    \end{bmatrix};
+    \]
+    \item the local block-banded accumulation formulas for \(\nabla_{\bar q}J\) and \(\nabla_TJ\);
+    \item the exact equivalence of dense and banded reverse accumulation;
+    \item the \(O(M)\) complexity theorem for the canonical minimal loop;
+    \item the existence of a valid local descent step under standard smoothness assumptions.
+\end{enumerate}
+
+\paragraph{Not completed at the present stage.}
+\begin{enumerate}
+    \item the full \(O(k^2M)\) complexity theorem for general \(k\);
+    \item the complete block-banded theorem for the full BLOM family;
+    \item the integration of hard dynamics constraints, ESDF-heavy collision systems, and full planner machinery;
+    \item a global convergence theorem for the nonconvex optimization process.
+\end{enumerate}
+
+Accordingly, the mathematically correct summary of Phase~9 is:
+\[
+\boxed{
+\text{raw Scheme~C is already a valid differentiable representation with an exact banded backward pass,}
+}
+\]
+and
+\[
+\boxed{
+\text{the minimal optimization loop is rigorous enough to justify Phase~10, but not yet a full planning theory.}
+}
