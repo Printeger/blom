@@ -684,3 +684,78 @@ Implemented deliverables under `phase_8/`:
 - `examples/`
 - `README_phase8.md`
 - `results/phase8_validation/`
+
+## Phase 9 Traceability
+
+This section maps the Phase 9 requirements in
+`phase_9/REQ-Phase9-minimal-differentiable-loop.md` to the implemented
+minimal differentiable-loop toolbox, tests, and generated artifacts.
+
+### Scope
+
+Implemented Phase 9 object:
+
+- raw Scheme C coefficient and Jacobian interfaces in the canonical case `s=4, k=2`
+- exact control / time / smooth obstacle objective terms with block gradients
+- dense checker and exact block-banded backward accumulation
+- finite-difference gradient validation for the total objective and each objective term
+- minimal projected space-time gradient-descent demo
+- unified Phase 9 suite with summary tables, plots, and interpretation output
+
+### Requirement Mapping
+
+| Requirement | Implementation | Verification |
+| --- | --- | --- |
+| Raw Scheme C coefficient interface returning block and flattened coefficients | `phase_9/blom_backward_diff.py` -> `compute_raw_schemeC_coeffs` | `phase_9/test_blom_backward_diff.py` |
+| Raw Scheme C dense Jacobian and block-Jacobian interfaces | `phase_9/blom_backward_diff.py` -> `compute_raw_schemeC_jacobians`, `_local_schemeC_sensitivity` | `phase_9/test_blom_backward_diff.py`, `phase9_jacobian_sparsity.png` |
+| Control cost, time penalty, and smooth obstacle penalty with exact block gradients | `phase_9/blom_backward_diff.py` -> `control_cost`, `time_penalty`, `soft_obstacle_penalty`, `obstacle_penalty_and_grad` | `phase_9/test_blom_backward_diff.py`, `phase9_gradcheck_summary.csv` |
+| Total minimal objective assembly and exact block gradients `g_c`, `g_T` | `phase_9/blom_backward_diff.py` -> `evaluate_minimal_objective` | `phase_9/test_blom_backward_diff.py`, `phase9_gradcheck_summary.md` |
+| Dense reverse differentiation and exact banded accumulation | `phase_9/blom_backward_diff.py` -> `backward_diff_dense`, `backward_diff_banded` | `phase_9/test_blom_backward_diff.py`, `phase9_dense_vs_banded_grad.png` |
+| Gradient-check runner with FD comparison, plots, CSV, JSON, and summary | `phase_9/blom_backward_diff.py` -> `run_phase9_gradcheck` | `python3 -m phase_9.blom_backward_diff`, `phase_9/results/phase9_validation/gradcheck/` |
+| Minimal projected gradient-descent demo for raw Scheme C | `phase_9/blom_space_time_opt_demo.py` -> `gradient_descent_step`, `run_minimal_optimization_demo` | `python3 -m phase_9.blom_space_time_opt_demo`, `phase_9/results/phase9_validation/optimization_demo/` |
+| Unified Phase 9 validation suite with overview CSV and interpretation summary | `phase_9/blom_phase9_validation_suite.py` -> `run_phase9_validation_suite` | `python3 -m phase_9.blom_phase9_validation_suite`, `phase_9/results/phase9_validation/compare/` |
+| Phase 9 tests for FD consistency, dense-vs-banded equality, per-term gradients, and demo smoke runs | `phase_9/test_blom_backward_diff.py` | `python3 -m unittest phase_9.test_blom_backward_diff` |
+| Phase 9 examples and README | `phase_9/examples/`, `phase_9/README_phase9.md` | direct script execution and manual review |
+
+### Verification Summary
+
+Executed for Phase 9 implementation:
+
+- `python3 -m compileall phase_9`
+- `python3 -m phase_9.blom_backward_diff`
+- `python3 -m phase_9.blom_space_time_opt_demo`
+- `python3 -m phase_9.blom_phase9_validation_suite`
+- `python3 -m phase_9.examples.demo_backward_diff`
+- `python3 -m phase_9.examples.demo_gradcheck`
+- `python3 -m phase_9.examples.demo_minimal_opt`
+- `python3 -m phase_9.examples.demo_phase9_suite`
+- `python3 -m unittest phase_9.test_blom_backward_diff`
+- `python3 -m unittest discover -s . -p 'test*.py'`
+
+Observed Phase 9 results:
+
+- Phase 9 unit tests: `8 passed`
+- Full repository test suite: `71 passed`
+- Total dense-vs-FD gradient max abs error: `3.755835e-05`
+- Total banded-vs-FD gradient max abs error: `3.755835e-05`
+- Dense-vs-banded max abs gap: `1.818989e-12`
+- Control-term partial gradient max abs error: `1.485118e-05`
+- Time-term partial gradient max abs error: `2.631780e-11`
+- Obstacle-term partial gradient max abs error: `4.200990e-09`
+- Minimal optimization objective drop: `2.688224e+03`
+- Minimal optimization gradient-norm drop proxy: `1.243217e+04`
+- Any duration touching the lower bound: `False`
+
+### Deliverables
+
+Implemented deliverables under `phase_9/`:
+
+- `REQ-Phase9-minimal-differentiable-loop.md`
+- `__init__.py`
+- `blom_backward_diff.py`
+- `blom_space_time_opt_demo.py`
+- `blom_phase9_validation_suite.py`
+- `test_blom_backward_diff.py`
+- `examples/`
+- `README_phase9.md`
+- `results/phase9_validation/`
