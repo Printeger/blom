@@ -1,0 +1,4 @@
+component,dense_sparse_gap,reparam_fd_gap,objective_drop_or_best,runtime_total
+backward_diff,9.094947017729282e-13,1.644413441681536e-05,0.0,0.0
+optimizer,0.0,0.0,2710.814043488962,0.2386285699903965
+benchmark,0.0,0.0,5.311151173281723,29.429138156585395

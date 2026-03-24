@@ -1,0 +1,5 @@
+k,implemented,nnz_q,nnz_T,support_width_mean,support_width_max
+2,True,93,82,3.0,4.0
+4,True,164,159,4.0,5.0
+6,True,189,198,5.0,6.0
+8,True,200,223,5.666666666666667,6.0

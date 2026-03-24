@@ -1,0 +1,29 @@
+{
+  "backward": {
+    "dense_vs_sparse_l2": 1.0435064581705444e-12,
+    "dense_vs_sparse_max_abs": 9.094947017729282e-13,
+    "objective_value": 2721.184218293416,
+    "reparam_vs_fd_l2": 2.89097343827059e-05,
+    "reparam_vs_fd_max_abs": 1.644413441681536e-05
+  },
+  "benchmark": {
+    "n_ablations": 4,
+    "n_rows": 20
+  },
+  "config": {
+    "T_min": 0.2,
+    "n_steps": 30,
+    "seed": 42
+  },
+  "optimizer": {
+    "accepted_ratio": 1.0,
+    "grad_norm_final": 11.980695614018167,
+    "grad_norm_peak": 7787.545675455843,
+    "objective_drop": 2710.814043488962,
+    "objective_final": 10.370174804454226,
+    "objective_initial": 2721.184218293416,
+    "runtime_per_iter": 0.007682438660413027,
+    "runtime_total": 0.2386285699903965,
+    "touches_T_min": false
+  }
+}

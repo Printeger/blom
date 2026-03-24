@@ -839,3 +839,82 @@ Implemented deliverables under `phase_9/`:
 - `examples/`
 - `README_phase9.md`
 - `results/phase9_validation/`
+
+## Phase 10 Traceability
+
+This section maps the Phase 10 requirements in `phase_10/REQ-Phase10-full-space-time-framework.md`
+to the implemented full objective / optimizer / benchmark framework, result artifacts, and verification assets.
+
+### Scope
+
+Implemented Phase 10 object:
+
+- raw Scheme C full objective layer on top of the canonical `s = 4` local family
+- general-even-`k` public interfaces for coefficient and Jacobian access
+- dense checker and sparse backward dual implementation
+- `xi = (q_bar, tau)` reparameterized optimizer
+- benchmark, baseline comparison, and ablation framework
+- unified suite aggregating backward, optimizer, and benchmark evidence
+
+### Requirement Mapping
+
+| Requirement | Implementation | Verification |
+| --- | --- | --- |
+| General-`k` raw Scheme C coefficient API returning block and flattened coefficients | `phase_10/blom_full_backward_diff.py` -> `compute_raw_schemeC_coeffs_general_k` | `phase_10/test_blom_full_backward_diff.py`, `python3 -m phase_10.blom_full_backward_diff` |
+| General-`k` Jacobian API with dense matrices, block dictionaries, and support-set metadata | `phase_10/blom_full_backward_diff.py` -> `compute_raw_schemeC_jacobians_general_k`, `_local_schemeC_sensitivity` | `phase_10/test_blom_full_backward_diff.py`, `python3 -m phase_10.blom_full_backward_diff`, sparsity/support outputs under `phase_10/results/phase10_framework/backward_diff/` |
+| Time reparameterization `tau -> T` and chain-rule support for `dT/dtau` | `phase_10/blom_full_backward_diff.py` -> `tau_to_T`, `dT_dtau`, `T_to_tau`, `q_tau_to_xi`, `xi_to_qbar_tau` | `phase_10/test_blom_full_backward_diff.py`, `phase_10/test_blom_space_time_optimizer.py` |
+| Full objective layer `K_ctrl + lambda_T K_time + lambda_obs K_obs + lambda_dyn K_dyn + lambda_bc K_bc + lambda_reg K_reg` with value/gradient outputs | `phase_10/blom_full_backward_diff.py` -> `control_cost_full`, `time_penalty_full`, `obstacle_penalty_full`, `dynamics_penalty_full`, `boundary_penalty_full`, `regularization_penalty_full`, `evaluate_full_objective`, `evaluate_full_objective_from_coeffs` | `phase_10/test_blom_full_backward_diff.py`, `python3 -m phase_10.blom_full_backward_diff`, `python3 -m phase_10.blom_space_time_optimizer` |
+| Dense backward, sparse backward, and reparameterized backward under `xi=(q_bar,tau)` | `phase_10/blom_full_backward_diff.py` -> `full_backward_diff_dense`, `full_backward_diff_sparse`, `full_backward_diff_reparam`, `finite_difference_gradient` | `phase_10/test_blom_full_backward_diff.py`, `python3 -m phase_10.blom_full_backward_diff`, `phase_10/results/phase10_framework/backward_diff/phase10_backward_summary.json` |
+| Optimizer-level framework in `xi` space with step rules and optimization history export | `phase_10/blom_space_time_optimizer.py` -> `optimizer_step`, `run_space_time_optimization` | `phase_10/test_blom_space_time_optimizer.py`, `python3 -m phase_10.blom_space_time_optimizer`, optimizer artifacts under `phase_10/results/phase10_framework/optimizer/` |
+| Framework-level benchmark, baseline comparison, `M`-sweep, `k`-sweep, and ablation study | `phase_10/blom_benchmark_suite.py` -> `run_baseline_raw_schemeC`, `run_baseline_minco`, `run_baseline_schemeA`, `run_baseline_heuristic`, `run_benchmark_suite` | `phase_10/test_blom_benchmark_suite.py`, `python3 -m phase_10.blom_benchmark_suite`, benchmark artifacts under `phase_10/results/phase10_framework/summary/` |
+| Unified Phase 10 suite integrating backward, optimizer, benchmark, and top-level interpretation summary | `phase_10/blom_phase10_framework_suite.py` -> `run_phase10_framework_suite` | `python3 -m phase_10.blom_phase10_framework_suite`, `phase_10/results/phase10_framework/summary/phase10_suite_summary.json` |
+| Example entry points for backward, optimizer, `k`-sweep, baseline compare, ablation, and full suite replay | `phase_10/examples/demo_full_backward_diff.py`, `phase_10/examples/demo_optimizer.py`, `phase_10/examples/demo_k_sweep.py`, `phase_10/examples/demo_baseline_compare.py`, `phase_10/examples/demo_ablation.py`, `phase_10/examples/demo_phase10_suite.py` | direct execution of each example entry point |
+| Phase 10 README describing scope, main entry points, and run commands | `phase_10/README_phase10.md` | manual review |
+
+### Verification Summary
+
+Executed for Phase 10 implementation:
+
+- `python3 -m compileall phase_10`
+- `python3 -m phase_10.blom_full_backward_diff`
+- `python3 -m phase_10.blom_space_time_optimizer`
+- `python3 -m phase_10.blom_benchmark_suite`
+- `python3 -m phase_10.blom_phase10_framework_suite`
+- `python3 -m phase_10.examples.demo_full_backward_diff`
+- `python3 -m phase_10.examples.demo_optimizer`
+- `python3 -m phase_10.examples.demo_k_sweep`
+- `python3 -m phase_10.examples.demo_baseline_compare`
+- `python3 -m phase_10.examples.demo_ablation`
+- `python3 -m phase_10.examples.demo_phase10_suite`
+- `python3 -m unittest discover -s phase_10 -p 'test*.py'`
+- `python3 -m unittest discover -s . -p 'test*.py'`
+
+Observed Phase 10 results:
+
+- Phase 10 unit tests: `5 passed`
+- Full repository test suite: `80 passed`
+- Dense-vs-sparse backward max abs gap: `9.094947e-13`
+- Reparameterized gradient vs FD max abs gap: `1.326091e-05` in standalone backward run
+- Standalone optimizer objective drop: `2.702673e+03`
+- Standalone optimizer final objective: `1.851143e+01`
+- Framework-suite optimizer objective drop: `2.710814e+03`
+- Representative-case `k`-sweep support-width means: `3.0, 4.0, 5.0, 5.6667` for `k = 2, 4, 6, 8`
+- Representative-case benchmark best objective baseline: `raw_schemeC`
+- Fastest representative-case benchmark baseline: `heuristic`
+
+### Deliverables
+
+Implemented deliverables under `phase_10/`:
+
+- `REQ-Phase10-full-space-time-framework.md`
+- `__init__.py`
+- `blom_full_backward_diff.py`
+- `blom_space_time_optimizer.py`
+- `blom_benchmark_suite.py`
+- `blom_phase10_framework_suite.py`
+- `test_blom_full_backward_diff.py`
+- `test_blom_space_time_optimizer.py`
+- `test_blom_benchmark_suite.py`
+- `examples/`
+- `README_phase10.md`
+- `results/phase10_framework/`

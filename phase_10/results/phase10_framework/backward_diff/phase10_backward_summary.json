@@ -1,0 +1,43 @@
+{
+  "sparsity_rows": [
+    {
+      "implemented": true,
+      "k": 2,
+      "nnz_T": 82,
+      "nnz_q": 93,
+      "support_width_max": 4.0,
+      "support_width_mean": 3.0
+    },
+    {
+      "implemented": true,
+      "k": 4,
+      "nnz_T": 159,
+      "nnz_q": 164,
+      "support_width_max": 5.0,
+      "support_width_mean": 4.0
+    },
+    {
+      "implemented": true,
+      "k": 6,
+      "nnz_T": 198,
+      "nnz_q": 189,
+      "support_width_max": 6.0,
+      "support_width_mean": 5.0
+    },
+    {
+      "implemented": true,
+      "k": 8,
+      "nnz_T": 223,
+      "nnz_q": 200,
+      "support_width_max": 6.0,
+      "support_width_mean": 5.666666666666667
+    }
+  ],
+  "summary": {
+    "dense_vs_sparse_l2": 1.0435064581705444e-12,
+    "dense_vs_sparse_max_abs": 9.094947017729282e-13,
+    "objective_value": 2721.184218293416,
+    "reparam_vs_fd_l2": 2.89097343827059e-05,
+    "reparam_vs_fd_max_abs": 1.644413441681536e-05
+  }
+}

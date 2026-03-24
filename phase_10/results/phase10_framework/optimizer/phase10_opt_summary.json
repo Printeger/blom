@@ -1,0 +1,19 @@
+{
+  "config": {
+    "T_min": 0.2,
+    "method": "gd",
+    "n_steps": 20,
+    "step_rule": "armijo"
+  },
+  "summary": {
+    "accepted_ratio": 1.0,
+    "grad_norm_final": 0.3258681909240764,
+    "grad_norm_peak": 7787.545276711832,
+    "objective_drop": 2717.462330571047,
+    "objective_final": 3.7037627223690737,
+    "objective_initial": 2721.166093293416,
+    "runtime_per_iter": 0.029027539701201022,
+    "runtime_total": 0.6097197481431067,
+    "touches_T_min": false
+  }
+}
