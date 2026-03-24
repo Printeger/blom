@@ -465,3 +465,73 @@ Implemented deliverables under `phase_6/`:
 - `examples/`
 - `README_phase6.md`
 - `results/phase6_fd_jacobian_check/`
+
+## Phase 7 Traceability
+
+This section maps the Phase 7 requirements in `phase_7/REQ-Phase7-convergence-validation.md`
+to the implemented convergence-validation toolbox, tests, and generated artifacts.
+
+### Scope
+
+Implemented Phase 7 object:
+
+- exact Phase 1 MINCO reference construction and centered kernel extraction
+- idealized truncated BLOM-k built by truncating `G(T)=A(T)^{-1}S_q`
+- actual BLOM-k comparison using assembly Schemes A / B / C
+- coefficient-error, matching-error, and cost-gap sweeps over `k`
+- log-linear fitting of `log ||c^(k) - c*||`
+- randomized batch validation and automatic interpretation summaries
+
+### Requirement Mapping
+
+| Requirement | Implementation | Verification |
+| --- | --- | --- |
+| Exact MINCO reference plus centered kernel `G(T)=A(T)^{-1}S_q` | `phase_7/blom_convergence_vs_k.py` -> `compute_minco_reference`, `compute_total_snap_cost` | `phase_7/test_blom_convergence_vs_k.py`, `python3 -m phase_7.blom_convergence_vs_k` |
+| k-grid generation for `k = 2, 4, ...` with terminal inclusion | `phase_7/blom_convergence_vs_k.py` -> `make_k_grid` | `phase_7/test_blom_convergence_vs_k.py` |
+| Idealized truncated BLOM-k from blockwise kernel truncation | `phase_7/blom_convergence_vs_k.py` -> `compute_ideal_truncated_blom_k`, `_ideal_mask` | `phase_7/test_blom_convergence_vs_k.py`, `phase_7/results/phase7_convergence_vs_k/ideal/summary_ideal.json` |
+| Actual BLOM-k for Schemes A / B / C | `phase_7/blom_convergence_vs_k.py` -> `compute_actual_blom_k` | `phase_7/test_blom_convergence_vs_k.py`, `phase_7/results/phase7_convergence_vs_k/scheme_A/summary_scheme_A.json`, `phase_7/results/phase7_convergence_vs_k/scheme_B/summary_scheme_B.json`, `phase_7/results/phase7_convergence_vs_k/scheme_C/summary_scheme_C.json` |
+| Unified coefficient-error, matching-error, and cost-gap metrics | `phase_7/blom_convergence_vs_k.py` -> `compute_convergence_errors` | `phase_7/results/phase7_convergence_vs_k/compare/convergence_errors_by_k.csv`, `RESULT_PHASE7.md` |
+| Least-squares fit of `log(error)` against `k` | `phase_7/blom_convergence_vs_k.py` -> `fit_log_error_vs_k` | `phase_7/results/phase7_convergence_vs_k/compare/logfit_summary.csv`, `phase_7/results/phase7_convergence_vs_k/compare/log_coef_error_fit_all.png` |
+| Single-case Phase 7 sweep runner with mandatory plots and summary files | `phase_7/blom_convergence_vs_k.py` -> `run_convergence_vs_k`, `_write_interpretation_summary` | `python3 -m phase_7.blom_convergence_vs_k`, compare artifacts under `phase_7/results/phase7_convergence_vs_k/compare/` |
+| Randomized multi-trial convergence statistics | `phase_7/blom_convergence_vs_k.py` -> `run_random_trials` | `python3 -m phase_7.examples.demo_random_trials`, `phase_7/results/phase7_convergence_vs_k/compare/random_trials_summary.csv`, `phase_7/results/phase7_convergence_vs_k/compare/random_trials_aggregate.json` |
+| Example entry points for single-case, scheme comparison, ideal-vs-actual, and random-trial workflows | `phase_7/examples/demo_single_case.py`, `phase_7/examples/demo_compare_schemes.py`, `phase_7/examples/demo_ideal_vs_actual.py`, `phase_7/examples/demo_random_trials.py` | direct script execution |
+| Phase 7 README documenting scope, outputs, and the Scheme A caveat | `phase_7/README_phase7.md` | manual review |
+
+### Verification Summary
+
+Executed for Phase 7 implementation:
+
+- `python3 -m compileall phase_7`
+- `python3 -m phase_7.blom_convergence_vs_k`
+- `python3 -m phase_7.examples.demo_single_case`
+- `python3 -m phase_7.examples.demo_compare_schemes`
+- `python3 -m phase_7.examples.demo_ideal_vs_actual`
+- `python3 -m phase_7.examples.demo_random_trials`
+- `python3 -m unittest phase_7.test_blom_convergence_vs_k`
+- `python3 -m unittest discover -s . -p 'test*.py'`
+
+Observed Phase 7 results:
+
+- Phase 7 unit tests: `5 passed`
+- Full repository test suite: `50 passed`
+- Ideal-truncation final coefficient error at `k = 8`: `2.169e-13`
+- Scheme A final coefficient error at `k = 8`: `7.400e-12`
+- Scheme B final coefficient error at `k = 8`: `1.417e+02`
+- Scheme C final coefficient error at `k = 8`: `3.469e+00`
+- Ideal log-fit slope: `-4.686`, `R^2 = 0.686`
+- Scheme A log-fit slope: `-3.553e-15`, `R^2 = 1.000`
+- Scheme B log-fit slope: `-2.070e-01`, `R^2 = 0.922`
+- Scheme C log-fit slope: `-3.160e-01`, `R^2 = 0.996`
+- Random-trial success rates: `ideal=1.00, A=1.00, B=1.00, C=1.00`
+
+### Deliverables
+
+Implemented deliverables under `phase_7/`:
+
+- `REQ-Phase7-convergence-validation.md`
+- `__init__.py`
+- `blom_convergence_vs_k.py`
+- `test_blom_convergence_vs_k.py`
+- `examples/`
+- `README_phase7.md`
+- `results/phase7_convergence_vs_k/`

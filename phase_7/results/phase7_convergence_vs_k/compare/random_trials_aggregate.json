@@ -1,0 +1,32 @@
+{
+  "curves": {
+    "A": {
+      "mean_r2": -0.9166666666666666,
+      "mean_slope": 6.561284864685676e-16,
+      "median_final_matching_l2": 3.1136442224622427e-12,
+      "median_final_rel_cost_gap": -4.723998969780041e-14,
+      "success_rate": 1.0
+    },
+    "B": {
+      "mean_r2": 0.8805225742687869,
+      "mean_slope": -0.23179258216567333,
+      "median_final_matching_l2": 19.862652991393013,
+      "median_final_rel_cost_gap": 0.1515865896747417,
+      "success_rate": 1.0
+    },
+    "C": {
+      "mean_r2": 0.9922940717772591,
+      "mean_slope": -0.409929858255398,
+      "median_final_matching_l2": 0.11709818507262836,
+      "median_final_rel_cost_gap": 0.0011355098185240609,
+      "success_rate": 1.0
+    },
+    "ideal": {
+      "mean_r2": 0.6284931273951343,
+      "mean_slope": -2.357609413054028,
+      "median_final_matching_l2": NaN,
+      "median_final_rel_cost_gap": 4.996003610813204e-16,
+      "success_rate": 1.0
+    }
+  }
+}
