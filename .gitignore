@@ -14,3 +14,7 @@ __pycache__/
 *.swo
 *~
 *.tmp
+
+# Local virtual environments
+.venv/
+.venv_demo/

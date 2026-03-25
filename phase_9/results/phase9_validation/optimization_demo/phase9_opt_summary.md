@@ -1,10 +1,10 @@
 # Phase 9 Optimization Summary
 
-- Objective drop: `2.688224e+03`.
-- Control drop: `2.688807e+03`.
-- Time drop: `-1.802551e-01`.
-- Obstacle drop: `-4.023269e-01`.
-- Gradient-norm drop proxy: `1.243217e+04`.
+- Objective drop: `2.687960e+03`.
+- Control drop: `2.688663e+03`.
+- Time drop: `-1.793327e-01`.
+- Obstacle drop: `-5.239264e-01`.
+- Gradient-norm drop proxy: `1.242835e+04`.
 - Any duration touched the lower bound: `False`.
 
 Interpretation:

@@ -2,18 +2,18 @@
   "config": {
     "T_min": 0.2,
     "method": "gd",
-    "n_steps": 20,
+    "n_steps": 12,
     "step_rule": "armijo"
   },
   "summary": {
     "accepted_ratio": 1.0,
-    "grad_norm_final": 0.3258681909240764,
-    "grad_norm_peak": 7787.545276711832,
-    "objective_drop": 2717.462330571047,
-    "objective_final": 3.7037627223690737,
-    "objective_initial": 2721.166093293416,
-    "runtime_per_iter": 0.029027539701201022,
-    "runtime_total": 0.6097197481431067,
+    "grad_norm_final": 2.902885733119335,
+    "grad_norm_peak": 14586.244653891115,
+    "objective_drop": 5637.915952210154,
+    "objective_final": 37.997751065447204,
+    "objective_initial": 5675.913703275601,
+    "runtime_per_iter": 0.010248461427787939,
+    "runtime_total": 0.13859771704301238,
     "touches_T_min": false
   }
 }
